@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Verification
 
-Last updated: 2026-05-03 22:42 KST
+Last updated: 2026-05-04 01:02 KST
 
 ## Purpose
 Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
@@ -52,19 +52,21 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - `BLOCKED`: Unity compile error 또는 Play Mode 진입 실패.
 
 ## Latest Manual Result
-Date: NOT_RECORDED
-Unity version: NOT_RECORDED
-Aspect ratio / resolution: NOT_RECORDED
+Date: 2026-05-04 01:02 KST
+Unity version: 6000.3.8f1
+Aspect ratio / resolution: 1170x2532 (195:422)
 
 Draw Choice: NOT_RECORDED
 Pending Placement: NOT_RECORDED
 Invalid Placement: NOT_RECORDED
-Wave Combat: NOT_RECORDED
+Wave Combat: PASS
 
-Screenshots captured: 0
-Top issue: NOT_RECORDED
-Next code target: NOT_RECORDED
-Verification command result: NOT_RECORDED
+Screenshots captured: 2
+1. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010153.png
+2. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010245.png
+Top issue: Wave combat is readable, but Draw Choice, Pending Placement, and Invalid Placement still need direct captures.
+Next code target: None yet; continue Play Mode verification before changing layout code.
+Verification command result: Partial record; `Tools\Verify-PrototypePlayModeRecord.ps1 -JsonOnly` should remain `not_recorded` until all required states are captured.
 
 ## Result Template
 ```text
