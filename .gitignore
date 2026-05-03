@@ -104,3 +104,17 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local MCP and credentials
+/.mcp.json
+/[Aa]ssets/.mcp_auth_token
+/[Aa]ssets/.mcp_auth_token.meta
+/[Aa]ssets/[Ss]treaming[Aa]ssets/realvirtual-MCP/
+
+# Local verification artifacts
+/Docs/Prototype_PlayMode_Verification_Draft.txt
+/Docs/PlayModeScreenshots/
+
+# Local IDE folders
+.idea/
+.vscode/
