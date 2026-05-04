@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-04 20:24 KST
+Last updated: 2026-05-04 20:52 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -39,6 +39,7 @@ Last updated: 2026-05-04 20:24 KST
 - Added `Tools/Write-PrototypePlayModeResultFromSuite.ps1` so PASS/FIX/BLOCKED suite review outcomes can be drafted or applied without hand-editing markdown.
 - Added `Tools/Verify-PrototypePlayModeScreenshots.ps1` so captured Play Mode PNG quality, portrait resolution, file size, and state-label coverage are checked before visual review.
 - Added `Tools/Write-PrototypePlayModeReviewPack.ps1` so suite status, screenshot status, current record status, a screenshot contact sheet, and result command templates can be assembled into one review sheet.
+- Added `Docs/Prototype_Update_Roadmap.md` as the forward update direction for verification stability, core loop fun, content/wave expansion, art/feedback policy, and playtest operation.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -57,7 +58,7 @@ Last updated: 2026-05-04 20:24 KST
 - Unity compile/tests remain `inconclusive` in the current headless/sandbox environment. Manual Editor verification is still required.
 - Latest local recheck at 2026-05-04 17:35 KST: `Tools/Verify-PrototypeHudStateContract.ps1` reports `hud_contract_status=ok`, `failed_checks=0`; `Tools/Write-PrototypePlayModeResultFromSuite.ps1` parses and can draft non-PASS outcomes; `Tools/Verify-PrototypePlayModeSuite.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded` until the suite is captured; `Tools/Verify-PrototypeLayout.ps1` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded`, `playmode_suite_captured_count=0/4`; `Tools/Verify-PrototypePlayModeRecord.ps1 -JsonOnly` remains `playmode_record_status=not_recorded` with the three unrecorded manual states.
 - Latest local recheck at 2026-05-04 20:12 KST: `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` reports `playmode_screenshot_status=partial`, `screenshot_count=2`, `machine_quality_pass_count=2`, and missing labeled coverage for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat; `Tools/Verify-PrototypeHudStateContract.ps1` reports `check_count=26`, `failed_checks=0`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` now includes `playmode_screenshot_status=partial`.
-- Latest local recheck at 2026-05-04 20:24 KST: `Tools/Write-PrototypePlayModeReviewPack.ps1 -JsonOnly` reports `review_pack_status=ok`, `review_readiness=partial_evidence`, and writes the review pack through the temp fallback when Docs output is blocked; `Tools/Verify-PrototypeHudStateContract.ps1` reports `check_count=27`, `failed_checks=0`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` now recommends the review pack step before PASS/FIX/BLOCKED recording.
+- Latest local recheck at 2026-05-04 20:52 KST: `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` reports `readiness=needs_manual_playmode`, `gate_status=ok`, `asset_status=ok`, `layout_status=ok`, `hud_contract_status=ok`, `static_status=ok`, `compile_status=inconclusive`, and `tests_status=inconclusive`; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=27`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Verify-PrototypePlayModeSuite.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded`, `captured_count=0/4`; `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` reports `playmode_screenshot_status=partial`, `screenshot_count=2`, `valid_png_count=2`, `machine_quality_pass_count=2`, `unlabeled_count=2`, `covered_state_count=0/4`; `Tools/Verify-PrototypePlayModeRecord.ps1 -JsonOnly` reports `playmode_record_status=not_recorded` with Draw Choice, Pending Placement, and Invalid Placement still `NOT_RECORDED` and Wave Combat `PASS`; `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `review_pack_status=ok`, `review_readiness=partial_evidence` without writing the review pack.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -67,8 +68,8 @@ Last updated: 2026-05-04 20:24 KST
 - `Tools/Verify-PrototypePlayModeRecord.ps1`: reads the Play Mode verification document and reports `not_recorded`, `passed`, `needs_fix`, `blocked`, or `invalid_record`.
 - `Tools/Verify-PrototypePlayModeSuite.ps1`: reads `Docs/Prototype_PlayMode_Verification_Suite.txt` and reports whether all four prepared-state screenshots exist.
 - `Tools/Verify-PrototypePlayModeScreenshots.ps1`: reads screenshot PNG headers and reports file quality, portrait resolution, unlabeled captures, and missing state coverage.
-- `Tools/Write-PrototypePlayModeReviewPack.ps1`: writes a visual review pack from suite, screenshot, and record verifier outputs, including a screenshot contact sheet and result command templates.
-- `Tools/Write-PrototypePlayModeResultFromSuite.ps1`: writes a result draft or applies PASS/FIX/BLOCKED outcomes from suite evidence to the manual verification doc.
+- `Tools/Write-PrototypePlayModeReviewPack.ps1`: writes a visual review pack from suite, screenshot, and record verifier outputs, including a screenshot contact sheet and result command templates; use `-PreviewOnly -JsonOnly` for no-write status checks.
+- `Tools/Write-PrototypePlayModeResultFromSuite.ps1`: writes a result draft or applies PASS/FIX/BLOCKED outcomes from suite evidence to the manual verification doc; even `-JsonOnly` creates the draft, so run it only when a result draft/apply is intended.
 - `Tools/Create-PrototypeIngredientPlaceholders.ps1`: generates the 8 placeholder ingredient icons.
 - `Tools/Create-PrototypeCoreArtPlaceholders.ps1`: generates placeholder `FoodTruck.png` and `KitchenModule.png`.
 - `Tools/Ensure-PrototypeAssetMetas.ps1`: creates Unity sprite `.meta` files for missing prototype PNG metas.
@@ -94,6 +95,7 @@ Last updated: 2026-05-04 20:24 KST
 - `Docs/Prototype_Session_Handoff.md`: current session status, unresolved issues, next-session tasks, and paste-ready context packet.
 - `Docs/Prototype_NextStep_Playbook.md`: links to this handoff and keeps the next validation target explicit.
 - `Docs/Prototype_PlayMode_Verification.md`: manual Play Mode checklist, pass/fix categories, and result template.
+- `Docs/Prototype_Update_Roadmap.md`: forward update direction, operating loop, acceptance criteria, and command reference for upcoming prototype work.
 - `Docs/Prototype_Session_Handoff.md`: updated latest recheck timestamp, unresolved issue status, and next-session context packet.
 - `Docs/Prototype_NextStep_Playbook.md`: references the session status command as the first next-session check.
 - `Docs/Prototype_Session_Handoff.md`: updated again for the 2026-05-02 local MCP-free recheck, changed files, next-session recommendations, and paste-ready context packet.
@@ -106,9 +108,11 @@ Last updated: 2026-05-04 20:24 KST
 - The earlier UX concern remains the next product risk: game view, placement board, and block selection must be validated together so UI does not cover the core play space.
 - Git is initialized and the active work is on `codex/publish-prototype`; large imported third-party/local Unity folders remain intentionally untracked unless explicitly selected.
 - Numeric layout regression, source-sync, HUD state contract, suite evidence, screenshot evidence quality, and review pack helpers exist, but semantic screenshot comparison is still manual for portrait UI states.
-- Manual Play Mode verification is explicitly tracked and currently reports `playmode_record_status=not_recorded`; Wave Combat has screenshot evidence and the combat-only HUD follow-up is complete.
-- Play Mode suite evidence currently reports `playmode_suite_status=not_recorded` until `Capture Verification Suite` is run in Unity Play Mode.
-- Existing Play Mode screenshots currently report `playmode_screenshot_status=partial`: the two captured PNGs are valid portrait evidence, but they are unlabeled and do not cover the required suite states.
+- Manual Play Mode verification is explicitly tracked and currently reports `playmode_record_status=not_recorded`; the latest manual result has Wave Combat `PASS`, but Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
+- Play Mode suite evidence currently reports `playmode_suite_status=not_recorded`, `captured_count=0/4`, and missing coverage for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat until `Capture Verification Suite` is run in Unity Play Mode.
+- Existing Play Mode screenshots currently report `playmode_screenshot_status=partial`: the two captured PNGs are valid portrait evidence, but both are unlabeled, `covered_state_count=0/4`, and none of the required suite states have labeled screenshot coverage.
+- Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=partial_evidence`; full review pack generation should wait until suite-state captures or intentional review output writing.
+- `Tools/Write-PrototypePlayModeResultFromSuite.ps1` is the intended PASS/FIX/BLOCKED result writer, but status-only handoff passes should not run it because it writes a result draft even with `-JsonOnly`.
 - Unity MCP is currently unavailable from this session (`MCP SSE probe returned 404`).
 - Forced headless verification is blocked while the Unity Editor process is already running; use the open Editor for manual Play Mode or close it before a headless run.
 
@@ -117,9 +121,9 @@ Last updated: 2026-05-04 20:24 KST
 2. In Play Mode, run `Tools > Food Truck Prototype > Capture Verification Suite` before attempting longer manual play.
 3. Run `Tools/Verify-PrototypePlayModeSuite.ps1` to confirm all four suite screenshots exist.
 4. Run `Tools/Verify-PrototypePlayModeScreenshots.ps1` to confirm captured PNGs are valid portrait evidence and have labeled state coverage.
-5. Run `Tools/Write-PrototypePlayModeReviewPack.ps1` to assemble the evidence into one review sheet before making PASS/FIX/BLOCKED decisions.
+5. Run `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` for a no-write readiness check, then run `Tools/Write-PrototypePlayModeReviewPack.ps1` to assemble the evidence into one review sheet before making PASS/FIX/BLOCKED decisions.
 6. Use `Tools > Food Truck Prototype > Prepare and Capture State` only for focused retakes of Draw Choice, Pending Placement, or Invalid Placement.
-7. If all required states pass visually, run `Tools > Food Truck Prototype > Record PASS Manual Result`; otherwise use `Tools/Write-PrototypePlayModeResultFromSuite.ps1` with the failing `FIX_*` or `BLOCKED` status.
+7. If all required states pass visually, run `Tools > Food Truck Prototype > Record PASS Manual Result`; otherwise use `Tools/Write-PrototypePlayModeResultFromSuite.ps1` with the failing `FIX_*` or `BLOCKED` status when you are ready to create/apply the result draft.
 8. Run `Tools/Verify-PrototypeHudStateContract.ps1` after any Draw/Pending/Invalid Placement HUD code change.
 9. Run `Tools/Verify-PrototypeLayout.ps1` after any HUD layout code change.
 10. Run `Tools/Verify-PrototypePlayModeRecord.ps1` to confirm the manual record is parsable.
@@ -150,6 +154,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
@@ -170,14 +175,15 @@ Current status:
 - Asset gate passes: asset_status=ok, runtime_required_missing=0, final_art_missing=0, missing_meta=0, diagnostic_warnings=0.
 - Layout numeric/source-sync guard passes: layout_status=ok, failed_checks=0, source_sync_status=ok, source_sync_failed_checks=0.
 - HUD state contract guard passes: hud_contract_status=ok, failed_checks=0.
-- Play Mode suite evidence is tracked and currently not recorded: playmode_suite_status=not_recorded.
-- Play Mode screenshot evidence is tracked and currently partial: 2 valid portrait PNGs, but no labeled suite-state coverage yet.
-- Play Mode review pack generation works and currently reports review_readiness=partial_evidence until suite-state captures exist.
-- Manual Play Mode record is tracked and currently not recorded: playmode_record_status=not_recorded.
+- Play Mode suite evidence is tracked and currently not recorded: playmode_suite_status=not_recorded, captured_count=0/4.
+- Play Mode screenshot evidence is tracked and currently partial: 2 valid portrait PNGs, unlabeled_count=2, covered_state_count=0/4, and no labeled suite-state coverage yet.
+- Play Mode review pack writer works in preview mode and currently reports review_readiness=partial_evidence until suite-state captures exist; full generation writes the review pack.
+- Play Mode result writer can draft/apply PASS/FIX/BLOCKED outcomes from suite evidence, but even JsonOnly creates a draft, so reserve it for intentional result recording.
+- Manual Play Mode record is tracked and currently not recorded: playmode_record_status=not_recorded; Draw Choice, Pending Placement, and Invalid Placement are NOT_RECORDED while Wave Combat is PASS in the latest manual result.
 - Static guard passes: static_status=ok.
 - Integrated gate passes: gate_status=ok.
 - Unity compile/tests are inconclusive only because headless Editor verification is unreliable in this environment.
-- Latest local MCP-free recheck at 2026-05-04 20:24 KST confirmed Verify-PrototypeHudStateContract, Verify-PrototypePlayModeSuite, Verify-PrototypePlayModeScreenshots, Write-PrototypePlayModeReviewPack, Write-PrototypePlayModeResultFromSuite, Verify-PrototypeLayout, Verify-PrototypeStatic, Show-PrototypeSessionStatus, and Gate-Verification execute after adding low-interaction Play Mode helper states, batch suite capture, suite/screenshot evidence verification, review pack assembly, suite-backed PASS recording, and FIX/BLOCKED result drafting.
+- Latest local MCP-free recheck at 2026-05-04 20:52 KST confirmed Show-PrototypeSessionStatus, Gate-Verification, Verify-PrototypeHudStateContract, Verify-PrototypeLayout, Verify-PrototypeStatic, Verify-PrototypePlayModeSuite, Verify-PrototypePlayModeScreenshots, Verify-PrototypePlayModeRecord, and Write-PrototypePlayModeReviewPack preview mode execute after adding low-interaction Play Mode helper states, batch suite capture, suite/screenshot evidence verification, review pack assembly, suite-backed PASS recording, and FIX/BLOCKED result drafting. Write-PrototypePlayModeResultFromSuite was inspected but not re-run in this handoff-only pass because it writes a draft by design.
 
 Recent work:
 - Added Verify-PrototypeAssets.ps1 with PNG/meta diagnostics.
@@ -188,6 +194,7 @@ Recent work:
 - Documented commands in Docs/Fun_Game_Resource_Spec.md.
 - Current handoff is in Docs/Prototype_Session_Handoff.md and links from Docs/Prototype_NextStep_Playbook.md.
 - Manual Play Mode verification sheet is Docs/Prototype_PlayMode_Verification.md.
+- Forward update direction is Docs/Prototype_Update_Roadmap.md.
 - Latest heartbeat recheck at 2026-05-01 19:46 KST confirmed gate_status=ok and asset_status=ok; runtime gameplay code was not changed.
 - Added Tools/Show-PrototypeSessionStatus.ps1. Current readiness is needs_manual_playmode.
 - Added Tools/Verify-PrototypeLayout.ps1 and integrated layout_status into Gate-Verification and Show-PrototypeSessionStatus.
@@ -211,5 +218,5 @@ Recent work:
 - Compacted combat-only portrait HUD so the 3x3 build grid is hidden while no block/draw/rest context is active, added layout/action visibility guards for that state, added the HUD state contract verifier, added Play Mode helper state setup/capture menus for Draw/Pending/Invalid/Wave states, added the one-pass Capture Verification Suite, added machine-checkable suite/screenshot evidence verification, added review pack assembly, made PASS recording reuse suite screenshots from disk, and added suite-backed PASS/FIX/BLOCKED result drafting.
 
 Next priority:
-Use `Tools > Food Truck Prototype > Capture Verification Suite` in Play Mode to capture Draw Choice, Pending Placement, Invalid Placement, and Wave Combat with minimal direct input, then run Tools/Verify-PrototypePlayModeSuite.ps1, Tools/Verify-PrototypePlayModeScreenshots.ps1, and Tools/Write-PrototypePlayModeReviewPack.ps1 to confirm files exist, are valid portrait PNGs, have labeled state coverage, and are assembled for visual review. Use Tools/Write-PrototypePlayModeResultFromSuite.ps1 or the PASS menu to record the visual result. Continue code-level next work without blocking on longer Play Mode input from this PC.
+Use `Tools > Food Truck Prototype > Capture Verification Suite` in Play Mode to capture Draw Choice, Pending Placement, Invalid Placement, and Wave Combat with minimal direct input, then run Tools/Verify-PrototypePlayModeSuite.ps1, Tools/Verify-PrototypePlayModeScreenshots.ps1, and Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly to confirm files exist, are valid portrait PNGs, have labeled state coverage, and are ready for a review pack. Generate the full review pack and use Tools/Write-PrototypePlayModeResultFromSuite.ps1 or the PASS menu only when ready to record the visual result. Continue code-level next work without blocking on longer Play Mode input from this PC.
 ```
