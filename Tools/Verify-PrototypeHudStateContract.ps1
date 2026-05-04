@@ -58,6 +58,9 @@ $relativeFiles = [ordered]@{
     editorMenu = "Assets\Scripts\Editor\FoodTruckPrototypePlayModeVerificationMenu.cs"
     model = "Assets\Scripts\Prototype\FoodTruckRunModel.cs"
     tests = "Assets\Tests\EditMode\FoodTruckRunModelTests.cs"
+    playModeSuiteVerifier = "Tools\Verify-PrototypePlayModeSuite.ps1"
+    gate = "Tools\Gate-Verification.ps1"
+    sessionStatus = "Tools\Show-PrototypeSessionStatus.ps1"
 }
 
 $sources = @{}
@@ -236,6 +239,22 @@ Add-ContractCheck $checks "editor_helpers" "suite_capture_batches_manual_evidenc
     'BuildVerificationSuiteDraft',
     'lastVerificationSuiteEntries'
 ) "The Editor helper should batch all required states into one low-interaction evidence pass."
+
+Add-ContractCheck $checks "editor_helpers" "suite_evidence_is_machine_checkable" $sources.playModeSuiteVerifier @(
+    'Prototype_PlayMode_Verification_Suite.txt',
+    'playmode_suite_status',
+    'missing_states',
+    'missing_screenshots',
+    'captured_count',
+    'expected_state_count'
+) "The low-interaction suite evidence must be parsable before manual PASS/FIX recording."
+
+Add-ContractCheck $checks "editor_helpers" "suite_status_is_in_gate_and_session_status" ($sources.gate + $sources.sessionStatus) @(
+    'Verify-PrototypePlayModeSuite.ps1',
+    'playmode_suite',
+    'playmode_suite_status',
+    'playmode_suite_captured_count'
+) "The suite evidence status should be visible in gate and session readiness output."
 
 Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_layout_visibility" $sources.tests @(
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',

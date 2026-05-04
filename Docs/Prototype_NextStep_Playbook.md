@@ -50,8 +50,9 @@
 - MCP unavailable fallback: continue with local scripts/file inspection first; do not block completion-critical UX work on MCP connectivity.
 - HUD state contract command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Layout guard command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
+- Play Mode suite evidence command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode record command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Low-interaction capture path: in Play Mode use `Tools > Food Truck Prototype > Capture Verification Suite` to batch Draw Choice, Pending Placement, Invalid Placement, and Wave Combat evidence.
 - Focused fallback path: use `Tools > Food Truck Prototype > Prepare and Capture State` when only one state needs a retake.
-- Immediate next validation when Play Mode input is reliable again: review the suite captures and record the manual result.
-- Current code fallback is complete for the captured Wave combat issue, and Draw/Pending/Invalid/Wave helper-state setup plus suite capture are now gate-checked while manual record remains open.
+- Immediate next validation when Play Mode input is reliable again: run the suite verifier, review the captures visually, and record the manual result.
+- Current code fallback is complete for the captured Wave combat issue, and Draw/Pending/Invalid/Wave helper-state setup plus suite capture/evidence verification are now gate-checked while manual record remains open.

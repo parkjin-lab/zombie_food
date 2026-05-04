@@ -13,7 +13,8 @@ param(
     [switch]$JsonOnly,
     [switch]$SkipAssets,
     [switch]$SkipLayout,
-    [switch]$SkipHudContract
+    [switch]$SkipHudContract,
+    [switch]$SkipPlayModeSuite
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,6 +30,7 @@ $showScript = Join-Path $ProjectPath "Tools\Show-VerificationStatus.ps1"
 $assetScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
 $hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
+$playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 
 if (-not (Test-Path $ensureScript)) {
     Write-Error "Missing script: $ensureScript"
@@ -205,6 +207,51 @@ function Invoke-HudContractCheck {
     }
 }
 
+function Invoke-PlayModeSuiteCheck {
+    param(
+        [string]$PlayModeSuiteScriptPath,
+        [string]$RootPath
+    )
+
+    if (-not (Test-Path $PlayModeSuiteScriptPath)) {
+        return [pscustomobject]@{
+            exit_code = 90
+            playmode_suite = [pscustomobject]@{
+                playmode_suite_status = "missing_playmode_suite_verifier"
+                captured_count = $null
+                expected_state_count = $null
+            }
+        }
+    }
+
+    $suiteJsonRaw = & powershell -ExecutionPolicy Bypass -File $PlayModeSuiteScriptPath -ProjectPath $RootPath -JsonOnly
+    $exitCode = $LASTEXITCODE
+    $jsonLine = $suiteJsonRaw | Select-Object -Last 1
+    $suiteObj = $null
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$jsonLine)) {
+        try {
+            $suiteObj = $jsonLine | ConvertFrom-Json
+        }
+        catch {
+            $suiteObj = $null
+        }
+    }
+
+    if ($null -eq $suiteObj) {
+        $suiteObj = [pscustomobject]@{
+            playmode_suite_status = "failed_playmode_suite_parse"
+            captured_count = $null
+            expected_state_count = $null
+        }
+    }
+
+    return [pscustomobject]@{
+        exit_code = $exitCode
+        playmode_suite = $suiteObj
+    }
+}
+
 $ensureArgs = @(
     "-ExecutionPolicy", "Bypass",
     "-File", $ensureScript,
@@ -353,6 +400,35 @@ if (-not $SkipHudContract) {
     }
 }
 
+$playModeSuiteObj = $null
+if (-not $SkipPlayModeSuite) {
+    $playModeSuiteResult = Invoke-PlayModeSuiteCheck -PlayModeSuiteScriptPath $playModeSuiteScript -RootPath $ProjectPath
+    $playModeSuiteObj = $playModeSuiteResult.playmode_suite
+
+    if (-not $Compact -and $null -ne $playModeSuiteObj) {
+        Write-Host ("playmode_suite_status=" + $playModeSuiteObj.playmode_suite_status)
+        Write-Host ("playmode_suite_captured_count=" + $playModeSuiteObj.captured_count + "/" + $playModeSuiteObj.expected_state_count)
+    }
+
+    if ($playModeSuiteResult.exit_code -ne 0) {
+        if ($JsonOnly) {
+            $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
+            [ordered]@{
+                gate_status = "failed_playmode_suite"
+                status = $statusObj
+                assets = $assetObj
+                layout = $layoutObj
+                hud_contract = $hudContractObj
+                playmode_suite = $playModeSuiteObj
+            } | ConvertTo-Json -Depth 8 -Compress | Write-Host
+            exit 7
+        }
+
+        Write-Host "gate_status=failed_playmode_suite"
+        exit 7
+    }
+}
+
 $statusObj = $null
 if ($Json) {
     $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
@@ -378,6 +454,7 @@ if ($JsonOnly) {
         assets = $assetObj
         layout = $layoutObj
         hud_contract = $hudContractObj
+        playmode_suite = $playModeSuiteObj
     } | ConvertTo-Json -Depth 8 -Compress | Write-Host
     exit 0
 }

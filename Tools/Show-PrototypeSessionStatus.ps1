@@ -56,6 +56,7 @@ $assetScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
 $hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
 $playModeRecordScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRecord.ps1"
+$playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
 $playbookPath = Join-Path $ProjectPath "Docs\Prototype_NextStep_Playbook.md"
@@ -82,20 +83,30 @@ $hudContractResult = Invoke-JsonScript -ScriptPath $hudContractScript -Arguments
     "-JsonOnly"
 )
 
+$playModeSuiteResult = Invoke-JsonScript -ScriptPath $playModeSuiteScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-JsonOnly"
+)
+
 $gateData = $gateResult.data
 $assetData = $assetResult.data
 $verification = if ($null -ne $gateData) { $gateData.status } else { $null }
 $gateAssets = if ($null -ne $gateData) { $gateData.assets } else { $null }
 $gateLayout = if ($null -ne $gateData) { $gateData.layout } else { $null }
 $gateHudContract = if ($null -ne $gateData) { $gateData.hud_contract } else { $null }
+$gatePlayModeSuite = if ($null -ne $gateData) { $gateData.playmode_suite } else { $null }
 $playModeRecordData = $playModeRecordResult.data
 $hudContractData = $hudContractResult.data
+$playModeSuiteData = $playModeSuiteResult.data
 
 $assetStatus = if ($null -ne $assetData) { $assetData.asset_status } elseif ($null -ne $gateAssets) { $gateAssets.asset_status } else { "unknown" }
 $layoutStatus = if ($null -ne $gateLayout) { $gateLayout.layout_status } else { "unknown" }
 $hudContractStatus = if ($null -ne $hudContractData) { $hudContractData.hud_contract_status } elseif ($null -ne $gateHudContract) { $gateHudContract.hud_contract_status } else { "unknown" }
 $hudContractFailedChecks = if ($null -ne $hudContractData) { $hudContractData.failed_checks } elseif ($null -ne $gateHudContract) { $gateHudContract.failed_checks } else { $null }
 $playModeRecordStatus = if ($null -ne $playModeRecordData) { $playModeRecordData.playmode_record_status } else { "unknown" }
+$playModeSuiteStatus = if ($null -ne $playModeSuiteData) { $playModeSuiteData.playmode_suite_status } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.playmode_suite_status } else { "unknown" }
+$playModeSuiteCapturedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.captured_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.captured_count } else { $null }
+$playModeSuiteExpectedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.expected_state_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.expected_state_count } else { $null }
 $staticStatus = if ($null -ne $verification) { $verification.static_status } else { "unknown" }
 $compileStatus = if ($null -ne $verification) { $verification.compile_status } else { "unknown" }
 $testsStatus = if ($null -ne $verification) { $verification.tests_status } else { "unknown" }
@@ -108,6 +119,9 @@ if ($gateResult.ok -and $assetStatus -eq "ok" -and $layoutStatus -eq "ok" -and $
 elseif (-not $gateResult.ok -or $assetStatus -ne "ok" -or $layoutStatus -ne "ok" -or $hudContractStatus -ne "ok" -or $staticStatus -ne "ok" -or $playModeRecordStatus -eq "invalid_record") {
     $readiness = "needs_fix_before_playmode"
 }
+elseif ($playModeSuiteStatus -eq "invalid_suite") {
+    $readiness = "needs_fix_before_playmode"
+}
 elseif ($playModeRecordStatus -eq "needs_fix" -or $playModeRecordStatus -eq "blocked") {
     $readiness = "needs_playmode_fix"
 }
@@ -117,6 +131,7 @@ $unresolvedIssues.Add("Unity headless compile/tests remain inconclusive in this 
 if ($hudContractStatus -ne "ok") {
     $unresolvedIssues.Add("HUD state contract status: " + $hudContractStatus + ".") | Out-Null
 }
+$unresolvedIssues.Add("Play Mode verification suite status: " + $playModeSuiteStatus + ".") | Out-Null
 $unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
 $unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
 
@@ -129,6 +144,9 @@ $summary = [ordered]@{
     layout_status = $layoutStatus
     hud_contract_status = $hudContractStatus
     hud_contract_failed_checks = $hudContractFailedChecks
+    playmode_suite_status = $playModeSuiteStatus
+    playmode_suite_captured_count = $playModeSuiteCapturedCount
+    playmode_suite_expected_count = $playModeSuiteExpectedCount
     playmode_record_status = $playModeRecordStatus
     static_status = $staticStatus
     compile_status = $compileStatus
@@ -143,12 +161,14 @@ $summary = [ordered]@{
         playbook = (Test-Path -LiteralPath $playbookPath)
         layout_verifier = (Test-Path -LiteralPath $layoutScript)
         hud_state_contract_verifier = (Test-Path -LiteralPath $hudContractScript)
+        playmode_suite_verifier = (Test-Path -LiteralPath $playModeSuiteScript)
         playmode_record_verifier = (Test-Path -LiteralPath $playModeRecordScript)
     }
     unresolved_issues = $unresolvedIssues.ToArray()
     recommended_next_actions = @(
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
+        "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
         "In Play Mode, use Tools > Food Truck Prototype > Prepare and Capture State for low-interaction Draw/Pending/Invalid evidence.",
         "When Play Mode input is reliable again, capture Draw Choice, Pending Placement, and Invalid Placement evidence.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Play Mode Snapshot to collect screenshot evidence.",
@@ -174,6 +194,8 @@ Write-Host ("asset_status=" + $summary.asset_status)
 Write-Host ("layout_status=" + $summary.layout_status)
 Write-Host ("hud_contract_status=" + $summary.hud_contract_status)
 Write-Host ("hud_contract_failed_checks=" + $summary.hud_contract_failed_checks)
+Write-Host ("playmode_suite_status=" + $summary.playmode_suite_status)
+Write-Host ("playmode_suite_captured_count=" + $summary.playmode_suite_captured_count + "/" + $summary.playmode_suite_expected_count)
 Write-Host ("playmode_record_status=" + $summary.playmode_record_status)
 Write-Host ("static_status=" + $summary.static_status)
 Write-Host ("compile_status=" + $summary.compile_status)

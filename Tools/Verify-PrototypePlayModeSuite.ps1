@@ -1,0 +1,248 @@
+param(
+    [string]$ProjectPath = "D:\uni\zombieFoodcenter",
+    [switch]$JsonOnly
+)
+
+$ErrorActionPreference = "Stop"
+
+$suitePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification_Suite.txt"
+$requiredStates = @("Draw Choice", "Pending Placement", "Invalid Placement", "Wave Combat")
+
+function Normalize-FieldValue {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return "NOT_RECORDED"
+    }
+
+    return $Value.Trim()
+}
+
+function Resolve-EvidencePath {
+    param(
+        [string]$EvidencePath,
+        [string]$RootPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($EvidencePath) -or $EvidencePath -eq "not captured" -or $EvidencePath -eq "NOT_RECORDED") {
+        return "NOT_RECORDED"
+    }
+
+    if ([System.IO.Path]::IsPathRooted($EvidencePath)) {
+        return [System.IO.Path]::GetFullPath($EvidencePath)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $RootPath $EvidencePath))
+}
+
+function Get-TopLevelFieldMap {
+    param([string]$Text)
+
+    $map = @{}
+    $lines = $Text -split "\r?\n"
+    foreach ($line in $lines) {
+        if ($line -match "^\s*([^:]+):\s*(.*)\s*$") {
+            $key = $matches[1].Trim()
+            $value = Normalize-FieldValue $matches[2]
+            if (-not $map.ContainsKey($key)) {
+                $map[$key] = $value
+            }
+        }
+    }
+
+    return $map
+}
+
+function Get-StateDetails {
+    param(
+        [string]$Text,
+        [string[]]$States
+    )
+
+    $stateSet = @{}
+    foreach ($state in $States) {
+        $stateSet[$state] = $true
+    }
+
+    $details = @{}
+    $currentState = $null
+    $lines = $Text -split "\r?\n"
+
+    foreach ($line in $lines) {
+        if ($line -match "^\s*-\s+(.+?)\s*$") {
+            $candidate = $matches[1].Trim()
+            if ($stateSet.ContainsKey($candidate)) {
+                $currentState = $candidate
+                if (-not $details.ContainsKey($currentState)) {
+                    $details[$currentState] = @{}
+                }
+                continue
+            }
+        }
+
+        if ($null -ne $currentState -and $line -match "^\s+([^:]+):\s*(.*)\s*$") {
+            $key = $matches[1].Trim()
+            $value = Normalize-FieldValue $matches[2]
+            $details[$currentState][$key] = $value
+        }
+    }
+
+    return $details
+}
+
+function New-NotRecordedResult {
+    param([string]$Path)
+
+    return [ordered]@{
+        playmode_suite_status = "not_recorded"
+        suite_path = $Path
+        suite_status_field = "NOT_RECORDED"
+        missing_states = $requiredStates
+        unprepared_states = @()
+        missing_screenshots = @()
+        invalid_fields = @()
+        captured_count = 0
+        expected_state_count = $requiredStates.Count
+        state_results = [ordered]@{}
+        date = "NOT_RECORDED"
+        completed = "NOT_RECORDED"
+        unity_version = "NOT_RECORDED"
+        aspect_ratio_resolution = "NOT_RECORDED"
+        next_action = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+    }
+}
+
+if (-not (Test-Path -LiteralPath $suitePath -PathType Leaf)) {
+    $result = New-NotRecordedResult -Path $suitePath
+    if ($JsonOnly) {
+        $result | ConvertTo-Json -Depth 8 -Compress | Write-Host
+    }
+    else {
+        Write-Host "playmode_suite_status=not_recorded"
+        Write-Host ("suite_path=" + $suitePath)
+        Write-Host "next_action=Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+    }
+    exit 0
+}
+
+$content = [System.IO.File]::ReadAllText($suitePath)
+$topFields = Get-TopLevelFieldMap $content
+$stateDetails = Get-StateDetails -Text $content -States $requiredStates
+
+$invalidFields = New-Object System.Collections.Generic.List[string]
+$missingStates = New-Object System.Collections.Generic.List[string]
+$unpreparedStates = New-Object System.Collections.Generic.List[string]
+$missingScreenshots = New-Object System.Collections.Generic.List[string]
+$stateResults = [ordered]@{}
+$capturedCount = 0
+
+foreach ($field in @("Date", "Completed", "Unity version", "Aspect ratio / resolution", "Suite status")) {
+    if (-not $topFields.ContainsKey($field) -or $topFields[$field] -eq "NOT_RECORDED") {
+        $invalidFields.Add($field)
+    }
+}
+
+$suiteStatusField = if ($topFields.ContainsKey("Suite status")) { $topFields["Suite status"] } else { "NOT_RECORDED" }
+$suiteStatusNormalized = $suiteStatusField.ToLowerInvariant()
+if ($suiteStatusNormalized -ne "completed" -and $suiteStatusNormalized -ne "aborted" -and $suiteStatusNormalized -ne "not_recorded") {
+    $invalidFields.Add("Suite status=" + $suiteStatusField)
+}
+
+foreach ($state in $requiredStates) {
+    if (-not $stateDetails.ContainsKey($state)) {
+        $missingStates.Add($state)
+        $stateResults[$state] = [ordered]@{
+            prepared = "NOT_RECORDED"
+            screenshot = "NOT_RECORDED"
+            screenshot_exists = $false
+            prepare_result = "NOT_RECORDED"
+            hud_state_summary = "NOT_RECORDED"
+        }
+        continue
+    }
+
+    $details = $stateDetails[$state]
+    $prepared = if ($details.ContainsKey("Prepared")) { $details["Prepared"] } else { "NOT_RECORDED" }
+    $prepareResult = if ($details.ContainsKey("Prepare result")) { $details["Prepare result"] } else { "NOT_RECORDED" }
+    $hudSummary = if ($details.ContainsKey("HUD state summary")) { $details["HUD state summary"] } else { "NOT_RECORDED" }
+    $screenshotRaw = if ($details.ContainsKey("Screenshot")) { $details["Screenshot"] } else { "NOT_RECORDED" }
+    $resolvedScreenshot = Resolve-EvidencePath -EvidencePath $screenshotRaw -RootPath $ProjectPath
+    $screenshotExists = $false
+
+    if ($prepared.ToLowerInvariant() -ne "yes") {
+        $unpreparedStates.Add($state)
+    }
+
+    if ($resolvedScreenshot -eq "NOT_RECORDED") {
+        $missingScreenshots.Add($state)
+    }
+    elseif (Test-Path -LiteralPath $resolvedScreenshot -PathType Leaf) {
+        $screenshotExists = $true
+        $capturedCount++
+    }
+    else {
+        $missingScreenshots.Add($state + "=" + $resolvedScreenshot)
+    }
+
+    $stateResults[$state] = [ordered]@{
+        prepared = $prepared
+        screenshot = $resolvedScreenshot
+        screenshot_exists = $screenshotExists
+        prepare_result = $prepareResult
+        hud_state_summary = $hudSummary
+    }
+}
+
+$playModeSuiteStatus = "captured"
+$nextAction = "Review the suite screenshots visually, then record PASS or FIX_* in Docs\Prototype_PlayMode_Verification.md."
+
+if ($invalidFields.Count -gt 0) {
+    $playModeSuiteStatus = "invalid_suite"
+    $nextAction = "Fix Docs\Prototype_PlayMode_Verification_Suite.txt or rerun Capture Verification Suite."
+}
+elseif ($suiteStatusNormalized -eq "aborted") {
+    $playModeSuiteStatus = "aborted"
+    $nextAction = "Rerun Capture Verification Suite in Unity Play Mode."
+}
+elseif ($missingStates.Count -gt 0 -or $unpreparedStates.Count -gt 0 -or $missingScreenshots.Count -gt 0) {
+    $playModeSuiteStatus = "incomplete"
+    $nextAction = "Rerun Capture Verification Suite or retake missing states with Prepare and Capture State."
+}
+
+$result = [ordered]@{
+    playmode_suite_status = $playModeSuiteStatus
+    suite_path = $suitePath
+    suite_status_field = $suiteStatusField
+    missing_states = $missingStates.ToArray()
+    unprepared_states = $unpreparedStates.ToArray()
+    missing_screenshots = $missingScreenshots.ToArray()
+    invalid_fields = $invalidFields.ToArray()
+    captured_count = $capturedCount
+    expected_state_count = $requiredStates.Count
+    state_results = $stateResults
+    date = if ($topFields.ContainsKey("Date")) { $topFields["Date"] } else { "NOT_RECORDED" }
+    completed = if ($topFields.ContainsKey("Completed")) { $topFields["Completed"] } else { "NOT_RECORDED" }
+    unity_version = if ($topFields.ContainsKey("Unity version")) { $topFields["Unity version"] } else { "NOT_RECORDED" }
+    aspect_ratio_resolution = if ($topFields.ContainsKey("Aspect ratio / resolution")) { $topFields["Aspect ratio / resolution"] } else { "NOT_RECORDED" }
+    next_action = $nextAction
+}
+
+if ($JsonOnly) {
+    $result | ConvertTo-Json -Depth 8 -Compress | Write-Host
+}
+else {
+    Write-Host ("playmode_suite_status=" + $playModeSuiteStatus)
+    Write-Host ("suite_status_field=" + $suiteStatusField)
+    Write-Host ("captured_count=" + $capturedCount + "/" + $requiredStates.Count)
+    foreach ($state in $requiredStates) {
+        $stateResult = $stateResults[$state]
+        Write-Host ("- " + $state + ": prepared=" + $stateResult["prepared"] + ", screenshot_exists=" + $stateResult["screenshot_exists"])
+    }
+    Write-Host ("next_action=" + $nextAction)
+}
+
+if ($playModeSuiteStatus -eq "invalid_suite") {
+    exit 10
+}
+
+exit 0
