@@ -60,6 +60,7 @@ $relativeFiles = [ordered]@{
     tests = "Assets\Tests\EditMode\FoodTruckRunModelTests.cs"
     playModeSuiteVerifier = "Tools\Verify-PrototypePlayModeSuite.ps1"
     playModeScreenshotVerifier = "Tools\Verify-PrototypePlayModeScreenshots.ps1"
+    playModeReviewPackWriter = "Tools\Write-PrototypePlayModeReviewPack.ps1"
     playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
     sessionStatus = "Tools\Show-PrototypeSessionStatus.ps1"
@@ -273,6 +274,17 @@ Add-ContractCheck $checks "editor_helpers" "screenshot_status_is_in_gate_and_ses
     'playmode_screenshot_status',
     'playmode_screenshot_count'
 ) "Screenshot evidence quality should be visible in gate and session readiness output."
+
+Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_visual_decision" $sources.playModeReviewPackWriter @(
+    'Prototype_PlayMode_ReviewPack.md',
+    'Verify-PrototypePlayModeSuite.ps1',
+    'Verify-PrototypePlayModeScreenshots.ps1',
+    'Verify-PrototypePlayModeRecord.ps1',
+    'Screenshot Contact Sheet',
+    'Recommended Result Commands',
+    'Write-TextWithFallback',
+    'visual_review_required'
+) "Manual visual review should have a single evidence pack before PASS/FIX/BLOCKED recording."
 
 Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_evidence" $sources.editorMenu @(
     'CollectManualResultScreenshotEvidence',

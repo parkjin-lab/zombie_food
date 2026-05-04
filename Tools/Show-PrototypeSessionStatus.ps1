@@ -58,6 +58,7 @@ $hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContr
 $playModeRecordScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRecord.ps1"
 $playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
+$playModeReviewPackScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeReviewPack.ps1"
 $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
 $playbookPath = Join-Path $ProjectPath "Docs\Prototype_NextStep_Playbook.md"
@@ -183,6 +184,7 @@ $summary = [ordered]@{
         hud_state_contract_verifier = (Test-Path -LiteralPath $hudContractScript)
         playmode_suite_verifier = (Test-Path -LiteralPath $playModeSuiteScript)
         playmode_screenshot_verifier = (Test-Path -LiteralPath $playModeScreenshotsScript)
+        playmode_review_pack_writer = (Test-Path -LiteralPath $playModeReviewPackScript)
         playmode_record_verifier = (Test-Path -LiteralPath $playModeRecordScript)
     }
     unresolved_issues = $unresolvedIssues.ToArray()
@@ -191,6 +193,7 @@ $summary = [ordered]@{
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
         "Run Tools\Verify-PrototypePlayModeScreenshots.ps1 to check screenshot PNG quality and state coverage.",
+        "Run Tools\Write-PrototypePlayModeReviewPack.ps1 to generate a single visual review sheet.",
         "Use Tools\Write-PrototypePlayModeResultFromSuite.ps1 to draft or apply PASS/FIX/BLOCKED results without hand-editing markdown.",
         "In Play Mode, use Tools > Food Truck Prototype > Prepare and Capture State for low-interaction Draw/Pending/Invalid evidence.",
         "When Play Mode input is reliable again, capture Draw Choice, Pending Placement, and Invalid Placement evidence.",

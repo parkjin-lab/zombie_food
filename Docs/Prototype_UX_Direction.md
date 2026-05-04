@@ -30,6 +30,7 @@
 - The Play Mode verification suite can batch all four required capture states into one evidence pass and preserve a state-by-state manifest.
 - The suite manifest is now machine-checkable so missing screenshots are caught before manual PASS/FIX recording.
 - Captured screenshot files now have a local PNG quality and state-coverage verifier before visual PASS/FIX review.
+- Suite, screenshot, and record status can now be assembled into one review pack with a contact sheet and result command templates.
 - PASS recording now reads the saved suite manifest so screenshot evidence is retained after Editor reloads.
 - PASS/FIX/BLOCKED manual outcomes can now be drafted from suite evidence without hand-editing the verification markdown.
 

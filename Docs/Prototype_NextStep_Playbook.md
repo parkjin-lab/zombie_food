@@ -52,6 +52,7 @@
 - Layout guard command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode suite evidence command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode screenshot evidence command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
+- Play Mode review pack command: `powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode result writer command: `powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS`.
 - Play Mode record command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Low-interaction capture path: in Play Mode use `Tools > Food Truck Prototype > Capture Verification Suite` to batch Draw Choice, Pending Placement, Invalid Placement, and Wave Combat evidence.
@@ -61,3 +62,4 @@
 - PASS recording now reuses saved suite screenshot evidence, so the manual record can survive Editor reloads between suite capture and PASS confirmation.
 - FIX/BLOCKED manual outcomes can be drafted or applied with `Tools\Write-PrototypePlayModeResultFromSuite.ps1` instead of hand-editing the markdown.
 - Existing screenshots currently pass PNG/portrait quality checks but remain `partial` until required states are captured with suite labels.
+- `Tools\Write-PrototypePlayModeReviewPack.ps1` now assembles suite status, screenshot status, current record status, a contact sheet, and result command templates into one review sheet.
