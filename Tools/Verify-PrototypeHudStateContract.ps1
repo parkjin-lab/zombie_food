@@ -49,11 +49,13 @@ $relativeFiles = [ordered]@{
     drawFlow = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceFlow.cs"
     drawVisuals = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceVisuals.cs"
     drawRisk = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceRiskUI.cs"
+    playModeVerification = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PlayModeVerification.cs"
     pendingAssist = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PendingPlacementAssist.cs"
     placementFeedback = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PlacementFeedback.cs"
     presentation = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PresentationActions.cs"
     prototypeVfx = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PrototypeVfx.cs"
     telemetry = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.Telemetry.cs"
+    editorMenu = "Assets\Scripts\Editor\FoodTruckPrototypePlayModeVerificationMenu.cs"
     model = "Assets\Scripts\Prototype\FoodTruckRunModel.cs"
     tests = "Assets\Tests\EditMode\FoodTruckRunModelTests.cs"
 }
@@ -198,6 +200,34 @@ Add-ContractCheck $checks "telemetry" "hud_reports_core_ux_metrics" $sources.tel
     '"Pick Risk: LOW " + riskLow + " | MID " + riskMid + " | HIGH " + riskHigh'
 ) "The HUD must preserve the next sprint's UX instrumentation path."
 
+Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_states" $sources.playModeVerification @(
+    'public enum PlayModeVerificationState',
+    'DrawChoice',
+    'PendingPlacement',
+    'InvalidPlacement',
+    'WaveCombat',
+    'public bool TryPreparePlayModeVerificationState(PlayModeVerificationState state, out string message)',
+    'BuildPlayModeVerificationStateSummary()'
+) "PC-limited sessions need one-click setup for each remaining manual capture state."
+
+Add-ContractCheck $checks "editor_helpers" "menu_exposes_prepare_and_capture_actions" $sources.editorMenu @(
+    'Prepare State/Draw Choice',
+    'Prepare State/Pending Placement',
+    'Prepare State/Invalid Placement',
+    'Prepare State/Wave Combat',
+    'Prepare and Capture State/Draw Choice',
+    'Prepare and Capture State/Pending Placement',
+    'Prepare and Capture State/Invalid Placement',
+    'Prepare and Capture State/Wave Combat'
+) "The Editor menu must expose low-interaction state setup and capture paths."
+
+Add-ContractCheck $checks "editor_helpers" "snapshot_draft_includes_prepared_state_summary" $sources.editorMenu @(
+    'Prepared state: ',
+    'Prepare result: ',
+    'HUD state summary: ',
+    'hud.BuildPlayModeVerificationStateSummary()'
+) "Captured drafts should explain which verification state was generated."
+
 Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_layout_visibility" $sources.tests @(
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',
     'TryPlacePendingAtCell_InvalidAnchor_RecordsInvalidAnchorFailure',
@@ -224,7 +254,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, and Invalid Placement HUD states.",

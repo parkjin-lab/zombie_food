@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Verification
 
-Last updated: 2026-05-04 16:31 KST
+Last updated: 2026-05-04 16:45 KST
 
 ## Purpose
 Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
@@ -19,6 +19,8 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 
 ## Editor Helpers
 - Play Mode 중 `Tools > Food Truck Prototype > Capture Play Mode Snapshot`을 실행하면 `Docs/PlayModeScreenshots`에 스크린샷을 저장하고 `Docs/Prototype_PlayMode_Verification_Draft.txt`에 현재 Unity 버전/해상도/리소스 로드 상태를 기록한다.
+- Play Mode 입력이 불안정하면 `Tools > Food Truck Prototype > Prepare and Capture State` 아래의 Draw Choice / Pending Placement / Invalid Placement / Wave Combat 메뉴를 사용한다. 각 메뉴는 해당 상태를 자동으로 만든 뒤 스크린샷과 draft에 준비 상태 요약을 남긴다.
+- 상태만 먼저 만들고 직접 확인하려면 `Tools > Food Truck Prototype > Prepare State` 아래 메뉴를 사용한 뒤 `Capture Play Mode Snapshot`을 실행한다.
 - 네 상태가 모두 PASS임을 직접 확인한 뒤 `Tools > Food Truck Prototype > Record PASS Manual Result`를 실행하면 `Latest Manual Result`가 자동으로 PASS 기록으로 갱신된다.
 - 문제가 보이면 PASS 기록 메뉴를 쓰지 말고 아래 Result Template 값을 직접 채운다.
 
@@ -66,7 +68,7 @@ Screenshots captured: 2
 1. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010153.png
 2. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010245.png
 Top issue: Current PC cannot reliably continue direct Play Mode interaction. Captured Wave Combat was readable, but the bottom build panel occupied too much portrait space when no block was pending.
-Next code target: Completed 2026-05-04 16:31 KST; combat-only HUD now hides the 3x3 build grid, and the source-level HUD state contract for Draw Choice, Pending Placement, Invalid Placement, telemetry, and regression coverage is wired into the gate.
+Next code target: Completed 2026-05-04 16:45 KST; Play Mode helper menus can now prepare and capture Draw Choice, Pending Placement, Invalid Placement, and Wave Combat with minimal direct gameplay input.
 Verification command result: Partial Play Mode record remains `not_recorded` until Draw Choice, Pending Placement, and Invalid Placement can be captured; `Tools\Verify-PrototypeHudStateContract.ps1`, `Tools\Verify-PrototypeLayout.ps1`, `Tools\Verify-PrototypeStatic.ps1`, and `Tools\Gate-Verification.ps1 -RunTests -JsonOnly` pass.
 
 ## Result Template

@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-04 16:31 KST
+Last updated: 2026-05-04 16:45 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -32,6 +32,7 @@ Last updated: 2026-05-04 16:31 KST
 - Updated the session status recommendation text so PC-limited sessions can continue code-level work while keeping manual Play Mode verification unresolved.
 - Added `Tools/Verify-PrototypeHudStateContract.ps1` as a source-level contract guard for Draw Choice, Pending Placement, Invalid Placement, UX telemetry, and regression coverage.
 - Integrated the HUD state contract into `Tools/Gate-Verification.ps1` and `Tools/Show-PrototypeSessionStatus.ps1` so PC-limited sessions can advance code-level work without losing the remaining manual Play Mode checklist.
+- Added Play Mode helper state setup in `FoodTruckPrototypeHud.PlayModeVerification.cs` and Editor menu actions under `Tools > Food Truck Prototype > Prepare State` / `Prepare and Capture State`.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -48,7 +49,7 @@ Last updated: 2026-05-04 16:31 KST
 - `Tools/Gate-Verification.ps1 -RunTests -ForceHeadless -RequireFresh -RequireCompileOk -RequireTestsOk -JsonOnly`: `gate_status=failed_blocked_env` while Unity Editor is already running.
 - Unity Editor log check found no recent `FoodTruckPrototypePlayModeVerificationMenu`, `ZombieFoodcenter.Editor`, `error CS`, or compilation-failure lines after adding the Editor helper.
 - Unity compile/tests remain `inconclusive` in the current headless/sandbox environment. Manual Editor verification is still required.
-- Latest local recheck at 2026-05-04 16:31 KST: `Tools/Verify-PrototypeHudStateContract.ps1` reports `hud_contract_status=ok`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Verify-PrototypePlayModeRecord.ps1 -JsonOnly` remains `playmode_record_status=not_recorded` with the three unrecorded manual states.
+- Latest local recheck at 2026-05-04 16:45 KST: `Tools/Verify-PrototypeHudStateContract.ps1` reports `hud_contract_status=ok`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Verify-PrototypePlayModeRecord.ps1 -JsonOnly` remains `playmode_record_status=not_recorded` with the three unrecorded manual states.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -66,6 +67,7 @@ Last updated: 2026-05-04 16:31 KST
 - `Tools/Show-VerificationStatus.ps1`: uses the shared status path resolver and literal status-file reads.
 - `Tools/Assert-VerificationStatus.ps1`: uses the shared status path resolver and literal status-file reads.
 - `Assets/Scripts/Editor/FoodTruckPrototypePlayModeVerificationMenu.cs`: Play Mode helper menu for screenshots, verification drafts, and confirmed all-PASS record writing.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PlayModeVerification.cs`: runtime HUD helper that prepares Draw Choice, Pending Placement, Invalid Placement, and Wave Combat verification states.
 - `Assets/Scripts/Editor/ZombieFoodcenter.Editor.asmdef`: Editor assembly definition referencing the prototype runtime assembly.
 - `Docs/Fun_Game_Resource_Spec.md`: documents resource verification commands and diagnostics.
 - `Assets/Resources/FoodTruckPrototype/Sprites/Ingredients/README.md`: notes generated placeholder icon workflow.
@@ -87,7 +89,7 @@ Last updated: 2026-05-04 16:31 KST
 
 ## Current Unresolved Issues
 - Unity compile/test confidence is still low because this environment cannot reliably run Editor headless verification.
-- Actual in-game visual validation is still required for Draw Choice, Pending Placement, and Invalid Placement when the local PC can reliably interact with Play Mode again.
+- Actual in-game visual validation is still required for Draw Choice, Pending Placement, and Invalid Placement, but the Editor now has low-interaction state setup/capture menus for this PC.
 - The generated art is intentionally placeholder quality. Replace with final art using the same file names when production assets are ready.
 - The earlier UX concern remains the next product risk: game view, placement board, and block selection must be validated together so UI does not cover the core play space.
 - Git is initialized and the active work is on `codex/publish-prototype`; large imported third-party/local Unity folders remain intentionally untracked unless explicitly selected.
@@ -98,7 +100,7 @@ Last updated: 2026-05-04 16:31 KST
 
 ## Recommended Next Session Work
 1. Treat the combat-only HUD compaction as complete unless a fresh screenshot shows a regression.
-2. When the local PC can continue Play Mode input, capture Draw Choice, Pending Placement, and Invalid Placement with `Tools > Food Truck Prototype > Capture Play Mode Snapshot`.
+2. In Play Mode, capture Draw Choice, Pending Placement, and Invalid Placement with `Tools > Food Truck Prototype > Prepare and Capture State` before attempting longer manual play.
 3. If all required states pass visually, run `Tools > Food Truck Prototype > Record PASS Manual Result`; otherwise fill the `Latest Manual Result` section manually with the failing `FIX_*` status.
 4. Run `Tools/Verify-PrototypeHudStateContract.ps1` after any Draw/Pending/Invalid Placement HUD code change.
 5. Run `Tools/Verify-PrototypeLayout.ps1` after any HUD layout code change.
@@ -147,7 +149,7 @@ Current status:
 - Static guard passes: static_status=ok.
 - Integrated gate passes: gate_status=ok.
 - Unity compile/tests are inconclusive only because headless Editor verification is unreliable in this environment.
-- Latest local MCP-free recheck at 2026-05-04 16:31 KST confirmed Verify-PrototypeHudStateContract, Verify-PrototypeLayout, Verify-PrototypeStatic, Show-PrototypeSessionStatus, and Gate-Verification execute after the combat-only HUD compaction.
+- Latest local MCP-free recheck at 2026-05-04 16:45 KST confirmed Verify-PrototypeHudStateContract, Verify-PrototypeLayout, Verify-PrototypeStatic, Show-PrototypeSessionStatus, and Gate-Verification execute after adding low-interaction Play Mode helper states.
 
 Recent work:
 - Added Verify-PrototypeAssets.ps1 with PNG/meta diagnostics.
@@ -174,8 +176,8 @@ Recent work:
   - Record PASS Manual Result updates Docs/Prototype_PlayMode_Verification.md after explicit visual confirmation.
 - Published the checkpoint to GitHub draft PR #1 on branch codex/publish-prototype.
 - Captured Wave Combat screenshots and committed them as verification evidence.
-- Compacted combat-only portrait HUD so the 3x3 build grid is hidden while no block/draw/rest context is active, added layout/action visibility guards for that state, and added the HUD state contract verifier for Draw/Pending/Invalid Placement.
+- Compacted combat-only portrait HUD so the 3x3 build grid is hidden while no block/draw/rest context is active, added layout/action visibility guards for that state, added the HUD state contract verifier, and added Play Mode helper state setup/capture menus for Draw/Pending/Invalid/Wave states.
 
 Next priority:
-Proceed with code-level next work without blocking on more Play Mode input from this PC. Run Tools/Verify-PrototypeHudStateContract.ps1 after Draw/Pending/Invalid Placement HUD code changes and Tools/Verify-PrototypeLayout.ps1 after layout changes. When a reliable Play Mode session is available again, capture Draw Choice, Pending Placement, and Invalid Placement, then run Tools/Verify-PrototypePlayModeRecord.ps1.
+Use the new `Tools > Food Truck Prototype > Prepare and Capture State` menus in Play Mode to capture Draw Choice, Pending Placement, and Invalid Placement with minimal direct input, then run Tools/Verify-PrototypePlayModeRecord.ps1. Continue code-level next work without blocking on longer Play Mode input from this PC.
 ```

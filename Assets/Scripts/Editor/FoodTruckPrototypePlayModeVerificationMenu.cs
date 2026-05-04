@@ -24,12 +24,113 @@ namespace ZombieFoodcenter.Editor
         [MenuItem(MenuRoot + "Capture Play Mode Snapshot")]
         private static void CapturePlayModeSnapshot()
         {
+            CapturePlayModeSnapshot(null, null);
+        }
+
+        private static void CapturePlayModeSnapshot(string preparedStateLabel, string preparedMessage)
+        {
             string screenshotPath = CaptureScreenshot();
             string draftPath = GetProjectPath(DraftRelativePath);
-            File.WriteAllText(draftPath, BuildSnapshotDraft(screenshotPath), Encoding.UTF8);
+            File.WriteAllText(draftPath, BuildSnapshotDraft(screenshotPath, preparedStateLabel, preparedMessage), Encoding.UTF8);
             AssetDatabase.Refresh();
             EditorUtility.RevealInFinder(draftPath);
             Debug.Log("FoodTruck prototype Play Mode snapshot draft written to " + draftPath);
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Draw Choice", true)]
+        private static bool CanPrepareDrawChoiceState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Draw Choice")]
+        private static void PrepareDrawChoiceState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.DrawChoice, false);
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Pending Placement", true)]
+        private static bool CanPreparePendingPlacementState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Pending Placement")]
+        private static void PreparePendingPlacementState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.PendingPlacement, false);
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Invalid Placement", true)]
+        private static bool CanPrepareInvalidPlacementState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Invalid Placement")]
+        private static void PrepareInvalidPlacementState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.InvalidPlacement, false);
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Wave Combat", true)]
+        private static bool CanPrepareWaveCombatState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare State/Wave Combat")]
+        private static void PrepareWaveCombatState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.WaveCombat, false);
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Draw Choice", true)]
+        private static bool CanPrepareAndCaptureDrawChoiceState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Draw Choice")]
+        private static void PrepareAndCaptureDrawChoiceState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.DrawChoice, true);
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Pending Placement", true)]
+        private static bool CanPrepareAndCapturePendingPlacementState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Pending Placement")]
+        private static void PrepareAndCapturePendingPlacementState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.PendingPlacement, true);
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Invalid Placement", true)]
+        private static bool CanPrepareAndCaptureInvalidPlacementState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Invalid Placement")]
+        private static void PrepareAndCaptureInvalidPlacementState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.InvalidPlacement, true);
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Wave Combat", true)]
+        private static bool CanPrepareAndCaptureWaveCombatState()
+        {
+            return CanPrepareVerificationState();
+        }
+
+        [MenuItem(MenuRoot + "Prepare and Capture State/Wave Combat")]
+        private static void PrepareAndCaptureWaveCombatState()
+        {
+            PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState.WaveCombat, true);
         }
 
         [MenuItem(MenuRoot + "Record PASS Manual Result", true)]
@@ -77,7 +178,7 @@ namespace ZombieFoodcenter.Editor
             }
 
             File.WriteAllText(docPath, updated, Encoding.UTF8);
-            File.WriteAllText(GetProjectPath(DraftRelativePath), BuildSnapshotDraft(screenshotPath), Encoding.UTF8);
+            File.WriteAllText(GetProjectPath(DraftRelativePath), BuildSnapshotDraft(screenshotPath, null, null), Encoding.UTF8);
             AssetDatabase.Refresh();
             EditorUtility.RevealInFinder(docPath);
             Debug.Log("FoodTruck prototype manual PASS result recorded in " + docPath);
@@ -107,15 +208,28 @@ namespace ZombieFoodcenter.Editor
             return screenshotPath;
         }
 
-        private static string BuildSnapshotDraft(string screenshotPath)
+        private static string BuildSnapshotDraft(string screenshotPath, string preparedStateLabel, string preparedMessage)
         {
-            bool hasHud = UnityEngine.Object.FindFirstObjectByType<FoodTruckPrototypeHud>() != null;
+            FoodTruckPrototypeHud hud = FindHud();
+            bool hasHud = hud != null;
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("FoodTruck Prototype Play Mode Verification Draft");
             builder.AppendLine("Date: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " KST");
             builder.AppendLine("Unity version: " + Application.unityVersion);
             builder.AppendLine("Aspect ratio / resolution: " + BuildResolutionLabel());
             builder.AppendLine("HUD instance present: " + (hasHud ? "yes" : "no"));
+            if (!string.IsNullOrEmpty(preparedStateLabel))
+            {
+                builder.AppendLine("Prepared state: " + preparedStateLabel);
+            }
+            if (!string.IsNullOrEmpty(preparedMessage))
+            {
+                builder.AppendLine("Prepare result: " + preparedMessage);
+            }
+            if (hasHud)
+            {
+                builder.AppendLine("HUD state summary: " + hud.BuildPlayModeVerificationStateSummary());
+            }
             builder.AppendLine("Screenshot: " + screenshotPath);
             builder.AppendLine();
             builder.AppendLine("Resource checks:");
@@ -133,6 +247,71 @@ namespace ZombieFoodcenter.Editor
             builder.AppendLine("After recording, run:");
             builder.AppendLine("powershell -ExecutionPolicy Bypass -File \"Tools\\Verify-PrototypePlayModeRecord.ps1\" -ProjectPath \"D:\\uni\\zombieFoodcenter\" -JsonOnly");
             return builder.ToString();
+        }
+
+        private static bool CanPrepareVerificationState()
+        {
+            return EditorApplication.isPlaying &&
+                !EditorApplication.isCompiling &&
+                FindHud() != null;
+        }
+
+        private static void PrepareVerificationState(FoodTruckPrototypeHud.PlayModeVerificationState state, bool captureAfterPrepare)
+        {
+            FoodTruckPrototypeHud hud = FindHud();
+            if (hud == null)
+            {
+                EditorUtility.DisplayDialog("FoodTruck HUD missing", "No FoodTruckPrototypeHud instance is present in Play Mode.", "OK");
+                return;
+            }
+
+            string stateLabel = BuildStateLabel(state);
+            if (!hud.TryPreparePlayModeVerificationState(state, out string message))
+            {
+                EditorUtility.DisplayDialog("Could not prepare state", stateLabel + ": " + message, "OK");
+                return;
+            }
+
+            Debug.Log("FoodTruck prototype verification state prepared: " + stateLabel + " | " + message);
+
+            if (!captureAfterPrepare)
+            {
+                return;
+            }
+
+            EditorApplication.QueuePlayerLoopUpdate();
+            SceneView.RepaintAll();
+            EditorApplication.delayCall += () =>
+            {
+                if (!EditorApplication.isPlaying)
+                {
+                    return;
+                }
+
+                CapturePlayModeSnapshot(stateLabel, message);
+            };
+        }
+
+        private static FoodTruckPrototypeHud FindHud()
+        {
+            return UnityEngine.Object.FindFirstObjectByType<FoodTruckPrototypeHud>();
+        }
+
+        private static string BuildStateLabel(FoodTruckPrototypeHud.PlayModeVerificationState state)
+        {
+            switch (state)
+            {
+                case FoodTruckPrototypeHud.PlayModeVerificationState.DrawChoice:
+                    return "Draw Choice";
+                case FoodTruckPrototypeHud.PlayModeVerificationState.PendingPlacement:
+                    return "Pending Placement";
+                case FoodTruckPrototypeHud.PlayModeVerificationState.InvalidPlacement:
+                    return "Invalid Placement";
+                case FoodTruckPrototypeHud.PlayModeVerificationState.WaveCombat:
+                    return "Wave Combat";
+                default:
+                    return state.ToString();
+            }
         }
 
         private static string BuildPassLatestResultSection(string screenshotPath)

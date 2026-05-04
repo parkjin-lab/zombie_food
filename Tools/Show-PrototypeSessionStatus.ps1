@@ -148,6 +148,7 @@ $summary = [ordered]@{
     unresolved_issues = $unresolvedIssues.ToArray()
     recommended_next_actions = @(
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
+        "In Play Mode, use Tools > Food Truck Prototype > Prepare and Capture State for low-interaction Draw/Pending/Invalid evidence.",
         "When Play Mode input is reliable again, capture Draw Choice, Pending Placement, and Invalid Placement evidence.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Play Mode Snapshot to collect screenshot evidence.",
         "If all checklist states pass visually, use Tools > Food Truck Prototype > Record PASS Manual Result.",

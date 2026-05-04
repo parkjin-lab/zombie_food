@@ -51,5 +51,6 @@
 - HUD state contract command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Layout guard command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode record command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
-- Immediate next validation when Play Mode input is reliable again: capture Draw choice, Pending placement, and Invalid placement.
-- Current code fallback is complete for the captured Wave combat issue, and the Draw/Pending/Invalid Placement HUD state contract is now gate-checked while manual capture remains blocked on this PC.
+- Low-interaction capture path: in Play Mode use `Tools > Food Truck Prototype > Prepare and Capture State` for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat.
+- Immediate next validation when Play Mode input is reliable again: review those prepared captures and record the manual result.
+- Current code fallback is complete for the captured Wave combat issue, and Draw/Pending/Invalid/Wave helper-state setup is now gate-checked while manual record remains open.
