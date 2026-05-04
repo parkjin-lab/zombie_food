@@ -256,6 +256,15 @@ Add-ContractCheck $checks "editor_helpers" "suite_status_is_in_gate_and_session_
     'playmode_suite_captured_count'
 ) "The suite evidence status should be visible in gate and session readiness output."
 
+Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_evidence" $sources.editorMenu @(
+    'CollectManualResultScreenshotEvidence',
+    'AddSuiteManifestEvidence',
+    'Regex.Matches',
+    'SuiteDraftRelativePath',
+    'AddEvidencePath(paths, seen, match.Groups["path"].Value, true)',
+    'Screenshots captured: '
+) "The PASS record helper should preserve suite screenshot evidence even after Editor state reloads."
+
 Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_layout_visibility" $sources.tests @(
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',
     'TryPlacePendingAtCell_InvalidAnchor_RecordsInvalidAnchorFailure',

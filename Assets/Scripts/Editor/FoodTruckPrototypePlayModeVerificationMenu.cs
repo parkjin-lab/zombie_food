@@ -182,7 +182,7 @@ namespace ZombieFoodcenter.Editor
         {
             bool confirmed = EditorUtility.DisplayDialog(
                 "Record prototype Play Mode PASS?",
-                "Use this only after visually confirming Draw Choice, Pending Placement, Invalid Placement, and Wave Combat are readable and usable.",
+                "Use this only after visually confirming Draw Choice, Pending Placement, Invalid Placement, and Wave Combat are readable and usable. If a verification suite manifest exists, its screenshots will be included as evidence.",
                 "Record PASS",
                 "Cancel");
 
@@ -540,19 +540,7 @@ namespace ZombieFoodcenter.Editor
 
         private static string BuildScreenshotEvidenceSection(string fallbackScreenshotPath)
         {
-            List<string> paths = new List<string>();
-            foreach (VerificationSuiteCaptureEntry entry in lastVerificationSuiteEntries)
-            {
-                if (!string.IsNullOrEmpty(entry.ScreenshotPath))
-                {
-                    paths.Add(entry.ScreenshotPath);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(fallbackScreenshotPath))
-            {
-                paths.Add(fallbackScreenshotPath);
-            }
+            List<string> paths = CollectManualResultScreenshotEvidence(fallbackScreenshotPath);
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("Screenshots captured: " + paths.Count);
@@ -562,6 +550,69 @@ namespace ZombieFoodcenter.Editor
             }
 
             return builder.ToString();
+        }
+
+        private static List<string> CollectManualResultScreenshotEvidence(string fallbackScreenshotPath)
+        {
+            List<string> paths = new List<string>();
+            HashSet<string> seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (VerificationSuiteCaptureEntry entry in lastVerificationSuiteEntries)
+            {
+                AddEvidencePath(paths, seen, entry.ScreenshotPath, false);
+            }
+
+            AddSuiteManifestEvidence(paths, seen);
+            AddEvidencePath(paths, seen, fallbackScreenshotPath, false);
+            return paths;
+        }
+
+        private static void AddSuiteManifestEvidence(List<string> paths, HashSet<string> seen)
+        {
+            string suitePath = GetProjectPath(SuiteDraftRelativePath);
+            if (!File.Exists(suitePath))
+            {
+                return;
+            }
+
+            string suiteText = File.ReadAllText(suitePath);
+            MatchCollection screenshotMatches = Regex.Matches(
+                suiteText,
+                @"(?im)^\s*Screenshot:\s*(?<path>.+?)\s*$");
+
+            foreach (Match match in screenshotMatches)
+            {
+                AddEvidencePath(paths, seen, match.Groups["path"].Value, true);
+            }
+        }
+
+        private static void AddEvidencePath(List<string> paths, HashSet<string> seen, string candidatePath, bool requireExistingFile)
+        {
+            if (string.IsNullOrWhiteSpace(candidatePath))
+            {
+                return;
+            }
+
+            string normalized = candidatePath.Trim();
+            if (string.Equals(normalized, "not captured", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(normalized, "NOT_RECORDED", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            string fullPath = Path.IsPathRooted(normalized)
+                ? Path.GetFullPath(normalized)
+                : GetProjectPath(normalized);
+
+            if (requireExistingFile && !File.Exists(fullPath))
+            {
+                return;
+            }
+
+            if (seen.Add(fullPath))
+            {
+                paths.Add(fullPath);
+            }
         }
 
         private static string BuildResolutionLabel()

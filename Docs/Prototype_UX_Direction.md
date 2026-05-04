@@ -29,6 +29,7 @@
 - Editor Play Mode helpers can now prepare and capture Draw Choice, Pending Placement, Invalid Placement, and Wave Combat states with minimal direct input.
 - The Play Mode verification suite can batch all four required capture states into one evidence pass and preserve a state-by-state manifest.
 - The suite manifest is now machine-checkable so missing screenshots are caught before manual PASS/FIX recording.
+- PASS recording now reads the saved suite manifest so screenshot evidence is retained after Editor reloads.
 
 ## Core Fun Reinforcement Plan
 ### P0 (Now)

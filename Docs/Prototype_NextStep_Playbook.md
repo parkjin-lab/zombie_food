@@ -56,3 +56,4 @@
 - Focused fallback path: use `Tools > Food Truck Prototype > Prepare and Capture State` when only one state needs a retake.
 - Immediate next validation when Play Mode input is reliable again: run the suite verifier, review the captures visually, and record the manual result.
 - Current code fallback is complete for the captured Wave combat issue, and Draw/Pending/Invalid/Wave helper-state setup plus suite capture/evidence verification are now gate-checked while manual record remains open.
+- PASS recording now reuses saved suite screenshot evidence, so the manual record can survive Editor reloads between suite capture and PASS confirmation.
