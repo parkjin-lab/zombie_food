@@ -793,6 +793,21 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildRecipeEffectChipText_DescribesPassiveAndActiveRoles()
+        {
+            var passive = new RecipeState("Veggie Stir-fry", RecipeTier.Basic, true, 0.45f, 20f);
+            var active = new RecipeState("Seafood Pasta", RecipeTier.Intermediate, false, 0.90f, 12f);
+
+            string passiveText = FoodTruckPrototypeHud.BuildRecipeEffectChipText(passive);
+            string activeText = FoodTruckPrototypeHud.BuildRecipeEffectChipText(active);
+
+            StringAssert.Contains("Regen/Cool", passiveText);
+            StringAssert.Contains("x0.5", passiveText);
+            StringAssert.Contains("Lane Hit", activeText);
+            StringAssert.Contains("x0.9", activeText);
+        }
+
+        [Test]
         public void HudFocusLayout_CombatOnly_ExpandsBattlefieldPanel()
         {
             FoodTruckPrototypeHud.GameplayFocusLayoutMetrics layout =

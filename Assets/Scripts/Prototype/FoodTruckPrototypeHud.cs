@@ -2277,8 +2277,14 @@ namespace ZombieFoodcenter.Prototype
                         ? new Color(0.32f, 0.72f, 0.86f, 1f)
                         : new Color(0.35f, 0.79f, 0.47f, 1f);
 
-                string chipText = recipe.Name + "  [" + recipe.RemainingSeconds.ToString("0") + "s]";
-                RectTransform chip = CreateChip(chipText, color);
+                string chipText =
+                    recipe.Name +
+                    " | " +
+                    BuildRecipeEffectChipText(recipe) +
+                    " [" +
+                    recipe.RemainingSeconds.ToString("0") +
+                    "s]";
+                RectTransform chip = CreateChip(chipText, color, 260f, 310f, 13);
                 if (chip != null
                     && synergyChipPulseTimer > 0f
                     && string.Equals(recipe.Name, lastActivatedRecipeName, StringComparison.Ordinal))
@@ -2314,6 +2320,19 @@ namespace ZombieFoodcenter.Prototype
             label.text = text;
             Stretch(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(8f, 2f), new Vector2(-8f, -2f));
             return chip;
+        }
+
+        public static string BuildRecipeEffectChipText(RecipeState recipe)
+        {
+            if (recipe == null)
+            {
+                return "Unknown effect";
+            }
+
+            string power = "x" + recipe.Potency.ToString("0.0");
+            return recipe.IsPassive
+                ? "Regen/Cool " + power
+                : "Lane Hit " + power;
         }
 
     }

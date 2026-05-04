@@ -88,6 +88,9 @@ The Synergy Bar should also retain the latest recipe trigger as a compact recent
 cue so a player can still connect "what I just did" to the active recipe after the
 banner fades.
 
+Active recipe chips should describe the payoff in-place: passive recipes read as
+recovery/cooling support, while active recipes read as lane-hit pressure.
+
 The summary should highlight:
 - Wave result: cleared, failed, truck damage, remaining HP, and clear margin.
 - Payoff: damage dealt, enemies stopped, Heat gained/relieved, and any combo contribution.
@@ -102,6 +105,7 @@ The summary should highlight:
 - Verify Invalid Placement reason plus next-action copy near the board: `occupied`, `out_of_bounds`, `invalid_anchor`, `no_pending`.
 - Verify Recipe activation banners: recipe name, tier, and trigger cause should be readable before they fade.
 - Verify the Synergy Bar recent-recipe cue remains readable without crowding active recipe duration chips.
+- Verify active recipe chips communicate both duration and effect role without requiring the combat log.
 - Verify the wave outcome/payoff cue at the end of Wave Combat before the next draw.
 - If the cue is too fleeting or crowded, promote it into a compact persistent payoff panel.
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.
@@ -113,6 +117,7 @@ The summary should highlight:
 - After a failed placement, the next useful action is understandable without opening the full log.
 - The player can explain why R1/R2 are recommended without interpreting numeric scores.
 - The player can tell whether a recipe came from a bonus roll or a 3x bingo condition.
+- The player can tell whether an active recipe is recovery/cooling support or lane-hit pressure.
 - The Wave Combat screen keeps HP, Heat, Wave, lane pressure, and truck position readable at the same time.
 - The wave outcome/payoff summary makes the last decision's effect understandable without reading logs.
 - Draw/Pending/Invalid/Wave readability reaches `PASS`, or each `FIX` has a concrete evidence-backed reason.

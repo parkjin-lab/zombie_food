@@ -265,6 +265,14 @@ Add-ContractCheck $checks "recipe_feedback" "hud_keeps_recent_recipe_cause_visib
     'payload.IndexOf(" from ", StringComparison.Ordinal)'
 ) "The recipe source should remain visible after the activation banner fades, and chip pulse should still target the active recipe name."
 
+Add-ContractCheck $checks "recipe_feedback" "active_recipe_chips_describe_effect_role" $sources.hud @(
+    'BuildRecipeEffectChipText(recipe)',
+    'public static string BuildRecipeEffectChipText(RecipeState recipe)',
+    '"Regen/Cool " + power',
+    '"Lane Hit " + power',
+    'CreateChip(chipText, color, 260f, 310f, 13)'
+) "Active recipe chips should show what the recipe is doing, not only name and remaining time."
+
 Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_states" $sources.playModeVerification @(
     'public enum PlayModeVerificationState',
     'DrawChoice',
@@ -371,6 +379,7 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'TryPlacePendingAtCell_OverlapWithTwoBlocks_DoesNotAutoMerge',
     'TryPlacePendingAtCell_ThirdMatchingBlock_ActivatesRecipeBingo',
     'TriggerRandomRecipe_LogsActivationCause',
+    'BuildRecipeEffectChipText_DescribesPassiveAndActiveRoles',
     'model.LastRecipeActivationCue',
     'Tick_WhenWaveAdvances_RecordsOutcomeSummary',
     'HudActionVisibility_CombatOnlyIdle_ShowsBuildEntryRow',
