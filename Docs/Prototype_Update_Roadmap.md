@@ -19,6 +19,7 @@ evidence.
 - Review pack: `Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `partial_evidence`.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
+- Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
 
 ## Start Here
 1. Print the current session status.
@@ -88,7 +89,7 @@ The summary should highlight:
 - Verify that the three draw cards keep `Fit`, `Heat`, `Role`, `Value/Risk`, and `Target` readable in compact portrait layout.
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.
 - Strengthen Pending Placement preview: rotation, footprint, blocked cells, and targeting range.
-- Surface Invalid Placement reasons near the board: `occupied`, `out_of_bounds`, `invalid_anchor`, `no_pending`.
+- Verify Invalid Placement reason plus next-action copy near the board: `occupied`, `out_of_bounds`, `invalid_anchor`, `no_pending`.
 - Verify the wave outcome/payoff cue at the end of Wave Combat before the next draw.
 - If the cue is too fleeting or crowded, promote it into a compact persistent payoff panel.
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.
@@ -97,6 +98,7 @@ The summary should highlight:
 - The player can explain the difference between the three draw cards within three seconds.
 - The player can compare at least one board-fit signal and one Heat/risk signal before choosing a card.
 - Repeated placement failures from the same reason decrease across playtest sessions.
+- After a failed placement, the next useful action is understandable without opening the full log.
 - The Wave Combat screen keeps HP, Heat, Wave, lane pressure, and truck position readable at the same time.
 - The wave outcome/payoff summary makes the last decision's effect understandable without reading logs.
 - Draw/Pending/Invalid/Wave readability reaches `PASS`, or each `FIX` has a concrete evidence-backed reason.

@@ -153,6 +153,7 @@ namespace ZombieFoodcenter.Prototype
         {
             model.ResetRun();
             lastPlacementBlockedHint = string.Empty;
+            lastPlacementBlockedFailReason = PlacementFailReason.None;
             ResetPendingPlacementAssist(true);
             SetPendingDragGhostVisible(false);
             SetPendingRecommendationAssistVisible(false);

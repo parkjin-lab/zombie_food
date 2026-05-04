@@ -280,6 +280,7 @@ namespace ZombieFoodcenter.Prototype
         private int pendingHoverAnchorCell = -1;
         private bool pendingHoverValid;
         private string lastPlacementBlockedHint = string.Empty;
+        private PlacementFailReason lastPlacementBlockedFailReason = PlacementFailReason.None;
         private readonly int[] recommendedAnchorCells = { -1, -1 };
         private readonly float[] recommendedAnchorScores = { float.MinValue, float.MinValue };
         private int recommendedAnchorCount;

@@ -132,6 +132,8 @@ Add-ContractCheck $checks "pending_placement" "pending_hint_tracks_anchor_rotati
     '" | Slot " + (anchorCell + 1) + " " + readiness',
     '" | Slot " + (anchorCell + 1) + " BLOCKED"',
     'BuildPlacementBlockedHint()',
+    'BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason)',
+    '" | Next: " + recoveryHint',
     '" | Rotate [Q/E] or ROT L/R | Drag/drop or tap another cell"',
     '" | Rot " + model.PendingRotationDegrees + "deg"'
 ) "Pending copy must update with hover state, rotation, and blocked context."
@@ -175,6 +177,9 @@ Add-ContractCheck $checks "invalid_placement" "fail_reason_text_is_actionable" $
 
 Add-ContractCheck $checks "invalid_placement" "hud_maps_fail_reasons_to_near_target_feedback" $sources.pendingAssist @(
     'private static string BuildPlacementFailReasonHint(PlacementFailReason failReason)',
+    'private static PlacementFailReason ResolvePlacementFailReasonFromText(string reason)',
+    'private string BuildPlacementBlockedActionHint(string reason, PlacementFailReason failReason)',
+    'private string BuildRecommendedRetryHint(string prefix)',
     'case PlacementFailReason.OutOfBounds:',
     'case PlacementFailReason.Occupied:',
     'case PlacementFailReason.InvalidAnchor:',
@@ -182,6 +187,13 @@ Add-ContractCheck $checks "invalid_placement" "hud_maps_fail_reasons_to_near_tar
     'ShowPlacementBlockedCue("Drop onto a valid inventory slot.");',
     'TriggerPendingPlacementFeedback(false, Array.Empty<int>())'
 ) "Failure feedback must be readable near the grid, not only in logs."
+
+Add-ContractCheck $checks "invalid_placement" "blocked_cues_include_next_action" ($sources.pendingAssist + $sources.presentation) @(
+    'string recoveryHint = BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason);',
+    '"Placement blocked: " + blockedReason +',
+    'string.IsNullOrEmpty(recoveryHint) ? string.Empty : " " + recoveryHint',
+    '" | Next: " + recoveryHint'
+) "Blocked placement cues should include a short corrective next action."
 
 Add-ContractCheck $checks "invalid_placement" "presentation_uses_reason_specific_vfx" $sources.prototypeVfx @(
     'private Sprite ResolvePlacementFailVfxSprite(string fallbackReason)',

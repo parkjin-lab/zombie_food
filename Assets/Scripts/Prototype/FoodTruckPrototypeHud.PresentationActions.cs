@@ -44,9 +44,11 @@ namespace ZombieFoodcenter.Prototype
                     break;
                 case PresentationTriggerType.PlacementBlocked:
                     string blockedReason = BuildPlacementBlockedHint(payload);
+                    string recoveryHint = BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason);
                     message = string.IsNullOrEmpty(blockedReason)
                         ? "Placement blocked."
-                        : "Placement blocked: " + blockedReason;
+                        : "Placement blocked: " + blockedReason +
+                            (string.IsNullOrEmpty(recoveryHint) ? string.Empty : " " + recoveryHint);
                     color = new Color(0.92f, 0.38f, 0.28f, 1f);
                     clip = sfxPlaceBlockedClip;
                     clipVolume = 0.80f;

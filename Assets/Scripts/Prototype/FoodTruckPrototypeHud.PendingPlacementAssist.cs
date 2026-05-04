@@ -51,9 +51,11 @@ namespace ZombieFoodcenter.Prototype
                 else
                 {
                     string blockedReason = BuildPlacementBlockedHint();
+                    string recoveryHint = BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason);
                     pendingHintText.text = model.PendingBlock.Label +
                         " | Slot " + (anchorCell + 1) + " BLOCKED" + recTag +
                         (string.IsNullOrEmpty(blockedReason) ? string.Empty : " (" + blockedReason + ")") +
+                        (string.IsNullOrEmpty(recoveryHint) ? string.Empty : " | Next: " + recoveryHint) +
                         " | " + recHint +
                         " | Rotate [Q/E] or ROT L/R | Drag/drop or tap another cell";
                 }
@@ -80,14 +82,19 @@ namespace ZombieFoodcenter.Prototype
         private string BuildPlacementBlockedHint(string fallbackReason, PlacementFailReason fallbackFailReason)
         {
             string reason = NormalizePlacementBlockedHint(fallbackReason);
+            PlacementFailReason resolvedFailReason = fallbackFailReason != PlacementFailReason.None
+                ? fallbackFailReason
+                : ResolvePlacementFailReasonFromText(reason);
             if (string.IsNullOrEmpty(reason))
             {
                 reason = BuildPlacementFailReasonHint(fallbackFailReason);
+                resolvedFailReason = fallbackFailReason;
             }
 
             if (!string.IsNullOrEmpty(reason))
             {
                 lastPlacementBlockedHint = reason;
+                lastPlacementBlockedFailReason = resolvedFailReason;
                 return reason;
             }
 
@@ -100,6 +107,7 @@ namespace ZombieFoodcenter.Prototype
             if (!string.IsNullOrEmpty(reason))
             {
                 lastPlacementBlockedHint = reason;
+                lastPlacementBlockedFailReason = ResolvePlacementFailReasonFromText(reason);
                 return reason;
             }
 
@@ -107,6 +115,7 @@ namespace ZombieFoodcenter.Prototype
             if (!string.IsNullOrEmpty(reason))
             {
                 lastPlacementBlockedHint = reason;
+                lastPlacementBlockedFailReason = model.LastPlacementFailReason;
                 return reason;
             }
 
@@ -116,6 +125,37 @@ namespace ZombieFoodcenter.Prototype
         private static string NormalizePlacementBlockedHint(string reason)
         {
             return string.IsNullOrWhiteSpace(reason) ? string.Empty : reason.Trim();
+        }
+
+        private static PlacementFailReason ResolvePlacementFailReasonFromText(string reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                return PlacementFailReason.None;
+            }
+
+            string normalized = reason.Trim().ToLowerInvariant();
+            if (normalized.Contains("bounds"))
+            {
+                return PlacementFailReason.OutOfBounds;
+            }
+
+            if (normalized.Contains("occupied"))
+            {
+                return PlacementFailReason.Occupied;
+            }
+
+            if (normalized.Contains("invalid anchor"))
+            {
+                return PlacementFailReason.InvalidAnchor;
+            }
+
+            if (normalized.Contains("no pending"))
+            {
+                return PlacementFailReason.NoPendingBlock;
+            }
+
+            return PlacementFailReason.None;
         }
 
         private static string BuildPlacementFailReasonHint(PlacementFailReason failReason)
@@ -135,12 +175,50 @@ namespace ZombieFoodcenter.Prototype
             }
         }
 
+        private string BuildPlacementBlockedActionHint(string reason, PlacementFailReason failReason)
+        {
+            PlacementFailReason resolvedFailReason = failReason != PlacementFailReason.None
+                ? failReason
+                : ResolvePlacementFailReasonFromText(reason);
+
+            switch (resolvedFailReason)
+            {
+                case PlacementFailReason.OutOfBounds:
+                    return BuildRecommendedRetryHint("Rotate once or try");
+                case PlacementFailReason.Occupied:
+                    return BuildRecommendedRetryHint("Try another slot or");
+                case PlacementFailReason.InvalidAnchor:
+                    return BuildRecommendedRetryHint("Drop on the grid or try");
+                case PlacementFailReason.NoPendingBlock:
+                    return "Draw and choose a block first.";
+                default:
+                    return BuildRecommendedRetryHint("Try");
+            }
+        }
+
+        private string BuildRecommendedRetryHint(string prefix)
+        {
+            if (recommendedAnchorCount > 1 && recommendedAnchorCells[0] >= 0 && recommendedAnchorCells[1] >= 0)
+            {
+                return prefix + " R1/R2 slots " + (recommendedAnchorCells[0] + 1) + "/" + (recommendedAnchorCells[1] + 1) + ".";
+            }
+
+            if (recommendedAnchorCount > 0 && recommendedAnchorCells[0] >= 0)
+            {
+                return prefix + " R1 slot " + (recommendedAnchorCells[0] + 1) + ".";
+            }
+
+            return "Rotate once, sell, or free a cell.";
+        }
+
         private void ShowPlacementBlockedCue(string reason)
         {
             string blockedReason = BuildPlacementBlockedHint(reason);
+            string recoveryHint = BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason);
             string message = string.IsNullOrEmpty(blockedReason)
                 ? "Placement blocked."
-                : "Placement blocked: " + blockedReason;
+                : "Placement blocked: " + blockedReason +
+                    (string.IsNullOrEmpty(recoveryHint) ? string.Empty : " " + recoveryHint);
             Color color = new Color(0.92f, 0.38f, 0.28f, 1f);
             TriggerPrototypeVfx(ResolvePlacementFailVfxSprite(blockedReason), color, 0.92f);
             ShowCueBanner(message, color);
@@ -468,6 +546,7 @@ namespace ZombieFoodcenter.Prototype
                 if (valid)
                 {
                     lastPlacementBlockedHint = string.Empty;
+                    lastPlacementBlockedFailReason = PlacementFailReason.None;
                 }
                 else
                 {
@@ -856,6 +935,7 @@ namespace ZombieFoodcenter.Prototype
                         else
                         {
                             lastPlacementBlockedHint = string.Empty;
+                            lastPlacementBlockedFailReason = PlacementFailReason.None;
                             ResetPendingPlacementAssist(true);
                         }
 
@@ -924,6 +1004,7 @@ namespace ZombieFoodcenter.Prototype
                         else
                         {
                             lastPlacementBlockedHint = string.Empty;
+                            lastPlacementBlockedFailReason = PlacementFailReason.None;
                         }
                     }
                     else
