@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,6 +15,19 @@ namespace ZombieFoodcenter.Editor
         private const string VerificationDocRelativePath = "Docs/Prototype_PlayMode_Verification.md";
         private const string ScreenshotDirectoryRelativePath = "Docs/PlayModeScreenshots";
         private const string DraftRelativePath = "Docs/Prototype_PlayMode_Verification_Draft.txt";
+        private const string SuiteDraftRelativePath = "Docs/Prototype_PlayMode_Verification_Suite.txt";
+        private const double SuiteCaptureDelaySeconds = 0.35d;
+
+        private static readonly FoodTruckPrototypeHud.PlayModeVerificationState[] VerificationSuiteStates =
+        {
+            FoodTruckPrototypeHud.PlayModeVerificationState.DrawChoice,
+            FoodTruckPrototypeHud.PlayModeVerificationState.PendingPlacement,
+            FoodTruckPrototypeHud.PlayModeVerificationState.InvalidPlacement,
+            FoodTruckPrototypeHud.PlayModeVerificationState.WaveCombat
+        };
+
+        private static VerificationSuiteCaptureState activeSuiteCapture;
+        private static List<VerificationSuiteCaptureEntry> lastVerificationSuiteEntries = new List<VerificationSuiteCaptureEntry>();
 
         [MenuItem(MenuRoot + "Capture Play Mode Snapshot", true)]
         private static bool CanCapturePlayModeSnapshot()
@@ -29,12 +43,36 @@ namespace ZombieFoodcenter.Editor
 
         private static void CapturePlayModeSnapshot(string preparedStateLabel, string preparedMessage)
         {
-            string screenshotPath = CaptureScreenshot();
+            string screenshotPath = CaptureScreenshot(preparedStateLabel);
             string draftPath = GetProjectPath(DraftRelativePath);
             File.WriteAllText(draftPath, BuildSnapshotDraft(screenshotPath, preparedStateLabel, preparedMessage), Encoding.UTF8);
             AssetDatabase.Refresh();
             EditorUtility.RevealInFinder(draftPath);
             Debug.Log("FoodTruck prototype Play Mode snapshot draft written to " + draftPath);
+        }
+
+        [MenuItem(MenuRoot + "Capture Verification Suite", true)]
+        private static bool CanCaptureVerificationSuite()
+        {
+            return CanPrepareVerificationState() && activeSuiteCapture == null;
+        }
+
+        [MenuItem(MenuRoot + "Capture Verification Suite")]
+        private static void CaptureVerificationSuite()
+        {
+            FoodTruckPrototypeHud hud = FindHud();
+            if (hud == null)
+            {
+                EditorUtility.DisplayDialog("FoodTruck HUD missing", "No FoodTruckPrototypeHud instance is present in Play Mode.", "OK");
+                return;
+            }
+
+            activeSuiteCapture = new VerificationSuiteCaptureState(DateTime.Now);
+            EditorApplication.update -= ContinueVerificationSuiteCapture;
+            EditorApplication.update += ContinueVerificationSuiteCapture;
+            EditorApplication.QueuePlayerLoopUpdate();
+            SceneView.RepaintAll();
+            Debug.Log("FoodTruck prototype verification suite capture started.");
         }
 
         [MenuItem(MenuRoot + "Prepare State/Draw Choice", true)]
@@ -153,7 +191,7 @@ namespace ZombieFoodcenter.Editor
                 return;
             }
 
-            string screenshotPath = CaptureScreenshot();
+            string screenshotPath = CaptureScreenshot("pass-confirmation");
             string docPath = GetProjectPath(VerificationDocRelativePath);
             if (!File.Exists(docPath))
             {
@@ -199,10 +237,18 @@ namespace ZombieFoodcenter.Editor
 
         private static string CaptureScreenshot()
         {
+            return CaptureScreenshot(null);
+        }
+
+        private static string CaptureScreenshot(string labelSuffix)
+        {
             string screenshotDir = GetProjectPath(ScreenshotDirectoryRelativePath);
             Directory.CreateDirectory(screenshotDir);
 
-            string fileName = "foodtruck-playmode-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".png";
+            string suffix = BuildFileNameSuffix(labelSuffix);
+            string fileName = "foodtruck-playmode-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff") +
+                (string.IsNullOrEmpty(suffix) ? string.Empty : "-" + suffix) +
+                ".png";
             string screenshotPath = Path.Combine(screenshotDir, fileName);
             ScreenCapture.CaptureScreenshot(screenshotPath, 1);
             return screenshotPath;
@@ -292,6 +338,163 @@ namespace ZombieFoodcenter.Editor
             };
         }
 
+        private static void ContinueVerificationSuiteCapture()
+        {
+            VerificationSuiteCaptureState capture = activeSuiteCapture;
+            if (capture == null)
+            {
+                EditorApplication.update -= ContinueVerificationSuiteCapture;
+                return;
+            }
+
+            if (!EditorApplication.isPlaying)
+            {
+                FinishVerificationSuiteCapture("Play Mode stopped before the suite completed.", true);
+                return;
+            }
+
+            if (EditorApplication.timeSinceStartup < capture.NextActionTime)
+            {
+                return;
+            }
+
+            if (capture.PendingEntry != null)
+            {
+                capture.PendingEntry.ScreenshotPath = CaptureScreenshot(capture.PendingEntry.StateLabel);
+                capture.Entries.Add(capture.PendingEntry);
+                Debug.Log("FoodTruck prototype verification suite captured: " + capture.PendingEntry.StateLabel);
+                capture.PendingEntry = null;
+                capture.StateIndex++;
+                capture.NextActionTime = EditorApplication.timeSinceStartup + SuiteCaptureDelaySeconds;
+                EditorApplication.QueuePlayerLoopUpdate();
+                SceneView.RepaintAll();
+                return;
+            }
+
+            if (capture.StateIndex >= VerificationSuiteStates.Length)
+            {
+                FinishVerificationSuiteCapture(null, false);
+                return;
+            }
+
+            FoodTruckPrototypeHud hud = FindHud();
+            if (hud == null)
+            {
+                FinishVerificationSuiteCapture("FoodTruck HUD disappeared before the suite completed.", true);
+                return;
+            }
+
+            FoodTruckPrototypeHud.PlayModeVerificationState state = VerificationSuiteStates[capture.StateIndex];
+            string stateLabel = BuildStateLabel(state);
+            VerificationSuiteCaptureEntry entry = new VerificationSuiteCaptureEntry
+            {
+                StateLabel = stateLabel
+            };
+
+            if (!hud.TryPreparePlayModeVerificationState(state, out string message))
+            {
+                entry.Prepared = false;
+                entry.PrepareMessage = message;
+                entry.HudStateSummary = hud.BuildPlayModeVerificationStateSummary();
+                capture.Entries.Add(entry);
+                capture.StateIndex++;
+                capture.NextActionTime = EditorApplication.timeSinceStartup + SuiteCaptureDelaySeconds;
+                Debug.LogWarning("FoodTruck prototype verification suite could not prepare " + stateLabel + ": " + message);
+                return;
+            }
+
+            entry.Prepared = true;
+            entry.PrepareMessage = message;
+            entry.HudStateSummary = hud.BuildPlayModeVerificationStateSummary();
+            capture.PendingEntry = entry;
+            capture.NextActionTime = EditorApplication.timeSinceStartup + SuiteCaptureDelaySeconds;
+            EditorApplication.QueuePlayerLoopUpdate();
+            SceneView.RepaintAll();
+            Debug.Log("FoodTruck prototype verification suite prepared: " + stateLabel + " | " + message);
+        }
+
+        private static void FinishVerificationSuiteCapture(string abortReason, bool aborted)
+        {
+            VerificationSuiteCaptureState capture = activeSuiteCapture;
+            activeSuiteCapture = null;
+            EditorApplication.update -= ContinueVerificationSuiteCapture;
+
+            if (capture == null)
+            {
+                return;
+            }
+
+            if (capture.PendingEntry != null)
+            {
+                capture.Entries.Add(capture.PendingEntry);
+                capture.PendingEntry = null;
+            }
+
+            capture.AbortReason = abortReason;
+            capture.Aborted = aborted;
+            string suitePath = GetProjectPath(SuiteDraftRelativePath);
+            File.WriteAllText(suitePath, BuildVerificationSuiteDraft(capture), Encoding.UTF8);
+            lastVerificationSuiteEntries = new List<VerificationSuiteCaptureEntry>(capture.Entries);
+            AssetDatabase.Refresh();
+            EditorUtility.RevealInFinder(suitePath);
+
+            if (aborted)
+            {
+                Debug.LogWarning("FoodTruck prototype verification suite stopped: " + abortReason);
+            }
+            else
+            {
+                Debug.Log("FoodTruck prototype verification suite written to " + suitePath);
+            }
+        }
+
+        private static string BuildVerificationSuiteDraft(VerificationSuiteCaptureState capture)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("FoodTruck Prototype Play Mode Verification Suite");
+            builder.AppendLine("Date: " + capture.StartedAt.ToString("yyyy-MM-dd HH:mm") + " KST");
+            builder.AppendLine("Completed: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " KST");
+            builder.AppendLine("Unity version: " + Application.unityVersion);
+            builder.AppendLine("Aspect ratio / resolution: " + BuildResolutionLabel());
+            builder.AppendLine("Suite status: " + (capture.Aborted ? "aborted" : "completed"));
+            if (!string.IsNullOrEmpty(capture.AbortReason))
+            {
+                builder.AppendLine("Abort reason: " + capture.AbortReason);
+            }
+
+            builder.AppendLine();
+            builder.AppendLine("Captured states:");
+            for (int i = 0; i < capture.Entries.Count; i++)
+            {
+                VerificationSuiteCaptureEntry entry = capture.Entries[i];
+                builder.AppendLine((i + 1) + ". " + entry.StateLabel + ": " +
+                    (entry.Prepared ? "prepared" : "prepare_failed") +
+                    (string.IsNullOrEmpty(entry.ScreenshotPath) ? "" : " | " + entry.ScreenshotPath));
+            }
+
+            builder.AppendLine();
+            builder.AppendLine("State details:");
+            foreach (VerificationSuiteCaptureEntry entry in capture.Entries)
+            {
+                builder.AppendLine("- " + entry.StateLabel);
+                builder.AppendLine("  Prepared: " + (entry.Prepared ? "yes" : "no"));
+                builder.AppendLine("  Prepare result: " + entry.PrepareMessage);
+                builder.AppendLine("  HUD state summary: " + entry.HudStateSummary);
+                builder.AppendLine("  Screenshot: " + (string.IsNullOrEmpty(entry.ScreenshotPath) ? "not captured" : entry.ScreenshotPath));
+            }
+
+            builder.AppendLine();
+            builder.AppendLine("Manual result template:");
+            builder.AppendLine("Draw Choice: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
+            builder.AppendLine("Pending Placement: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
+            builder.AppendLine("Invalid Placement: PASS / FIX_FEEDBACK / FIX_LAYOUT / BLOCKED");
+            builder.AppendLine("Wave Combat: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
+            builder.AppendLine();
+            builder.AppendLine("After recording, run:");
+            builder.AppendLine("powershell -ExecutionPolicy Bypass -File \"Tools\\Verify-PrototypePlayModeRecord.ps1\" -ProjectPath \"D:\\uni\\zombieFoodcenter\" -JsonOnly");
+            return builder.ToString();
+        }
+
         private static FoodTruckPrototypeHud FindHud()
         {
             return UnityEngine.Object.FindFirstObjectByType<FoodTruckPrototypeHud>();
@@ -316,6 +519,7 @@ namespace ZombieFoodcenter.Editor
 
         private static string BuildPassLatestResultSection(string screenshotPath)
         {
+            string screenshotEvidence = BuildScreenshotEvidenceSection(screenshotPath);
             return
                 "## Latest Manual Result" + Environment.NewLine +
                 "Date: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm") + " KST" + Environment.NewLine +
@@ -327,12 +531,37 @@ namespace ZombieFoodcenter.Editor
                 "Invalid Placement: PASS" + Environment.NewLine +
                 "Wave Combat: PASS" + Environment.NewLine +
                 Environment.NewLine +
-                "Screenshots captured: 1" + Environment.NewLine +
-                "1. " + screenshotPath + Environment.NewLine +
+                screenshotEvidence +
                 "Top issue: None recorded during manual PASS check." + Environment.NewLine +
                 "Next code target: None." + Environment.NewLine +
                 "Verification command result: Recorded through Unity Editor menu; run Tools\\Verify-PrototypePlayModeRecord.ps1 -JsonOnly." + Environment.NewLine +
                 Environment.NewLine;
+        }
+
+        private static string BuildScreenshotEvidenceSection(string fallbackScreenshotPath)
+        {
+            List<string> paths = new List<string>();
+            foreach (VerificationSuiteCaptureEntry entry in lastVerificationSuiteEntries)
+            {
+                if (!string.IsNullOrEmpty(entry.ScreenshotPath))
+                {
+                    paths.Add(entry.ScreenshotPath);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(fallbackScreenshotPath))
+            {
+                paths.Add(fallbackScreenshotPath);
+            }
+
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine("Screenshots captured: " + paths.Count);
+            for (int i = 0; i < paths.Count; i++)
+            {
+                builder.AppendLine((i + 1) + ". " + paths[i]);
+            }
+
+            return builder.ToString();
         }
 
         private static string BuildResolutionLabel()
@@ -360,10 +589,48 @@ namespace ZombieFoodcenter.Editor
             return Resources.Load<Sprite>(resourcesPath) != null ? "loaded" : "missing";
         }
 
+        private static string BuildFileNameSuffix(string labelSuffix)
+        {
+            if (string.IsNullOrWhiteSpace(labelSuffix))
+            {
+                return string.Empty;
+            }
+
+            string slug = Regex.Replace(labelSuffix.ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+            return slug;
+        }
+
         private static string GetProjectPath(string relativePath)
         {
             string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
             return Path.GetFullPath(Path.Combine(projectRoot, relativePath));
+        }
+
+        private sealed class VerificationSuiteCaptureState
+        {
+            public VerificationSuiteCaptureState(DateTime startedAt)
+            {
+                StartedAt = startedAt;
+                NextActionTime = EditorApplication.timeSinceStartup;
+                Entries = new List<VerificationSuiteCaptureEntry>();
+            }
+
+            public DateTime StartedAt { get; private set; }
+            public double NextActionTime { get; set; }
+            public int StateIndex { get; set; }
+            public VerificationSuiteCaptureEntry PendingEntry { get; set; }
+            public List<VerificationSuiteCaptureEntry> Entries { get; private set; }
+            public bool Aborted { get; set; }
+            public string AbortReason { get; set; }
+        }
+
+        private sealed class VerificationSuiteCaptureEntry
+        {
+            public string StateLabel { get; set; }
+            public bool Prepared { get; set; }
+            public string PrepareMessage { get; set; }
+            public string HudStateSummary { get; set; }
+            public string ScreenshotPath { get; set; }
         }
     }
 }

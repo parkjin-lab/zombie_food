@@ -27,6 +27,7 @@
 - Action buttons now respect phase gating (event/draw/has pending/can vent/can burst).
 - Source-level HUD state contract guard now checks Draw Choice, Pending Placement, Invalid Placement, telemetry, and regression coverage when Play Mode capture is blocked.
 - Editor Play Mode helpers can now prepare and capture Draw Choice, Pending Placement, Invalid Placement, and Wave Combat states with minimal direct input.
+- The Play Mode verification suite can batch all four required capture states into one evidence pass and preserve a state-by-state manifest.
 
 ## Core Fun Reinforcement Plan
 ### P0 (Now)

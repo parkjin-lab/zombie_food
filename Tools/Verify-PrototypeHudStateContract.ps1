@@ -228,6 +228,15 @@ Add-ContractCheck $checks "editor_helpers" "snapshot_draft_includes_prepared_sta
     'hud.BuildPlayModeVerificationStateSummary()'
 ) "Captured drafts should explain which verification state was generated."
 
+Add-ContractCheck $checks "editor_helpers" "suite_capture_batches_manual_evidence" $sources.editorMenu @(
+    'Capture Verification Suite',
+    'SuiteDraftRelativePath',
+    'VerificationSuiteCaptureState',
+    'ContinueVerificationSuiteCapture',
+    'BuildVerificationSuiteDraft',
+    'lastVerificationSuiteEntries'
+) "The Editor helper should batch all required states into one low-interaction evidence pass."
+
 Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_layout_visibility" $sources.tests @(
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',
     'TryPlacePendingAtCell_InvalidAnchor_RecordsInvalidAnchorFailure',
