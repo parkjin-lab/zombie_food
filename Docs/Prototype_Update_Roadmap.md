@@ -84,6 +84,10 @@ recipe comes online, the log and HUD banner should preserve the trigger source:
 placement bonus, auto-merge bonus, manual merge bonus, Recipe Rush event, or a 3x
 bingo condition with the best grade.
 
+The Synergy Bar should also retain the latest recipe trigger as a compact recent
+cue so a player can still connect "what I just did" to the active recipe after the
+banner fades.
+
 The summary should highlight:
 - Wave result: cleared, failed, truck damage, remaining HP, and clear margin.
 - Payoff: damage dealt, enemies stopped, Heat gained/relieved, and any combo contribution.
@@ -97,6 +101,7 @@ The summary should highlight:
 - Verify Pending Placement recommendation reasons: lane pressure, multi-lane coverage, and center/near-center placement should be readable without raw score interpretation.
 - Verify Invalid Placement reason plus next-action copy near the board: `occupied`, `out_of_bounds`, `invalid_anchor`, `no_pending`.
 - Verify Recipe activation banners: recipe name, tier, and trigger cause should be readable before they fade.
+- Verify the Synergy Bar recent-recipe cue remains readable without crowding active recipe duration chips.
 - Verify the wave outcome/payoff cue at the end of Wave Combat before the next draw.
 - If the cue is too fleeting or crowded, promote it into a compact persistent payoff panel.
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.

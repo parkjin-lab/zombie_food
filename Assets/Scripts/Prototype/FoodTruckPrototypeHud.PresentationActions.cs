@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ZombieFoodcenter.Prototype
@@ -56,7 +57,9 @@ namespace ZombieFoodcenter.Prototype
                     vfxSizeScale = 0.92f;
                     break;
                 case PresentationTriggerType.RecipeActivated:
-                    lastActivatedRecipeName = string.IsNullOrEmpty(payload) ? string.Empty : payload;
+                    lastActivatedRecipeName = model != null && !string.IsNullOrEmpty(model.LastRecipeActivationName)
+                        ? model.LastRecipeActivationName
+                        : ExtractRecipeNameFromActivationPayload(payload);
                     synergyChipPulseTimer = Mathf.Max(synergyChipPulseTimer, Mathf.Max(0.08f, synergyChipPulseDuration));
                     progressionUnlockPanelPulseTimer = Mathf.Max(
                         progressionUnlockPanelPulseTimer,
@@ -374,6 +377,23 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return "Recipe +" + activeCount + "\n" + inputHint;
+        }
+
+        private static string ExtractRecipeNameFromActivationPayload(string payload)
+        {
+            if (string.IsNullOrEmpty(payload))
+            {
+                return string.Empty;
+            }
+
+            int tierIndex = payload.IndexOf(" (", StringComparison.Ordinal);
+            if (tierIndex > 0)
+            {
+                return payload.Substring(0, tierIndex);
+            }
+
+            int causeIndex = payload.IndexOf(" from ", StringComparison.Ordinal);
+            return causeIndex > 0 ? payload.Substring(0, causeIndex) : payload;
         }
     }
 }

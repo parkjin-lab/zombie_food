@@ -762,6 +762,8 @@ namespace ZombieFoodcenter.Tests.EditMode
             StringAssert.Contains("from", lastRecipePayload);
             StringAssert.Contains("3x", lastRecipePayload);
             StringAssert.Contains("best G1", lastRecipePayload);
+            StringAssert.Contains("3x", model.LastRecipeActivationSummary);
+            StringAssert.Contains("best G1", model.LastRecipeActivationCue);
         }
 
         [Test]
@@ -785,6 +787,9 @@ namespace ZombieFoodcenter.Tests.EditMode
             StringAssert.Contains("Recipe online:", lastLog);
             StringAssert.Contains("Random recipe roll", lastLog);
             StringAssert.Contains("Random recipe roll", lastRecipePayload);
+            Assert.IsFalse(string.IsNullOrEmpty(model.LastRecipeActivationName));
+            StringAssert.Contains("Random recipe roll", model.LastRecipeActivationSummary);
+            StringAssert.Contains("Random recipe roll", model.LastRecipeActivationCue);
         }
 
         [Test]

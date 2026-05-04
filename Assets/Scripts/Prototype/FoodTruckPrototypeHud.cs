@@ -2256,6 +2256,12 @@ namespace ZombieFoodcenter.Prototype
                 Destroy(synergyContainer.GetChild(i).gameObject);
             }
 
+            string lastRecipeCue = model != null ? model.LastRecipeActivationCue : string.Empty;
+            if (!string.IsNullOrEmpty(lastRecipeCue))
+            {
+                CreateChip("Last: " + lastRecipeCue, new Color(0.74f, 0.52f, 0.18f, 1f), 300f, 340f, 13);
+            }
+
             if (model.ActiveRecipes.Count == 0)
             {
                 CreateChip("No active recipe", new Color(0.35f, 0.38f, 0.43f, 1f));
@@ -2290,16 +2296,21 @@ namespace ZombieFoodcenter.Prototype
             }
         }
 
-        private RectTransform CreateChip(string text, Color color)
+        private RectTransform CreateChip(
+            string text,
+            Color color,
+            float minWidth = 190f,
+            float preferredWidth = 220f,
+            int fontSize = 16)
         {
             RectTransform chip = new GameObject("Chip", typeof(RectTransform), typeof(Image), typeof(LayoutElement)).GetComponent<RectTransform>();
             chip.transform.SetParent(synergyContainer, false);
             chip.GetComponent<Image>().color = color;
             LayoutElement layout = chip.GetComponent<LayoutElement>();
-            layout.minWidth = 190f;
-            layout.preferredWidth = 220f;
+            layout.minWidth = minWidth;
+            layout.preferredWidth = preferredWidth;
 
-            Text label = CreateText(chip, "Label", 16, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
+            Text label = CreateText(chip, "Label", fontSize, FontStyle.Bold, TextAnchor.MiddleCenter, Color.white);
             label.text = text;
             Stretch(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(8f, 2f), new Vector2(-8f, -2f));
             return chip;

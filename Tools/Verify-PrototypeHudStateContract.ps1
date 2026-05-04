@@ -243,15 +243,27 @@ Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources
 ) "Wave change feedback should prioritize the last wave payoff when one is available."
 
 Add-ContractCheck $checks "recipe_feedback" "recipe_activation_payload_explains_cause" $sources.model @(
+    'public string LastRecipeActivationName => lastRecipeActivationName;',
+    'public string LastRecipeActivationSummary => lastRecipeActivationSummary;',
+    'public string LastRecipeActivationCue => lastRecipeActivationCue;',
     'private bool TriggerRandomRecipe(string cause)',
     'TriggerRandomRecipe("Placement bonus roll")',
     'TriggerRandomRecipe("Auto-merge bonus roll")',
     'TriggerRandomRecipe("Merge bonus roll")',
     'TriggerRandomRecipe("Recipe Rush event")',
     'BuildRecipeActivationCause(prefix, pair.Key, pair.Value, maxGrade)',
+    'lastRecipeActivationCue = BuildRecipeActivationCue(template, cause);',
     'private static string BuildRecipeActivationPayload(RecipeTemplate template, string cause)',
     'EmitPresentationTrigger(PresentationTriggerType.RecipeActivated, payload)'
 ) "Recipe activation feedback should explain whether the recipe came from placement, merge, event, or bingo conditions."
+
+Add-ContractCheck $checks "recipe_feedback" "hud_keeps_recent_recipe_cause_visible" ($sources.hud + $sources.presentation) @(
+    'model.LastRecipeActivationCue',
+    'CreateChip("Last: " + lastRecipeCue',
+    'lastActivatedRecipeName = model != null && !string.IsNullOrEmpty(model.LastRecipeActivationName)',
+    'ExtractRecipeNameFromActivationPayload(payload)',
+    'payload.IndexOf(" from ", StringComparison.Ordinal)'
+) "The recipe source should remain visible after the activation banner fades, and chip pulse should still target the active recipe name."
 
 Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_states" $sources.playModeVerification @(
     'public enum PlayModeVerificationState',
@@ -359,6 +371,7 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'TryPlacePendingAtCell_OverlapWithTwoBlocks_DoesNotAutoMerge',
     'TryPlacePendingAtCell_ThirdMatchingBlock_ActivatesRecipeBingo',
     'TriggerRandomRecipe_LogsActivationCause',
+    'model.LastRecipeActivationCue',
     'Tick_WhenWaveAdvances_RecordsOutcomeSummary',
     'HudActionVisibility_CombatOnlyIdle_ShowsBuildEntryRow',
     'HudActionVisibility_CombatOnlyUrgent_ShowsOnlyReactionRow',

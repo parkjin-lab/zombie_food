@@ -336,6 +336,9 @@ namespace ZombieFoodcenter.Prototype
         private float wavePeakHeat;
         private string lastWaveOutcomeSummary = string.Empty;
         private string lastWaveOutcomeCue = string.Empty;
+        private string lastRecipeActivationName = string.Empty;
+        private string lastRecipeActivationSummary = string.Empty;
+        private string lastRecipeActivationCue = string.Empty;
         private string drawAssistTag = "BAL";
         public event Action StateChanged;
         public event Action<string> CombatLogAppended;
@@ -400,6 +403,9 @@ namespace ZombieFoodcenter.Prototype
         public float PlacementSuccessRate => placementAttemptCount > 0 ? (float)placementSuccessCount / placementAttemptCount : 0f;
         public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;
         public string LastWaveOutcomeCue => lastWaveOutcomeCue;
+        public string LastRecipeActivationName => lastRecipeActivationName;
+        public string LastRecipeActivationSummary => lastRecipeActivationSummary;
+        public string LastRecipeActivationCue => lastRecipeActivationCue;
         public string DrawAssistTag => drawAssistTag;
         public IReadOnlyList<RecipeState> ActiveRecipes => activeRecipes;
         public IReadOnlyList<LaneEnemyState> LaneEnemies => laneEnemies;
@@ -448,6 +454,9 @@ namespace ZombieFoodcenter.Prototype
             placedBlocks.Clear();
             lastWaveOutcomeSummary = string.Empty;
             lastWaveOutcomeCue = string.Empty;
+            lastRecipeActivationName = string.Empty;
+            lastRecipeActivationSummary = string.Empty;
+            lastRecipeActivationCue = string.Empty;
             for (int i = 0; i < blockByCell.Length; i++)
             {
                 blockByCell[i] = -1;
@@ -2043,6 +2052,9 @@ namespace ZombieFoodcenter.Prototype
             }
 
             string payload = BuildRecipeActivationPayload(template, cause);
+            lastRecipeActivationName = template.Name;
+            lastRecipeActivationSummary = payload;
+            lastRecipeActivationCue = BuildRecipeActivationCue(template, cause);
             AppendLog("Recipe online: " + payload);
             EmitPresentationTrigger(PresentationTriggerType.RecipeActivated, payload);
         }
@@ -2051,6 +2063,16 @@ namespace ZombieFoodcenter.Prototype
         {
             string payload = template.Name + " (" + template.Tier + ")";
             return string.IsNullOrEmpty(cause) ? payload : payload + " from " + cause;
+        }
+
+        private static string BuildRecipeActivationCue(RecipeTemplate template, string cause)
+        {
+            if (string.IsNullOrEmpty(cause))
+            {
+                return template.Name + " (" + template.Tier + ")";
+            }
+
+            return template.Name + " from " + cause;
         }
 
         private void RotateWeather()
