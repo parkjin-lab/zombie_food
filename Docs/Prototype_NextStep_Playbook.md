@@ -4,7 +4,7 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-05 01:08 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 recommendation reason copy 변경 후에도 통과한다.
+- 2026-05-05 01:16 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 recipe activation cause feedback 변경 후에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=not_recorded`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과하지만 suite 라벨 커버리지가 없어 최종 판정 증거로는 아직 `partial`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -12,6 +12,7 @@
 - Draw Choice 카드는 이제 `Fit`, `Heat`, `Role` 칩으로 세 카드의 즉시 차이를 더 빨리 비교하게 만드는 방향으로 보강됐다.
 - Invalid Placement 피드백은 이제 사유와 함께 `Next` 행동 힌트를 표시해 같은 실패를 반복하지 않도록 보강됐다.
 - Pending Placement 추천은 이제 점수보다 `cover L3 high`, `2-lane`, `center` 같은 이유를 먼저 보여준다.
+- Recipe activation 피드백은 이제 단순히 레시피 이름만 말하지 않고, 보너스 롤인지 3x 빙고 조건인지까지 같이 노출하는 방향으로 보강 중이다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.

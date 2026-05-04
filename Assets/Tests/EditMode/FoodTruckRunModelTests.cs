@@ -759,6 +759,32 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(HasActiveRecipe(model, "Bingo: Dot Pattern"));
             Assert.GreaterOrEqual(recipeTriggerCount, 2);
             StringAssert.Contains("Bingo:", lastRecipePayload);
+            StringAssert.Contains("from", lastRecipePayload);
+            StringAssert.Contains("3x", lastRecipePayload);
+            StringAssert.Contains("best G1", lastRecipePayload);
+        }
+
+        [Test]
+        public void TriggerRandomRecipe_LogsActivationCause()
+        {
+            var model = new FoodTruckRunModel(seed: 72);
+            string lastLog = null;
+            string lastRecipePayload = null;
+            model.CombatLogAppended += message => lastLog = message;
+            model.PresentationTriggered += (type, payload) =>
+            {
+                if (type == PresentationTriggerType.RecipeActivated)
+                {
+                    lastRecipePayload = payload;
+                }
+            };
+
+            bool triggered = model.TriggerRandomRecipe();
+
+            Assert.IsTrue(triggered);
+            StringAssert.Contains("Recipe online:", lastLog);
+            StringAssert.Contains("Random recipe roll", lastLog);
+            StringAssert.Contains("Random recipe roll", lastRecipePayload);
         }
 
         [Test]

@@ -802,7 +802,7 @@ namespace ZombieFoodcenter.Prototype
                     bool autoMergeRecipeBingoActivated = EvaluateRecipeBingo();
                     if (!autoMergeRecipeBingoActivated && random.NextDouble() < 0.45d)
                     {
-                        TriggerRandomRecipe();
+                        TriggerRandomRecipe("Auto-merge bonus roll");
                     }
                     else
                     {
@@ -855,7 +855,7 @@ namespace ZombieFoodcenter.Prototype
 
             if (!recipeBingoActivated && random.NextDouble() < 0.30d)
             {
-                TriggerRandomRecipe();
+                TriggerRandomRecipe("Placement bonus roll");
             }
             else
             {
@@ -1019,7 +1019,7 @@ namespace ZombieFoodcenter.Prototype
             AppendLog("Merged " + second.IngredientName + " to G" + second.Grade + ".");
             if (!recipeBingoActivated && random.NextDouble() < 0.45d)
             {
-                TriggerRandomRecipe();
+                TriggerRandomRecipe("Merge bonus roll");
             }
             else
             {
@@ -1045,13 +1045,18 @@ namespace ZombieFoodcenter.Prototype
 
         public bool TriggerRandomRecipe()
         {
+            return TriggerRandomRecipe("Random recipe roll");
+        }
+
+        private bool TriggerRandomRecipe(string cause)
+        {
             if (IsRunOver)
             {
                 return false;
             }
 
             RecipeTemplate template = recipePool[random.Next(0, recipePool.Length)];
-            ActivateRecipe(template);
+            ActivateRecipe(template, cause);
             RaiseChanged();
             return true;
         }
@@ -1968,11 +1973,19 @@ namespace ZombieFoodcenter.Prototype
 
                 activeRecipeBingoKeys.Add(key);
                 int maxGrade = maxGrades.TryGetValue(pair.Key, out int grade) ? grade : 1;
-                ActivateRecipe(BuildBingoRecipeTemplate(prefix, pair.Key, pair.Value, maxGrade, passive));
+                ActivateRecipe(
+                    BuildBingoRecipeTemplate(prefix, pair.Key, pair.Value, maxGrade, passive),
+                    BuildRecipeActivationCause(prefix, pair.Key, pair.Value, maxGrade));
                 anyActivated = true;
             }
 
             return anyActivated;
+        }
+
+        private static string BuildRecipeActivationCause(string prefix, string value, int count, int maxGrade)
+        {
+            string source = prefix == "ING" ? value + " ingredient" : value + " shape";
+            return count + "x " + source + ", best G" + maxGrade;
         }
 
         private RecipeTemplate BuildBingoRecipeTemplate(string prefix, string value, int count, int maxGrade, bool passive)
@@ -1991,6 +2004,11 @@ namespace ZombieFoodcenter.Prototype
         }
 
         private void ActivateRecipe(RecipeTemplate template)
+        {
+            ActivateRecipe(template, string.Empty);
+        }
+
+        private void ActivateRecipe(RecipeTemplate template, string cause)
         {
             RecipeState existing = activeRecipes.Find(r => r.Name == template.Name);
             if (existing != null)
@@ -2024,8 +2042,15 @@ namespace ZombieFoodcenter.Prototype
                 Supplies += Mathf.RoundToInt(2f + template.Potency * 2f);
             }
 
-            AppendLog("Recipe online: " + template.Name + " (" + template.Tier + ")");
-            EmitPresentationTrigger(PresentationTriggerType.RecipeActivated, template.Name);
+            string payload = BuildRecipeActivationPayload(template, cause);
+            AppendLog("Recipe online: " + payload);
+            EmitPresentationTrigger(PresentationTriggerType.RecipeActivated, payload);
+        }
+
+        private static string BuildRecipeActivationPayload(RecipeTemplate template, string cause)
+        {
+            string payload = template.Name + " (" + template.Tier + ")";
+            return string.IsNullOrEmpty(cause) ? payload : payload + " from " + cause;
         }
 
         private void RotateWeather()
@@ -2782,8 +2807,8 @@ namespace ZombieFoodcenter.Prototype
                     Heat = Mathf.Max(0f, Heat - 5f);
                     break;
                 case RunEventOptionType.RecipeRush:
-                    TriggerRandomRecipe();
-                    TriggerRandomRecipe();
+                    TriggerRandomRecipe("Recipe Rush event");
+                    TriggerRandomRecipe("Recipe Rush event");
                     AddHeatProgressive(5f);
                     break;
             }

@@ -50,6 +50,8 @@ Last updated: 2026-05-05 01:08 KST
 - Extended the HUD state contract with a blocked-placement next-action check.
 - Reworked Pending Placement recommendation copy so R1/R2 suggestions explain why they are useful, using lane pressure, multi-lane coverage, and center/near-center positioning instead of exposing score-first debug text.
 - Extended the HUD state contract so recommendation text keeps reason labels such as `cover L3 high`, `2-lane`, and `center`.
+- Updated recipe activation feedback so logs and HUD recipe banners explain the trigger source: placement bonus, auto-merge bonus, manual merge bonus, Recipe Rush event, or 3x bingo condition with best grade.
+- Extended the HUD state contract and EditMode regression coverage so recipe activation payloads keep their cause visible.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -73,6 +75,7 @@ Last updated: 2026-05-05 01:08 KST
 - Latest local recheck at 2026-05-05 00:49 KST after Draw Choice tactical chips: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=29`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 00:54 KST after blocked-placement next-action copy: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=30`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 01:08 KST after recommendation reason copy: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=30`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
+- Latest local recheck at 2026-05-05 01:16 KST after recipe activation cause feedback: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=31`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -80,9 +83,11 @@ Last updated: 2026-05-05 01:08 KST
 - `Tools/Verify-PrototypeLayout.ps1`: checks `CalculateGameplayFocusLayout` numeric bounds across reference portrait, narrow phone, small phone, and landscape tablet viewports; also checks core C# layout constants for source drift.
 - `Tools/Verify-PrototypeHudStateContract.ps1`: source-level contract guard for Draw Choice, Pending Placement, Invalid Placement, UX telemetry, Editor helper suite capture, suite evidence verification, and regression coverage.
 - `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: now tracks per-wave payoff stats and exposes `LastWaveOutcomeSummary` / `LastWaveOutcomeCue`.
+- `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: recipe activation payloads now include source/cause text for placement, merge, event, and bingo activations.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: wave-change cue now prefers the latest payoff cue when available.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.DrawChoiceFlow.cs`: Draw Choice card text now includes fit count, estimated Heat cost, and a tactical role label.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PendingPlacementAssist.cs`: blocked placement hint text now includes a corrective `Next` action based on the failure reason and current recommendations.
+- `Assets/Tests/EditMode/FoodTruckRunModelTests.cs`: recipe bingo and random recipe activation now assert cause-bearing payload/log output.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PendingPlacementAssist.cs`: recommendation hints now prioritize player-facing reasons over raw score text.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: placement blocked cue banners now include the same corrective next action.
 - `Assets/Tests/EditMode/FoodTruckRunModelTests.cs`: covers wave payoff summary generation on wave advance.

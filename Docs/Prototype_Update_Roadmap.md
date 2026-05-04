@@ -79,6 +79,11 @@ Implementation status: the model now records a concise wave payoff summary and t
 HUD wave-change cue surfaces it. The remaining product task is to verify readability
 in portrait Play Mode and decide whether the cue should become a persistent panel.
 
+Recipe activation feedback now follows the same cause-and-effect direction. When a
+recipe comes online, the log and HUD banner should preserve the trigger source:
+placement bonus, auto-merge bonus, manual merge bonus, Recipe Rush event, or a 3x
+bingo condition with the best grade.
+
 The summary should highlight:
 - Wave result: cleared, failed, truck damage, remaining HP, and clear margin.
 - Payoff: damage dealt, enemies stopped, Heat gained/relieved, and any combo contribution.
@@ -91,6 +96,7 @@ The summary should highlight:
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.
 - Verify Pending Placement recommendation reasons: lane pressure, multi-lane coverage, and center/near-center placement should be readable without raw score interpretation.
 - Verify Invalid Placement reason plus next-action copy near the board: `occupied`, `out_of_bounds`, `invalid_anchor`, `no_pending`.
+- Verify Recipe activation banners: recipe name, tier, and trigger cause should be readable before they fade.
 - Verify the wave outcome/payoff cue at the end of Wave Combat before the next draw.
 - If the cue is too fleeting or crowded, promote it into a compact persistent payoff panel.
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.
@@ -101,6 +107,7 @@ The summary should highlight:
 - Repeated placement failures from the same reason decrease across playtest sessions.
 - After a failed placement, the next useful action is understandable without opening the full log.
 - The player can explain why R1/R2 are recommended without interpreting numeric scores.
+- The player can tell whether a recipe came from a bonus roll or a 3x bingo condition.
 - The Wave Combat screen keeps HP, Heat, Wave, lane pressure, and truck position readable at the same time.
 - The wave outcome/payoff summary makes the last decision's effect understandable without reading logs.
 - Draw/Pending/Invalid/Wave readability reaches `PASS`, or each `FIX` has a concrete evidence-backed reason.

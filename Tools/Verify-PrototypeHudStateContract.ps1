@@ -242,6 +242,17 @@ Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources
     '"Wave " + model.Wave + " started. Keep your lanes stable."'
 ) "Wave change feedback should prioritize the last wave payoff when one is available."
 
+Add-ContractCheck $checks "recipe_feedback" "recipe_activation_payload_explains_cause" $sources.model @(
+    'private bool TriggerRandomRecipe(string cause)',
+    'TriggerRandomRecipe("Placement bonus roll")',
+    'TriggerRandomRecipe("Auto-merge bonus roll")',
+    'TriggerRandomRecipe("Merge bonus roll")',
+    'TriggerRandomRecipe("Recipe Rush event")',
+    'BuildRecipeActivationCause(prefix, pair.Key, pair.Value, maxGrade)',
+    'private static string BuildRecipeActivationPayload(RecipeTemplate template, string cause)',
+    'EmitPresentationTrigger(PresentationTriggerType.RecipeActivated, payload)'
+) "Recipe activation feedback should explain whether the recipe came from placement, merge, event, or bingo conditions."
+
 Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_states" $sources.playModeVerification @(
     'public enum PlayModeVerificationState',
     'DrawChoice',
@@ -346,6 +357,8 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',
     'TryPlacePendingAtCell_InvalidAnchor_RecordsInvalidAnchorFailure',
     'TryPlacePendingAtCell_OverlapWithTwoBlocks_DoesNotAutoMerge',
+    'TryPlacePendingAtCell_ThirdMatchingBlock_ActivatesRecipeBingo',
+    'TriggerRandomRecipe_LogsActivationCause',
     'Tick_WhenWaveAdvances_RecordsOutcomeSummary',
     'HudActionVisibility_CombatOnlyIdle_ShowsBuildEntryRow',
     'HudActionVisibility_CombatOnlyUrgent_ShowsOnlyReactionRow',
@@ -369,10 +382,10 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
-        "This is a source-level contract for Draw Choice, Pending Placement, and Invalid Placement HUD states.",
+        "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",
         "It does not replace manual Unity Play Mode visual verification.",
         "Use it when this PC cannot reliably capture the remaining Play Mode states."
     )
