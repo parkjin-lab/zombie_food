@@ -134,6 +134,10 @@ Add-ContractCheck $checks "pending_placement" "pending_hint_tracks_anchor_rotati
     'BuildPlacementBlockedHint()',
     'BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason)',
     '" | Next: " + recoveryHint',
+    '"Recommend R1 slot " + (recommendedAnchorCells[0] + 1)',
+    '"Recommend R1/R2 slots " + (recommendedAnchorCells[0] + 1) + "/" + (recommendedAnchorCells[1] + 1)',
+    'string pressureTag = GetPlacementPressureTag(hottestPressure);',
+    '"cover L" + (hottestLane + 1) + " " + pressureTag',
     '" | Rotate [Q/E] or ROT L/R | Drag/drop or tap another cell"',
     '" | Rot " + model.PendingRotationDegrees + "deg"'
 ) "Pending copy must update with hover state, rotation, and blocked context."

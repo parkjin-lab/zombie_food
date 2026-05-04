@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-05 00:54 KST
+Last updated: 2026-05-05 01:08 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -48,6 +48,8 @@ Last updated: 2026-05-05 00:54 KST
 - Extended the HUD state contract so Draw Choice cards must keep `Fit`, `Heat`, and `Role` information visible.
 - Added prescribed next-action copy for blocked placement states, so invalid placement feedback now pairs the reason with a corrective hint such as trying R1/R2, rotating, dropping on the grid, or drawing first.
 - Extended the HUD state contract with a blocked-placement next-action check.
+- Reworked Pending Placement recommendation copy so R1/R2 suggestions explain why they are useful, using lane pressure, multi-lane coverage, and center/near-center positioning instead of exposing score-first debug text.
+- Extended the HUD state contract so recommendation text keeps reason labels such as `cover L3 high`, `2-lane`, and `center`.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -70,6 +72,7 @@ Last updated: 2026-05-05 00:54 KST
 - Latest local recheck at 2026-05-05 00:34 KST after wave payoff work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=29`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 00:49 KST after Draw Choice tactical chips: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=29`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 00:54 KST after blocked-placement next-action copy: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=30`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
+- Latest local recheck at 2026-05-05 01:08 KST after recommendation reason copy: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=30`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -80,6 +83,7 @@ Last updated: 2026-05-05 00:54 KST
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: wave-change cue now prefers the latest payoff cue when available.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.DrawChoiceFlow.cs`: Draw Choice card text now includes fit count, estimated Heat cost, and a tactical role label.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PendingPlacementAssist.cs`: blocked placement hint text now includes a corrective `Next` action based on the failure reason and current recommendations.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PendingPlacementAssist.cs`: recommendation hints now prioritize player-facing reasons over raw score text.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: placement blocked cue banners now include the same corrective next action.
 - `Assets/Tests/EditMode/FoodTruckRunModelTests.cs`: covers wave payoff summary generation on wave advance.
 - `Tools/Verify-PrototypeHudStateContract.ps1`: now includes a `wave_outcome` group guarding payoff summary model/HUD/test coverage, strengthens Draw Choice card text checks for tactical chips, and guards blocked placement next-action copy.
@@ -132,6 +136,7 @@ Last updated: 2026-05-05 00:54 KST
 - Wave outcome/payoff summary is code-guarded, but still needs Play Mode visual review to confirm cue readability in portrait combat.
 - Draw Choice tactical chips are code-guarded, but still need Play Mode visual review to confirm the three cards remain readable in the compact portrait layout.
 - Blocked placement next-action copy is code-guarded, but still needs Play Mode visual review to confirm the cue is not too long in portrait.
+- Pending Placement recommendation reasons are code-guarded, but still need Play Mode visual review to confirm the R1/R2 text stays readable in portrait.
 - Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=partial_evidence`; full review pack generation should wait until suite-state captures or intentional review output writing.
 - `Tools/Write-PrototypePlayModeResultFromSuite.ps1` is the intended PASS/FIX/BLOCKED result writer, but status-only handoff passes should not run it because it writes a result draft even with `-JsonOnly`.
 - Unity MCP is currently unavailable from this session (`MCP SSE probe returned 404`).
@@ -155,6 +160,7 @@ Last updated: 2026-05-05 00:54 KST
 15. During the next Wave Combat capture, verify that the wave payoff cue is readable and does not obscure HP/Heat/lane pressure.
 16. During the next Draw Choice capture, verify that `Fit`, `Heat`, and `Role` can be compared across all three cards within three seconds.
 17. During the next Invalid Placement capture, verify that the reason and `Next` action are visible near the board/cue without requiring the full log.
+18. During the next Pending Placement capture, verify that R1/R2 recommendations explain the useful lane/coverage/center reason without crowding the board.
 
 ## Manual Play Mode Acceptance Checklist
 - Full checklist and result template: `Docs/Prototype_PlayMode_Verification.md`.

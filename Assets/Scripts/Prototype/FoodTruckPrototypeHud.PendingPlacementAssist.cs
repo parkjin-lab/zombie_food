@@ -340,23 +340,17 @@ namespace ZombieFoodcenter.Prototype
                 return "Recommend: no valid slot";
             }
 
-            string primaryScore = recommendedAnchorScores[0] > float.MinValue * 0.5f
-                ? recommendedAnchorScores[0].ToString("0.0")
-                : "--";
             string primaryDetail = BuildPlacementRecommendationDetail(recommendedAnchorCells[0]);
             if (recommendedAnchorCount == 1 || recommendedAnchorCells[1] < 0)
             {
-                return "Recommend R1: slot " + (recommendedAnchorCells[0] + 1) +
-                    " s" + primaryScore +
-                    (string.IsNullOrEmpty(primaryDetail) ? string.Empty : " (" + primaryDetail + ")");
+                return "Recommend R1 slot " + (recommendedAnchorCells[0] + 1) +
+                    (string.IsNullOrEmpty(primaryDetail) ? string.Empty : ": " + primaryDetail);
             }
 
-            string secondaryScore = recommendedAnchorScores[1] > float.MinValue * 0.5f
-                ? recommendedAnchorScores[1].ToString("0.0")
-                : "--";
-            return "Recommend R1/R2: " + (recommendedAnchorCells[0] + 1) + "/" + (recommendedAnchorCells[1] + 1) +
-                " s" + primaryScore + "/" + secondaryScore +
-                (string.IsNullOrEmpty(primaryDetail) ? string.Empty : " | " + primaryDetail);
+            string secondaryDetail = BuildPlacementRecommendationDetail(recommendedAnchorCells[1]);
+            return "Recommend R1/R2 slots " + (recommendedAnchorCells[0] + 1) + "/" + (recommendedAnchorCells[1] + 1) +
+                (string.IsNullOrEmpty(primaryDetail) ? string.Empty : " | R1 " + primaryDetail) +
+                (string.IsNullOrEmpty(secondaryDetail) ? string.Empty : " | R2 " + secondaryDetail);
         }
 
         private string BuildPlacementRecommendationDetail(int anchorCell)
@@ -400,13 +394,41 @@ namespace ZombieFoodcenter.Prototype
                 return string.Empty;
             }
 
-            string laneText = "lane " + (hottestLane + 1) + " p" + hottestPressure.ToString("0.0");
+            int x = anchorCell % FoodTruckRunModel.InventoryWidth;
+            int y = anchorCell / FoodTruckRunModel.InventoryWidth;
+            int centerDistance = Mathf.Abs(x - 1) + Mathf.Abs(y - 1);
+            string pressureTag = GetPlacementPressureTag(hottestPressure);
+            string laneText = "cover L" + (hottestLane + 1) + " " + pressureTag + " p" + hottestPressure.ToString("0.0");
             if (laneCount > 1)
             {
-                laneText += ", cover " + laneCount + " lanes";
+                laneText += ", " + laneCount + "-lane";
+            }
+
+            if (centerDistance == 0)
+            {
+                laneText += ", center";
+            }
+            else if (centerDistance == 1)
+            {
+                laneText += ", near center";
             }
 
             return laneText;
+        }
+
+        private static string GetPlacementPressureTag(float pressure)
+        {
+            if (pressure >= 24f)
+            {
+                return "high";
+            }
+
+            if (pressure >= 12f)
+            {
+                return "steady";
+            }
+
+            return "light";
         }
 
         private bool IsRecommendedAnchorCell(int cellIndex, out bool isPrimary)
