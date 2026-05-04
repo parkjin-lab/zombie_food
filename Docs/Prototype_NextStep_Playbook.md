@@ -49,5 +49,5 @@
 - MCP unavailable fallback: continue with local scripts/file inspection first; do not block completion-critical UX work on MCP connectivity.
 - Layout guard command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode record command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
-- Immediate next validation: Unity Play Mode portrait layout check for Draw choice, Pending placement, and Wave combat.
-- Do not add new feature scope until the game view, placement board, and block selection are readable together.
+- Immediate next validation when Play Mode input is reliable again: capture Draw choice, Pending placement, and Invalid placement.
+- Current code fallback is complete for the captured Wave combat issue: combat-only portrait HUD hides the 3x3 build grid and keeps the bottom as a command strip.

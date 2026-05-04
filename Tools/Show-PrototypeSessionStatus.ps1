@@ -127,17 +127,18 @@ $summary = [ordered]@{
     unresolved_issues = @(
         "Unity headless compile/tests remain inconclusive in this environment.",
         ("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + "."),
-        "Portrait UI readability for game view + placement board + block choice still needs visual confirmation even when numeric layout guard passes."
+        "Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again."
     )
     recommended_next_actions = @(
-        "Open Unity Editor locally and run Play Mode, or use the already-open Editor session if one is running.",
+        "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
+        "When Play Mode input is reliable again, capture Draw Choice, Pending Placement, and Invalid Placement evidence.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Play Mode Snapshot to collect screenshot evidence.",
         "If all checklist states pass visually, use Tools > Food Truck Prototype > Record PASS Manual Result.",
         "If any checklist state fails, record the FIX_* result manually in Docs\Prototype_PlayMode_Verification.md.",
         "Close Unity Editor before using forced headless verification.",
         "Run Tools\Verify-PrototypeLayout.ps1 if layout code changes before Play Mode.",
         "Run Tools\Verify-PrototypePlayModeRecord.ps1 after recording Play Mode results.",
-        "If layout fails, adjust FoodTruckPrototypeHud.CalculateGameplayFocusLayout / ApplyPanelLayout before adding features.",
+        "If layout fails, adjust FoodTruckPrototypeHud.CalculateGameplayFocusLayout / ApplyGameplayHudContext before adding features.",
         "After manual visual confirmation, rerun Tools\Gate-Verification.ps1 -RunTests -JsonOnly."
     )
 }

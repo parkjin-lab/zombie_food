@@ -95,14 +95,16 @@ namespace ZombieFoodcenter.Prototype
 
         public readonly struct GameplayActionVisibility
         {
-            public GameplayActionVisibility(bool showPrimaryActionRow, bool showSecondaryActionRow)
+            public GameplayActionVisibility(bool showPrimaryActionRow, bool showSecondaryActionRow, bool showInventoryGrid)
             {
                 ShowPrimaryActionRow = showPrimaryActionRow;
                 ShowSecondaryActionRow = showSecondaryActionRow;
+                ShowInventoryGrid = showInventoryGrid;
             }
 
             public bool ShowPrimaryActionRow { get; }
             public bool ShowSecondaryActionRow { get; }
+            public bool ShowInventoryGrid { get; }
             public bool ShowsAnyActionRow => ShowPrimaryActionRow || ShowSecondaryActionRow;
         }
 
@@ -130,7 +132,7 @@ namespace ZombieFoodcenter.Prototype
             }
             else if (combatOnlyFocus)
             {
-                topStartFocus = Mathf.Lerp(0.50f, 0.54f, portrait01);
+                topStartFocus = Mathf.Lerp(0.38f, 0.42f, portrait01);
             }
             else
             {
@@ -150,7 +152,7 @@ namespace ZombieFoodcenter.Prototype
             {
                 bottomTopFocus = minimalCombatStrip
                     ? Mathf.Lerp(0.10f, 0.14f, portrait01)
-                    : Mathf.Lerp(0.46f, 0.50f, portrait01);
+                    : Mathf.Lerp(0.13f, 0.16f, portrait01);
             }
 
             float focusGap = dragFocus ? 0.24f : (minimalCombatStrip ? 0.10f : 0.04f);
@@ -165,6 +167,7 @@ namespace ZombieFoodcenter.Prototype
         public static GameplayActionVisibility CalculateGameplayActionVisibility(
             bool gameplayFocusHud,
             bool combatOnlyFocus,
+            bool hasPlacementContext,
             bool hasDrawChoice,
             bool eventPending,
             bool canVentHeat,
@@ -175,7 +178,8 @@ namespace ZombieFoodcenter.Prototype
             bool urgentCombatAction = canVentHeat || canActivateComboBurst || overheated;
             bool showPrimary = !gameplayFocusHud || (!flowLocked && (!combatOnlyFocus || !urgentCombatAction));
             bool showSecondary = !gameplayFocusHud || canVentHeat || canActivateComboBurst || overheated;
-            return new GameplayActionVisibility(showPrimary, showSecondary);
+            bool showInventoryGrid = !gameplayFocusHud || hasPlacementContext;
+            return new GameplayActionVisibility(showPrimary, showSecondary, showInventoryGrid);
         }
 
         private FoodTruckRunModel model;
@@ -797,6 +801,9 @@ namespace ZombieFoodcenter.Prototype
         private bool compactHudMode = true;
         private bool gameplayHudFocusApplied;
         private bool gameplayHudFocusInitialized;
+        private bool gameplayHudLayoutContextInitialized;
+        private bool gameplayHudPlacementContextApplied;
+        private bool gameplayHudDragFocusApplied;
         private float ultraFocusHoldTimer;
         private bool minimalCombatStripActive;
         private bool minimalCombatStripLayoutApplied;
@@ -1748,6 +1755,7 @@ namespace ZombieFoodcenter.Prototype
             bool hasPlacedBlock = model != null && HasPlacedBlockInGrid();
             bool hasPlacementContext = model != null && (hasPendingBlock || hasDrawChoice || model.IsRestPhase);
             bool combatOnlyFocus = gameplayFocusHud && !hasPlacementContext;
+            bool dragLayout = gameplayFocusHud && hasPendingBlock && IsUltraFocusActive();
             int totalLaneEnemies = 0;
             float maxLanePressure = 0f;
             if (model != null)
@@ -1767,7 +1775,17 @@ namespace ZombieFoodcenter.Prototype
             }
 
             bool focusModeChanged = !gameplayHudFocusInitialized || gameplayHudFocusApplied != gameplayFocusHud;
-            if (focusModeChanged || minimalLayoutChanged)
+            bool layoutContextChanged = !gameplayHudLayoutContextInitialized
+                || gameplayHudPlacementContextApplied != hasPlacementContext
+                || gameplayHudDragFocusApplied != dragLayout;
+            if (layoutContextChanged)
+            {
+                gameplayHudLayoutContextInitialized = true;
+                gameplayHudPlacementContextApplied = hasPlacementContext;
+                gameplayHudDragFocusApplied = dragLayout;
+            }
+
+            if (focusModeChanged || minimalLayoutChanged || layoutContextChanged)
             {
                 gameplayHudFocusApplied = gameplayFocusHud;
                 gameplayHudFocusInitialized = true;
@@ -1821,6 +1839,7 @@ namespace ZombieFoodcenter.Prototype
             GameplayActionVisibility actionVisibility = CalculateGameplayActionVisibility(
                 gameplayFocusHud,
                 combatOnlyFocus,
+                hasPlacementContext,
                 hasDrawChoice,
                 model != null && model.EventPending,
                 model != null && model.CanVentHeat,
@@ -1829,8 +1848,8 @@ namespace ZombieFoodcenter.Prototype
             bool showPrimaryActions = actionVisibility.ShowPrimaryActionRow;
             bool showSecondaryCombatActions = actionVisibility.ShowSecondaryActionRow;
             bool showPendingRow = hasPendingBlock || hasDrawChoice;
-            bool showInventoryGrid = true;
-            bool showBottomPanel = showPendingRow || showInventoryGrid || hasDrawChoice || actionVisibility.ShowsAnyActionRow;
+            bool showInventoryGrid = actionVisibility.ShowInventoryGrid;
+            bool showBottomPanel = showPendingRow || showInventoryGrid || actionVisibility.ShowsAnyActionRow;
             float laneRowHeight = gameplayFocusHud ? (focusPlacementMode ? 64f : (hasPlacementContext ? 86f : 136f)) : 60f;
             float laneRowMinHeight = gameplayFocusHud ? (focusPlacementMode ? 54f : (hasPlacementContext ? 72f : 112f)) : 56f;
 
@@ -1945,7 +1964,7 @@ namespace ZombieFoodcenter.Prototype
             SetNodeVisible(pendingHelpRect, showPendingRow && !draggingPlacementFocus && !hasDrawChoice);
             SetNodeVisible(flowChecklistPanelRect, !gameplayFocusHud);
             SetNodeVisible(telemetryControlRowRect, !gameplayFocusHud);
-            SetNodeVisible(inventoryTitleText, showInventoryGrid || hasDrawChoice);
+            SetNodeVisible(inventoryTitleText, showInventoryGrid || showPendingRow);
             SetNodeVisible(inventoryGridShakeRoot, showInventoryGrid);
             SetNodeVisible(pendingRowRect, showPendingRow);
             SetNodeVisible(actionsRow1Rect, !draggingPlacementFocus && showPrimaryActions);

@@ -45,7 +45,7 @@ function Get-GameplayFocusLayout {
         $topStartFocus = Lerp 0.94 0.965 $portrait01
     }
     elseif ($combatOnlyFocus) {
-        $topStartFocus = Lerp 0.50 0.54 $portrait01
+        $topStartFocus = Lerp 0.38 0.42 $portrait01
     }
     else {
         $topStartFocus = Lerp 0.62 0.66 $portrait01
@@ -62,7 +62,7 @@ function Get-GameplayFocusLayout {
             $bottomTopFocus = Lerp 0.10 0.14 $portrait01
         }
         else {
-            $bottomTopFocus = Lerp 0.46 0.50 $portrait01
+            $bottomTopFocus = Lerp 0.13 0.16 $portrait01
         }
     }
 
@@ -160,11 +160,11 @@ $scenarios = @(
         has_placement = $false
         drag_focus = $false
         minimal_requested = $false
-        min_top_panel01 = 0.44
+        min_top_panel01 = 0.58
         max_top_panel01 = $null
-        min_bottom_panel01 = $null
-        max_bottom_panel01 = 0.52
-        min_center_gap01 = 0.03
+        min_bottom_panel01 = 0.12
+        max_bottom_panel01 = 0.18
+        min_center_gap01 = 0.20
         max_center_gap01 = $null
     },
     [pscustomobject]@{
@@ -226,9 +226,13 @@ $sourceSyncChecks = New-Object System.Collections.Generic.List[object]
 Add-SourceContainsCheck $sourceSyncChecks "calculate_method_exists" $hudSource "public static GameplayFocusLayoutMetrics CalculateGameplayFocusLayout("
 Add-SourceContainsCheck $sourceSyncChecks "portrait_normalization_constants" $hudSource "float portrait01 = Mathf.Clamp01((height / width - 1.4f) / 1.2f);"
 Add-SourceContainsCheck $sourceSyncChecks "drag_top_lerp_constants" $hudSource "topStartFocus = Mathf.Lerp(0.91f, 0.94f, portrait01);"
+Add-SourceContainsCheck $sourceSyncChecks "combat_top_lerp_constants" $hudSource "topStartFocus = Mathf.Lerp(0.38f, 0.42f, portrait01);"
 Add-SourceContainsCheck $sourceSyncChecks "placement_top_lerp_constants" $hudSource "topStartFocus = Mathf.Lerp(0.62f, 0.66f, portrait01);"
 Add-SourceContainsCheck $sourceSyncChecks "placement_bottom_lerp_constants" $hudSource "bottomTopFocus = Mathf.Lerp(0.54f, 0.58f, portrait01);"
+Add-SourceContainsCheck $sourceSyncChecks "combat_bottom_lerp_constants" $hudSource "Mathf.Lerp(0.13f, 0.16f, portrait01);"
 Add-SourceContainsCheck $sourceSyncChecks "focus_gap_constants" $hudSource "float focusGap = dragFocus ? 0.24f : (minimalCombatStrip ? 0.10f : 0.04f);"
+Add-SourceContainsCheck $sourceSyncChecks "combat_inventory_grid_hidden_without_placement" $hudSource "bool showInventoryGrid = !gameplayFocusHud || hasPlacementContext;"
+Add-SourceContainsCheck $sourceSyncChecks "layout_context_changes_reapply_panel_layout" $hudSource "bool layoutContextChanged = !gameplayHudLayoutContextInitialized"
 Add-SourceContainsCheck $sourceSyncChecks "apply_layout_uses_calculator" $uiBootstrapSource "GameplayFocusLayoutMetrics focusLayout = CalculateGameplayFocusLayout("
 Add-SourceContainsCheck $sourceSyncChecks "bottom_panel_uses_bottom_top_focus" $uiBootstrapSource "Stretch(bottomPanelRect, new Vector2(0f, 0f), new Vector2(1f, bottomTopFocus), bottomOffsetMin, bottomOffsetMax);"
 

@@ -743,10 +743,26 @@ namespace ZombieFoodcenter.Tests.EditMode
                     dragFocus: false,
                     minimalCombatStripRequested: false);
 
-            Assert.GreaterOrEqual(1f - layout.TopStart01, 0.46f);
-            Assert.GreaterOrEqual(layout.BottomTop01, 0.44f);
-            Assert.LessOrEqual(layout.BottomTop01, 0.52f);
-            Assert.LessOrEqual(layout.CenterViewport01, 0.06f);
+            Assert.GreaterOrEqual(1f - layout.TopStart01, 0.58f);
+            Assert.GreaterOrEqual(layout.BottomTop01, 0.12f);
+            Assert.LessOrEqual(layout.BottomTop01, 0.18f);
+            Assert.GreaterOrEqual(layout.CenterViewport01, 0.20f);
+        }
+
+        [Test]
+        public void HudFocusLayout_CapturedPortraitCombatOnly_KeepsBottomAsCommandStrip()
+        {
+            FoodTruckPrototypeHud.GameplayFocusLayoutMetrics layout =
+                FoodTruckPrototypeHud.CalculateGameplayFocusLayout(
+                    viewportWidth: 1170f,
+                    viewportHeight: 2532f,
+                    hasPlacementContext: false,
+                    dragFocus: false,
+                    minimalCombatStripRequested: false);
+
+            Assert.GreaterOrEqual(1f - layout.TopStart01, 0.58f);
+            Assert.LessOrEqual(layout.BottomTop01, 0.16f);
+            Assert.GreaterOrEqual(layout.CenterViewport01, 0.24f);
         }
 
         [Test]
@@ -788,6 +804,7 @@ namespace ZombieFoodcenter.Tests.EditMode
                 FoodTruckPrototypeHud.CalculateGameplayActionVisibility(
                     gameplayFocusHud: true,
                     combatOnlyFocus: true,
+                    hasPlacementContext: false,
                     hasDrawChoice: false,
                     eventPending: false,
                     canVentHeat: false,
@@ -797,6 +814,7 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(visibility.ShowPrimaryActionRow);
             Assert.IsFalse(visibility.ShowSecondaryActionRow);
             Assert.IsTrue(visibility.ShowsAnyActionRow);
+            Assert.IsFalse(visibility.ShowInventoryGrid);
         }
 
         [Test]
@@ -806,6 +824,7 @@ namespace ZombieFoodcenter.Tests.EditMode
                 FoodTruckPrototypeHud.CalculateGameplayActionVisibility(
                     gameplayFocusHud: true,
                     combatOnlyFocus: true,
+                    hasPlacementContext: false,
                     hasDrawChoice: false,
                     eventPending: false,
                     canVentHeat: true,
@@ -815,6 +834,25 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsFalse(visibility.ShowPrimaryActionRow);
             Assert.IsTrue(visibility.ShowSecondaryActionRow);
             Assert.IsTrue(visibility.ShowsAnyActionRow);
+            Assert.IsFalse(visibility.ShowInventoryGrid);
+        }
+
+        [Test]
+        public void HudActionVisibility_PlacementContext_KeepsInventoryGridVisible()
+        {
+            FoodTruckPrototypeHud.GameplayActionVisibility visibility =
+                FoodTruckPrototypeHud.CalculateGameplayActionVisibility(
+                    gameplayFocusHud: true,
+                    combatOnlyFocus: false,
+                    hasPlacementContext: true,
+                    hasDrawChoice: false,
+                    eventPending: false,
+                    canVentHeat: false,
+                    canActivateComboBurst: false,
+                    overheated: false);
+
+            Assert.IsTrue(visibility.ShowPrimaryActionRow);
+            Assert.IsTrue(visibility.ShowInventoryGrid);
         }
 
         private static bool HasActiveRecipe(FoodTruckRunModel model, string name)
