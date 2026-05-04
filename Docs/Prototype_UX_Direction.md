@@ -25,6 +25,7 @@
 - Cue banner now fades and updates in runtime loop.
 - Pending hint text now supports event/draw/pending contexts consistently.
 - Action buttons now respect phase gating (event/draw/has pending/can vent/can burst).
+- Source-level HUD state contract guard now checks Draw Choice, Pending Placement, Invalid Placement, telemetry, and regression coverage when Play Mode capture is blocked.
 
 ## Core Fun Reinforcement Plan
 ### P0 (Now)
@@ -66,6 +67,7 @@
 3. Add micro-animation presets for place success/fail.
 4. Add telemetry counters and simple CSV/console summary.
 5. Validate on vertical mobile aspect ratio with touch-first script.
+6. Keep `Tools\Verify-PrototypeHudStateContract.ps1` green after Draw/Pending/Invalid Placement HUD changes.
 ## Agent-Driven Next Step (2026-04-09)
 1. Stabilize placement explainability
 - Keep `LastPlacementFailReason` and `LastPlacementFailReasonText` as HUD source-of-truth.

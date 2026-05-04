@@ -53,6 +53,7 @@
 - 기본 점검: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeAssets.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`
 - JSON 점검: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeAssets.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly`
 - 최종 아트 누락까지 실패 처리: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeAssets.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -Strict`
+- HUD 상태 계약 점검: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`
 - PNG `.meta` 보강: `powershell -ExecutionPolicy Bypass -File "Tools\Ensure-PrototypeAssetMetas.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`
 - `needs_art`는 현재 더미/텍스트 fallback으로 게임이 실행 가능하지만, 최종 푸드트럭/주방/음식 아이콘 PNG가 아직 비어 있다는 뜻이다.
 - `diagnostic_warnings`는 PNG 크기, 알파 채널, `.meta` 누락이 권장값과 다를 때 증가한다. 기본 게이트는 경고로만 보고, 파일 누락/런타임 필수 리소스 누락만 실패 처리한다.

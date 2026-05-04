@@ -36,6 +36,7 @@
 ### 개발
 - 단계 잠금(event/draw/pending)에서 누락된 입력 경로가 없는가?
 - HUD 텍스트/배너/버튼 상태가 동일한 상태머신을 참조하는가?
+- Play Mode 입력이 막힌 환경에서는 `Tools\Verify-PrototypeHudStateContract.ps1`로 Draw/Pending/Invalid Placement 상태 계약을 먼저 고정했는가?
 
 ### 플레이테스트
 - 세로 폰 해상도에서 배치 가능한 영역이 충분한가?
@@ -47,7 +48,8 @@
 - Manual Play Mode verification sheet: `Docs/Prototype_PlayMode_Verification.md`.
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: continue with local scripts/file inspection first; do not block completion-critical UX work on MCP connectivity.
+- HUD state contract command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Layout guard command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode record command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Immediate next validation when Play Mode input is reliable again: capture Draw choice, Pending placement, and Invalid placement.
-- Current code fallback is complete for the captured Wave combat issue: combat-only portrait HUD hides the 3x3 build grid and keeps the bottom as a command strip.
+- Current code fallback is complete for the captured Wave combat issue, and the Draw/Pending/Invalid Placement HUD state contract is now gate-checked while manual capture remains blocked on this PC.

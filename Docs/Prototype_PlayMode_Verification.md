@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Verification
 
-Last updated: 2026-05-04 16:20 KST
+Last updated: 2026-05-04 16:31 KST
 
 ## Purpose
 Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
@@ -13,6 +13,7 @@ Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -RunTests -JsonOnly
 ```
 
@@ -65,8 +66,8 @@ Screenshots captured: 2
 1. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010153.png
 2. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010245.png
 Top issue: Current PC cannot reliably continue direct Play Mode interaction. Captured Wave Combat was readable, but the bottom build panel occupied too much portrait space when no block was pending.
-Next code target: Completed 2026-05-04 16:20 KST; combat-only HUD now hides the 3x3 build grid, keeps the bottom as a compact command strip, and reapplies layout when combat/build context changes.
-Verification command result: Partial Play Mode record remains `not_recorded` until Draw Choice, Pending Placement, and Invalid Placement can be captured; `Tools\Verify-PrototypeLayout.ps1` and `Tools\Verify-PrototypeStatic.ps1` pass after the combat-only HUD change.
+Next code target: Completed 2026-05-04 16:31 KST; combat-only HUD now hides the 3x3 build grid, and the source-level HUD state contract for Draw Choice, Pending Placement, Invalid Placement, telemetry, and regression coverage is wired into the gate.
+Verification command result: Partial Play Mode record remains `not_recorded` until Draw Choice, Pending Placement, and Invalid Placement can be captured; `Tools\Verify-PrototypeHudStateContract.ps1`, `Tools\Verify-PrototypeLayout.ps1`, `Tools\Verify-PrototypeStatic.ps1`, and `Tools\Gate-Verification.ps1 -RunTests -JsonOnly` pass.
 
 ## Result Template
 ```text

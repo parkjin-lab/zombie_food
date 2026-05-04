@@ -54,6 +54,7 @@ function Invoke-JsonScript {
 $gateScript = Join-Path $ProjectPath "Tools\Gate-Verification.ps1"
 $assetScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
+$hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
 $playModeRecordScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRecord.ps1"
 $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
@@ -76,15 +77,24 @@ $playModeRecordResult = Invoke-JsonScript -ScriptPath $playModeRecordScript -Arg
     "-JsonOnly"
 )
 
+$hudContractResult = Invoke-JsonScript -ScriptPath $hudContractScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-JsonOnly"
+)
+
 $gateData = $gateResult.data
 $assetData = $assetResult.data
 $verification = if ($null -ne $gateData) { $gateData.status } else { $null }
 $gateAssets = if ($null -ne $gateData) { $gateData.assets } else { $null }
 $gateLayout = if ($null -ne $gateData) { $gateData.layout } else { $null }
+$gateHudContract = if ($null -ne $gateData) { $gateData.hud_contract } else { $null }
 $playModeRecordData = $playModeRecordResult.data
+$hudContractData = $hudContractResult.data
 
 $assetStatus = if ($null -ne $assetData) { $assetData.asset_status } elseif ($null -ne $gateAssets) { $gateAssets.asset_status } else { "unknown" }
 $layoutStatus = if ($null -ne $gateLayout) { $gateLayout.layout_status } else { "unknown" }
+$hudContractStatus = if ($null -ne $hudContractData) { $hudContractData.hud_contract_status } elseif ($null -ne $gateHudContract) { $gateHudContract.hud_contract_status } else { "unknown" }
+$hudContractFailedChecks = if ($null -ne $hudContractData) { $hudContractData.failed_checks } elseif ($null -ne $gateHudContract) { $gateHudContract.failed_checks } else { $null }
 $playModeRecordStatus = if ($null -ne $playModeRecordData) { $playModeRecordData.playmode_record_status } else { "unknown" }
 $staticStatus = if ($null -ne $verification) { $verification.static_status } else { "unknown" }
 $compileStatus = if ($null -ne $verification) { $verification.compile_status } else { "unknown" }
@@ -92,15 +102,23 @@ $testsStatus = if ($null -ne $verification) { $verification.tests_status } else 
 $manualRequired = if ($null -ne $verification) { [bool]$verification.manual_verification_required } else { $true }
 
 $readiness = "needs_manual_playmode"
-if ($gateResult.ok -and $assetStatus -eq "ok" -and $layoutStatus -eq "ok" -and $staticStatus -eq "ok" -and $playModeRecordStatus -eq "passed" -and -not $manualRequired) {
+if ($gateResult.ok -and $assetStatus -eq "ok" -and $layoutStatus -eq "ok" -and $hudContractStatus -eq "ok" -and $staticStatus -eq "ok" -and $playModeRecordStatus -eq "passed" -and -not $manualRequired) {
     $readiness = "ready"
 }
-elseif (-not $gateResult.ok -or $assetStatus -ne "ok" -or $layoutStatus -ne "ok" -or $staticStatus -ne "ok" -or $playModeRecordStatus -eq "invalid_record") {
+elseif (-not $gateResult.ok -or $assetStatus -ne "ok" -or $layoutStatus -ne "ok" -or $hudContractStatus -ne "ok" -or $staticStatus -ne "ok" -or $playModeRecordStatus -eq "invalid_record") {
     $readiness = "needs_fix_before_playmode"
 }
 elseif ($playModeRecordStatus -eq "needs_fix" -or $playModeRecordStatus -eq "blocked") {
     $readiness = "needs_playmode_fix"
 }
+
+$unresolvedIssues = New-Object System.Collections.Generic.List[string]
+$unresolvedIssues.Add("Unity headless compile/tests remain inconclusive in this environment.") | Out-Null
+if ($hudContractStatus -ne "ok") {
+    $unresolvedIssues.Add("HUD state contract status: " + $hudContractStatus + ".") | Out-Null
+}
+$unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
+$unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
 
 $summary = [ordered]@{
     project_path = $ProjectPath
@@ -109,6 +127,8 @@ $summary = [ordered]@{
     gate_status = if ($null -ne $gateData) { $gateData.gate_status } else { "unknown" }
     asset_status = $assetStatus
     layout_status = $layoutStatus
+    hud_contract_status = $hudContractStatus
+    hud_contract_failed_checks = $hudContractFailedChecks
     playmode_record_status = $playModeRecordStatus
     static_status = $staticStatus
     compile_status = $compileStatus
@@ -122,13 +142,10 @@ $summary = [ordered]@{
         playmode_verification = (Test-Path -LiteralPath $playModePath)
         playbook = (Test-Path -LiteralPath $playbookPath)
         layout_verifier = (Test-Path -LiteralPath $layoutScript)
+        hud_state_contract_verifier = (Test-Path -LiteralPath $hudContractScript)
         playmode_record_verifier = (Test-Path -LiteralPath $playModeRecordScript)
     }
-    unresolved_issues = @(
-        "Unity headless compile/tests remain inconclusive in this environment.",
-        ("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + "."),
-        "Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again."
-    )
+    unresolved_issues = $unresolvedIssues.ToArray()
     recommended_next_actions = @(
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "When Play Mode input is reliable again, capture Draw Choice, Pending Placement, and Invalid Placement evidence.",
@@ -136,6 +153,7 @@ $summary = [ordered]@{
         "If all checklist states pass visually, use Tools > Food Truck Prototype > Record PASS Manual Result.",
         "If any checklist state fails, record the FIX_* result manually in Docs\Prototype_PlayMode_Verification.md.",
         "Close Unity Editor before using forced headless verification.",
+        "Run Tools\Verify-PrototypeHudStateContract.ps1 after Draw/Pending/Invalid Placement HUD code changes.",
         "Run Tools\Verify-PrototypeLayout.ps1 if layout code changes before Play Mode.",
         "Run Tools\Verify-PrototypePlayModeRecord.ps1 after recording Play Mode results.",
         "If layout fails, adjust FoodTruckPrototypeHud.CalculateGameplayFocusLayout / ApplyGameplayHudContext before adding features.",
@@ -152,6 +170,8 @@ Write-Host ("prototype_session_readiness=" + $summary.readiness)
 Write-Host ("gate_status=" + $summary.gate_status)
 Write-Host ("asset_status=" + $summary.asset_status)
 Write-Host ("layout_status=" + $summary.layout_status)
+Write-Host ("hud_contract_status=" + $summary.hud_contract_status)
+Write-Host ("hud_contract_failed_checks=" + $summary.hud_contract_failed_checks)
 Write-Host ("playmode_record_status=" + $summary.playmode_record_status)
 Write-Host ("static_status=" + $summary.static_status)
 Write-Host ("compile_status=" + $summary.compile_status)

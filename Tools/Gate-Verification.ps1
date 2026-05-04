@@ -12,7 +12,8 @@ param(
     [switch]$Json,
     [switch]$JsonOnly,
     [switch]$SkipAssets,
-    [switch]$SkipLayout
+    [switch]$SkipLayout,
+    [switch]$SkipHudContract
 )
 
 $ErrorActionPreference = "Stop"
@@ -27,6 +28,7 @@ $assertScript = Join-Path $ProjectPath "Tools\Assert-VerificationStatus.ps1"
 $showScript = Join-Path $ProjectPath "Tools\Show-VerificationStatus.ps1"
 $assetScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
+$hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
 
 if (-not (Test-Path $ensureScript)) {
     Write-Error "Missing script: $ensureScript"
@@ -160,6 +162,49 @@ function Invoke-LayoutCheck {
     }
 }
 
+function Invoke-HudContractCheck {
+    param(
+        [string]$HudContractScriptPath,
+        [string]$RootPath
+    )
+
+    if (-not (Test-Path $HudContractScriptPath)) {
+        return [pscustomobject]@{
+            exit_code = 90
+            hud_contract = [pscustomobject]@{
+                hud_contract_status = "missing_hud_contract_verifier"
+                failed_checks = $null
+            }
+        }
+    }
+
+    $hudContractJsonRaw = & powershell -ExecutionPolicy Bypass -File $HudContractScriptPath -ProjectPath $RootPath -JsonOnly
+    $exitCode = $LASTEXITCODE
+    $jsonLine = $hudContractJsonRaw | Select-Object -Last 1
+    $hudContractObj = $null
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$jsonLine)) {
+        try {
+            $hudContractObj = $jsonLine | ConvertFrom-Json
+        }
+        catch {
+            $hudContractObj = $null
+        }
+    }
+
+    if ($null -eq $hudContractObj) {
+        $hudContractObj = [pscustomobject]@{
+            hud_contract_status = "failed_hud_contract_parse"
+            failed_checks = $null
+        }
+    }
+
+    return [pscustomobject]@{
+        exit_code = $exitCode
+        hud_contract = $hudContractObj
+    }
+}
+
 $ensureArgs = @(
     "-ExecutionPolicy", "Bypass",
     "-File", $ensureScript,
@@ -280,6 +325,34 @@ if (-not $SkipLayout) {
     }
 }
 
+$hudContractObj = $null
+if (-not $SkipHudContract) {
+    $hudContractResult = Invoke-HudContractCheck -HudContractScriptPath $hudContractScript -RootPath $ProjectPath
+    $hudContractObj = $hudContractResult.hud_contract
+
+    if (-not $Compact -and $null -ne $hudContractObj) {
+        Write-Host ("hud_contract_status=" + $hudContractObj.hud_contract_status)
+        Write-Host ("hud_contract_failed_checks=" + $hudContractObj.failed_checks)
+    }
+
+    if ($hudContractResult.exit_code -ne 0) {
+        if ($JsonOnly) {
+            $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
+            [ordered]@{
+                gate_status = "failed_hud_contract"
+                status = $statusObj
+                assets = $assetObj
+                layout = $layoutObj
+                hud_contract = $hudContractObj
+            } | ConvertTo-Json -Depth 8 -Compress | Write-Host
+            exit 6
+        }
+
+        Write-Host "gate_status=failed_hud_contract"
+        exit 6
+    }
+}
+
 $statusObj = $null
 if ($Json) {
     $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
@@ -304,6 +377,7 @@ if ($JsonOnly) {
         status = $statusObj
         assets = $assetObj
         layout = $layoutObj
+        hud_contract = $hudContractObj
     } | ConvertTo-Json -Depth 8 -Compress | Write-Host
     exit 0
 }
