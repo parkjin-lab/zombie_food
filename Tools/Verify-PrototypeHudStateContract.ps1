@@ -59,6 +59,7 @@ $relativeFiles = [ordered]@{
     model = "Assets\Scripts\Prototype\FoodTruckRunModel.cs"
     tests = "Assets\Tests\EditMode\FoodTruckRunModelTests.cs"
     playModeSuiteVerifier = "Tools\Verify-PrototypePlayModeSuite.ps1"
+    playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
     sessionStatus = "Tools\Show-PrototypeSessionStatus.ps1"
 }
@@ -264,6 +265,17 @@ Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_ev
     'AddEvidencePath(paths, seen, match.Groups["path"].Value, true)',
     'Screenshots captured: '
 ) "The PASS record helper should preserve suite screenshot evidence even after Editor state reloads."
+
+Add-ContractCheck $checks "editor_helpers" "suite_result_writer_handles_pass_fix_and_blocked" $sources.playModeResultWriter @(
+    'Write-PrototypePlayModeResultFromSuite.ps1',
+    '[ValidateSet("PASS", "FIX_LAYOUT", "FIX_ASSET", "FIX_FEEDBACK", "BLOCKED", "NOT_RECORDED")]',
+    'Prototype_PlayMode_Verification_ResultDraft.txt',
+    'Verify-PrototypePlayModeSuite.ps1',
+    'Get-RecordStatusPreview',
+    'Write-TextWithFallback',
+    'Latest Manual Result',
+    '-Apply'
+) "Manual suite review should be recordable without hand-editing markdown for FIX or BLOCKED outcomes."
 
 Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_layout_visibility" $sources.tests @(
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',

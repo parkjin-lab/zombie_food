@@ -169,6 +169,7 @@ $summary = [ordered]@{
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
+        "Use Tools\Write-PrototypePlayModeResultFromSuite.ps1 to draft or apply PASS/FIX/BLOCKED results without hand-editing markdown.",
         "In Play Mode, use Tools > Food Truck Prototype > Prepare and Capture State for low-interaction Draw/Pending/Invalid evidence.",
         "When Play Mode input is reliable again, capture Draw Choice, Pending Placement, and Invalid Placement evidence.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Play Mode Snapshot to collect screenshot evidence.",
