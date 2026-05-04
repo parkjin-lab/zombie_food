@@ -55,6 +55,8 @@ Last updated: 2026-05-05 01:08 KST
 - Added a persistent recent-recipe cue to the Synergy Bar so the latest recipe trigger source remains visible after the activation banner fades.
 - Fixed recipe chip pulse targeting so the highlighted active recipe still matches by recipe name even when the presentation payload includes tier/cause text.
 - Updated active recipe chips to show the current effect role, such as `Regen/Cool x0.5` for passive recipes and `Lane Hit x0.9` for active recipes.
+- Added recipe payoff tracking so expired recipes report accumulated damage, KOs, HP restored, and Heat relieved in the log/HUD cue.
+- Added a Synergy Bar result chip for the latest expired recipe when no recipe is active.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -81,6 +83,7 @@ Last updated: 2026-05-05 01:08 KST
 - Latest local recheck at 2026-05-05 01:16 KST after recipe activation cause feedback: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=31`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 01:35 KST after persistent recipe cue work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=32`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 01:46 KST after active recipe role chip work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=33`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
+- Latest local recheck at 2026-05-05 01:52 KST after recipe expiry payoff work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=34`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -90,10 +93,13 @@ Last updated: 2026-05-05 01:08 KST
 - `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: now tracks per-wave payoff stats and exposes `LastWaveOutcomeSummary` / `LastWaveOutcomeCue`.
 - `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: recipe activation payloads now include source/cause text for placement, merge, event, and bingo activations.
 - `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: exposes `LastRecipeActivationName`, `LastRecipeActivationSummary`, and `LastRecipeActivationCue` for persistent HUD feedback.
+- `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: recipe states now accumulate payoff stats and emit a recipe-expired result cue.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: wave-change cue now prefers the latest payoff cue when available.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: Synergy Bar now keeps a recent-recipe cue chip visible while active recipe chips continue to show duration.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: active recipe chips now include a compact effect role label for passive recovery/cooling or active lane hits.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: Synergy Bar now shows the latest recipe result when no recipe remains active.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: recipe activation pulse now resolves the actual recipe name from model state or payload fallback.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: recipe expiry now has its own payoff cue presentation.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.DrawChoiceFlow.cs`: Draw Choice card text now includes fit count, estimated Heat cost, and a tactical role label.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PendingPlacementAssist.cs`: blocked placement hint text now includes a corrective `Next` action based on the failure reason and current recommendations.
 - `Assets/Tests/EditMode/FoodTruckRunModelTests.cs`: recipe bingo and random recipe activation now assert cause-bearing payload/log output.

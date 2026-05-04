@@ -73,6 +73,18 @@ namespace ZombieFoodcenter.Prototype
                     vfxSprite = vfxComboBurstSprite;
                     vfxSizeScale = 0.86f;
                     break;
+                case PresentationTriggerType.RecipeExpired:
+                    synergyChipPulseTimer = Mathf.Max(synergyChipPulseTimer, Mathf.Max(0.08f, synergyChipPulseDuration * 0.60f));
+                    message = string.IsNullOrEmpty(payload)
+                        ? "Recipe expired."
+                        : "Recipe expired: " + payload;
+                    color = new Color(0.74f, 0.58f, 0.32f, 1f);
+                    clip = sfxProgressionUnlockClip != null ? sfxProgressionUnlockClip : sfxComboBurstClip;
+                    clipVolume = 0.62f;
+                    vfxSprite = vfxComboBurstSprite;
+                    vfxSizeScale = 0.68f;
+                    vfxDurationScale = 0.80f;
+                    break;
                 case PresentationTriggerType.ComboBurst:
                     message = string.IsNullOrEmpty(payload)
                         ? "Combo Burst activated."

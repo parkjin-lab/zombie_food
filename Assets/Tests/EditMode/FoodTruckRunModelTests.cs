@@ -808,6 +808,35 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildRecipeImpactSummary_ReportsAccumulatedPayoff()
+        {
+            var recipe = new RecipeState("Seafood Pasta", RecipeTier.Intermediate, false, 0.90f, 12f)
+            {
+                DamageDealt = 24.4f,
+                EnemiesDefeated = 2,
+                HpRestored = 3.1f,
+                HeatRelieved = 5.6f
+            };
+
+            string summary = FoodTruckRunModel.BuildRecipeImpactSummary(recipe);
+
+            StringAssert.Contains("Dmg 24", summary);
+            StringAssert.Contains("KO 2", summary);
+            StringAssert.Contains("HP +3", summary);
+            StringAssert.Contains("Heat -6", summary);
+        }
+
+        [Test]
+        public void BuildRecipeImpactSummary_WhenNoPayoff_ReportsNoPayoff()
+        {
+            var recipe = new RecipeState("Veggie Stir-fry", RecipeTier.Basic, true, 0.45f, 20f);
+
+            string summary = FoodTruckRunModel.BuildRecipeImpactSummary(recipe);
+
+            StringAssert.Contains("No payoff recorded", summary);
+        }
+
+        [Test]
         public void HudFocusLayout_CombatOnly_ExpandsBattlefieldPanel()
         {
             FoodTruckPrototypeHud.GameplayFocusLayoutMetrics layout =

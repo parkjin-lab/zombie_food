@@ -44,6 +44,7 @@ namespace ZombieFoodcenter.Prototype
         AutoMergeSuccess,
         PlacementBlocked,
         RecipeActivated,
+        RecipeExpired,
         ComboBurst,
         OverheatSpike,
         ProgressionUnlock,
@@ -109,6 +110,10 @@ namespace ZombieFoodcenter.Prototype
         public bool IsPassive { get; }
         public float Potency { get; set; }
         public float RemainingSeconds { get; set; }
+        public float DamageDealt { get; set; }
+        public float HpRestored { get; set; }
+        public float HeatRelieved { get; set; }
+        public int EnemiesDefeated { get; set; }
     }
 
     public sealed class PendingBlockState
@@ -339,6 +344,8 @@ namespace ZombieFoodcenter.Prototype
         private string lastRecipeActivationName = string.Empty;
         private string lastRecipeActivationSummary = string.Empty;
         private string lastRecipeActivationCue = string.Empty;
+        private string lastRecipeResultSummary = string.Empty;
+        private string lastRecipeResultCue = string.Empty;
         private string drawAssistTag = "BAL";
         public event Action StateChanged;
         public event Action<string> CombatLogAppended;
@@ -406,6 +413,8 @@ namespace ZombieFoodcenter.Prototype
         public string LastRecipeActivationName => lastRecipeActivationName;
         public string LastRecipeActivationSummary => lastRecipeActivationSummary;
         public string LastRecipeActivationCue => lastRecipeActivationCue;
+        public string LastRecipeResultSummary => lastRecipeResultSummary;
+        public string LastRecipeResultCue => lastRecipeResultCue;
         public string DrawAssistTag => drawAssistTag;
         public IReadOnlyList<RecipeState> ActiveRecipes => activeRecipes;
         public IReadOnlyList<LaneEnemyState> LaneEnemies => laneEnemies;
@@ -457,6 +466,8 @@ namespace ZombieFoodcenter.Prototype
             lastRecipeActivationName = string.Empty;
             lastRecipeActivationSummary = string.Empty;
             lastRecipeActivationCue = string.Empty;
+            lastRecipeResultSummary = string.Empty;
+            lastRecipeResultCue = string.Empty;
             for (int i = 0; i < blockByCell.Length; i++)
             {
                 blockByCell[i] = -1;
@@ -1391,8 +1402,12 @@ namespace ZombieFoodcenter.Prototype
                 RecipeState recipe = activeRecipes[i];
                 if (recipe.IsPassive)
                 {
+                    float hpBefore = TruckHp;
+                    float heatBefore = Heat;
                     TruckHp = Mathf.Min(MaxTruckHp, TruckHp + recipe.Potency * 0.3f);
                     Heat = Mathf.Max(0f, Heat - recipe.Potency * 0.25f);
+                    recipe.HpRestored += Mathf.Max(0f, TruckHp - hpBefore);
+                    recipe.HeatRelieved += Mathf.Max(0f, heatBefore - Heat);
                     continue;
                 }
 
@@ -1410,9 +1425,11 @@ namespace ZombieFoodcenter.Prototype
                     float effectiveDealt = Mathf.Min(dealt, Mathf.Max(0f, enemy.Hp));
                     enemy.Hp -= dealt;
                     waveDamageDealt += effectiveDealt;
+                    recipe.DamageDealt += effectiveDealt;
                     if (enemy.Hp <= 0f)
                     {
                         waveEnemiesDefeated += 1;
+                        recipe.EnemiesDefeated += 1;
                         int baseGain = enemy.IsSpecial ? 3 : 1;
                         Supplies += GetHeatAdjustedSupplyGain(baseGain);
                         laneEnemies.RemoveAt(idx);
@@ -1562,10 +1579,45 @@ namespace ZombieFoodcenter.Prototype
                 recipe.RemainingSeconds -= 1f;
                 if (recipe.RemainingSeconds <= 0f)
                 {
-                    AppendLog(recipe.Name + " expired.");
+                    string impactSummary = BuildRecipeImpactSummary(recipe);
+                    lastRecipeResultSummary = recipe.Name + ": " + impactSummary;
+                    lastRecipeResultCue = recipe.Name + " " + impactSummary;
+                    AppendLog(recipe.Name + " expired: " + impactSummary + ".");
+                    EmitPresentationTrigger(PresentationTriggerType.RecipeExpired, lastRecipeResultSummary);
                     activeRecipes.RemoveAt(i);
                 }
             }
+        }
+
+        public static string BuildRecipeImpactSummary(RecipeState recipe)
+        {
+            if (recipe == null)
+            {
+                return "No payoff recorded";
+            }
+
+            List<string> parts = new List<string>();
+            if (recipe.DamageDealt >= 0.5f)
+            {
+                parts.Add("Dmg " + Mathf.RoundToInt(recipe.DamageDealt));
+            }
+
+            if (recipe.EnemiesDefeated > 0)
+            {
+                parts.Add("KO " + recipe.EnemiesDefeated);
+            }
+
+            if (recipe.HpRestored >= 0.5f)
+            {
+                parts.Add("HP +" + Mathf.RoundToInt(recipe.HpRestored));
+            }
+
+            if (recipe.HeatRelieved >= 0.5f)
+            {
+                parts.Add("Heat -" + Mathf.RoundToInt(recipe.HeatRelieved));
+            }
+
+            return parts.Count > 0 ? string.Join(", ", parts.ToArray()) : "No payoff recorded";
         }
 
         private float GetPassivePower()

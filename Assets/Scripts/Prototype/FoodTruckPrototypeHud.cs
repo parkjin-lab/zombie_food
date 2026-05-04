@@ -2264,6 +2264,12 @@ namespace ZombieFoodcenter.Prototype
 
             if (model.ActiveRecipes.Count == 0)
             {
+                string lastRecipeResultCue = model != null ? model.LastRecipeResultCue : string.Empty;
+                if (!string.IsNullOrEmpty(lastRecipeResultCue))
+                {
+                    CreateChip("Result: " + lastRecipeResultCue, new Color(0.42f, 0.49f, 0.58f, 1f), 320f, 360f, 13);
+                }
+
                 CreateChip("No active recipe", new Color(0.35f, 0.38f, 0.43f, 1f));
                 return;
             }

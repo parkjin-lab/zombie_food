@@ -273,6 +273,19 @@ Add-ContractCheck $checks "recipe_feedback" "active_recipe_chips_describe_effect
     'CreateChip(chipText, color, 260f, 310f, 13)'
 ) "Active recipe chips should show what the recipe is doing, not only name and remaining time."
 
+Add-ContractCheck $checks "recipe_feedback" "recipe_expiry_reports_accumulated_payoff" ($sources.model + $sources.hud + $sources.presentation) @(
+    'RecipeExpired',
+    'public string LastRecipeResultSummary => lastRecipeResultSummary;',
+    'public string LastRecipeResultCue => lastRecipeResultCue;',
+    'recipe.DamageDealt += effectiveDealt;',
+    'recipe.EnemiesDefeated += 1;',
+    'recipe.HpRestored += Mathf.Max(0f, TruckHp - hpBefore);',
+    'recipe.HeatRelieved += Mathf.Max(0f, heatBefore - Heat);',
+    'public static string BuildRecipeImpactSummary(RecipeState recipe)',
+    'EmitPresentationTrigger(PresentationTriggerType.RecipeExpired, lastRecipeResultSummary)',
+    'CreateChip("Result: " + lastRecipeResultCue'
+) "Recipe expiry feedback should summarize accumulated damage, KOs, recovery, and Heat relief."
+
 Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_states" $sources.playModeVerification @(
     'public enum PlayModeVerificationState',
     'DrawChoice',
@@ -380,6 +393,8 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'TryPlacePendingAtCell_ThirdMatchingBlock_ActivatesRecipeBingo',
     'TriggerRandomRecipe_LogsActivationCause',
     'BuildRecipeEffectChipText_DescribesPassiveAndActiveRoles',
+    'BuildRecipeImpactSummary_ReportsAccumulatedPayoff',
+    'BuildRecipeImpactSummary_WhenNoPayoff_ReportsNoPayoff',
     'model.LastRecipeActivationCue',
     'Tick_WhenWaveAdvances_RecordsOutcomeSummary',
     'HudActionVisibility_CombatOnlyIdle_ShowsBuildEntryRow',
