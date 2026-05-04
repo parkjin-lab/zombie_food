@@ -59,6 +59,7 @@ $relativeFiles = [ordered]@{
     model = "Assets\Scripts\Prototype\FoodTruckRunModel.cs"
     tests = "Assets\Tests\EditMode\FoodTruckRunModelTests.cs"
     playModeSuiteVerifier = "Tools\Verify-PrototypePlayModeSuite.ps1"
+    playModeScreenshotVerifier = "Tools\Verify-PrototypePlayModeScreenshots.ps1"
     playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
     sessionStatus = "Tools\Show-PrototypeSessionStatus.ps1"
@@ -250,12 +251,28 @@ Add-ContractCheck $checks "editor_helpers" "suite_evidence_is_machine_checkable"
     'expected_state_count'
 ) "The low-interaction suite evidence must be parsable before manual PASS/FIX recording."
 
+Add-ContractCheck $checks "editor_helpers" "screenshot_evidence_quality_is_machine_checkable" $sources.playModeScreenshotVerifier @(
+    'Read-PngHeader',
+    'playmode_screenshot_status',
+    'low_resolution_count',
+    'missing_states',
+    'unlabeled_count',
+    'visual_review_required'
+) "Captured Play Mode screenshots should have a local quality and coverage check before manual review."
+
 Add-ContractCheck $checks "editor_helpers" "suite_status_is_in_gate_and_session_status" ($sources.gate + $sources.sessionStatus) @(
     'Verify-PrototypePlayModeSuite.ps1',
     'playmode_suite',
     'playmode_suite_status',
     'playmode_suite_captured_count'
 ) "The suite evidence status should be visible in gate and session readiness output."
+
+Add-ContractCheck $checks "editor_helpers" "screenshot_status_is_in_gate_and_session_status" ($sources.gate + $sources.sessionStatus) @(
+    'Verify-PrototypePlayModeScreenshots.ps1',
+    'playmode_screenshots',
+    'playmode_screenshot_status',
+    'playmode_screenshot_count'
+) "Screenshot evidence quality should be visible in gate and session readiness output."
 
 Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_evidence" $sources.editorMenu @(
     'CollectManualResultScreenshotEvidence',

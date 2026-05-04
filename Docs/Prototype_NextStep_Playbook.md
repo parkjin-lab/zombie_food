@@ -51,11 +51,13 @@
 - HUD state contract command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Layout guard command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode suite evidence command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
+- Play Mode screenshot evidence command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Play Mode result writer command: `powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS`.
 - Play Mode record command: `powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - Low-interaction capture path: in Play Mode use `Tools > Food Truck Prototype > Capture Verification Suite` to batch Draw Choice, Pending Placement, Invalid Placement, and Wave Combat evidence.
 - Focused fallback path: use `Tools > Food Truck Prototype > Prepare and Capture State` when only one state needs a retake.
 - Immediate next validation when Play Mode input is reliable again: run the suite verifier, review the captures visually, and record the manual result.
-- Current code fallback is complete for the captured Wave combat issue, and Draw/Pending/Invalid/Wave helper-state setup plus suite capture/evidence verification are now gate-checked while manual record remains open.
+- Current code fallback is complete for the captured Wave combat issue, and Draw/Pending/Invalid/Wave helper-state setup plus suite capture/evidence and screenshot quality verification are now gate-checked while manual record remains open.
 - PASS recording now reuses saved suite screenshot evidence, so the manual record can survive Editor reloads between suite capture and PASS confirmation.
 - FIX/BLOCKED manual outcomes can be drafted or applied with `Tools\Write-PrototypePlayModeResultFromSuite.ps1` instead of hand-editing the markdown.
+- Existing screenshots currently pass PNG/portrait quality checks but remain `partial` until required states are captured with suite labels.

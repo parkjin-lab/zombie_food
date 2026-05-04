@@ -14,7 +14,8 @@ param(
     [switch]$SkipAssets,
     [switch]$SkipLayout,
     [switch]$SkipHudContract,
-    [switch]$SkipPlayModeSuite
+    [switch]$SkipPlayModeSuite,
+    [switch]$SkipPlayModeScreenshots
 )
 
 $ErrorActionPreference = "Stop"
@@ -31,6 +32,7 @@ $assetScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
 $hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
 $playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
+$playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
 
 if (-not (Test-Path $ensureScript)) {
     Write-Error "Missing script: $ensureScript"
@@ -252,6 +254,51 @@ function Invoke-PlayModeSuiteCheck {
     }
 }
 
+function Invoke-PlayModeScreenshotCheck {
+    param(
+        [string]$PlayModeScreenshotsScriptPath,
+        [string]$RootPath
+    )
+
+    if (-not (Test-Path $PlayModeScreenshotsScriptPath)) {
+        return [pscustomobject]@{
+            exit_code = 90
+            playmode_screenshots = [pscustomobject]@{
+                playmode_screenshot_status = "missing_playmode_screenshot_verifier"
+                screenshot_count = $null
+                invalid_count = $null
+            }
+        }
+    }
+
+    $screenshotJsonRaw = & powershell -ExecutionPolicy Bypass -File $PlayModeScreenshotsScriptPath -ProjectPath $RootPath -JsonOnly
+    $exitCode = $LASTEXITCODE
+    $jsonLine = $screenshotJsonRaw | Select-Object -Last 1
+    $screenshotObj = $null
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$jsonLine)) {
+        try {
+            $screenshotObj = $jsonLine | ConvertFrom-Json
+        }
+        catch {
+            $screenshotObj = $null
+        }
+    }
+
+    if ($null -eq $screenshotObj) {
+        $screenshotObj = [pscustomobject]@{
+            playmode_screenshot_status = "failed_playmode_screenshot_parse"
+            screenshot_count = $null
+            invalid_count = $null
+        }
+    }
+
+    return [pscustomobject]@{
+        exit_code = $exitCode
+        playmode_screenshots = $screenshotObj
+    }
+}
+
 $ensureArgs = @(
     "-ExecutionPolicy", "Bypass",
     "-File", $ensureScript,
@@ -429,6 +476,36 @@ if (-not $SkipPlayModeSuite) {
     }
 }
 
+$playModeScreenshotsObj = $null
+if (-not $SkipPlayModeScreenshots) {
+    $playModeScreenshotsResult = Invoke-PlayModeScreenshotCheck -PlayModeScreenshotsScriptPath $playModeScreenshotsScript -RootPath $ProjectPath
+    $playModeScreenshotsObj = $playModeScreenshotsResult.playmode_screenshots
+
+    if (-not $Compact -and $null -ne $playModeScreenshotsObj) {
+        Write-Host ("playmode_screenshot_status=" + $playModeScreenshotsObj.playmode_screenshot_status)
+        Write-Host ("playmode_screenshot_count=" + $playModeScreenshotsObj.screenshot_count)
+    }
+
+    if ($playModeScreenshotsResult.exit_code -ne 0) {
+        if ($JsonOnly) {
+            $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
+            [ordered]@{
+                gate_status = "failed_playmode_screenshots"
+                status = $statusObj
+                assets = $assetObj
+                layout = $layoutObj
+                hud_contract = $hudContractObj
+                playmode_suite = $playModeSuiteObj
+                playmode_screenshots = $playModeScreenshotsObj
+            } | ConvertTo-Json -Depth 8 -Compress | Write-Host
+            exit 8
+        }
+
+        Write-Host "gate_status=failed_playmode_screenshots"
+        exit 8
+    }
+}
+
 $statusObj = $null
 if ($Json) {
     $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
@@ -455,6 +532,7 @@ if ($JsonOnly) {
         layout = $layoutObj
         hud_contract = $hudContractObj
         playmode_suite = $playModeSuiteObj
+        playmode_screenshots = $playModeScreenshotsObj
     } | ConvertTo-Json -Depth 8 -Compress | Write-Host
     exit 0
 }
