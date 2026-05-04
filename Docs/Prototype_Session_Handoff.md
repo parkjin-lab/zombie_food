@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-04 20:52 KST
+Last updated: 2026-05-05 00:34 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -40,6 +40,10 @@ Last updated: 2026-05-04 20:52 KST
 - Added `Tools/Verify-PrototypePlayModeScreenshots.ps1` so captured Play Mode PNG quality, portrait resolution, file size, and state-label coverage are checked before visual review.
 - Added `Tools/Write-PrototypePlayModeReviewPack.ps1` so suite status, screenshot status, current record status, a screenshot contact sheet, and result command templates can be assembled into one review sheet.
 - Added `Docs/Prototype_Update_Roadmap.md` as the forward update direction for verification stability, core loop fun, content/wave expansion, art/feedback policy, and playtest operation.
+- Added wave outcome/payoff tracking to the run model so each wave transition records KO/damage, HP delta, Heat delta, supplies delta, peak Heat, combo contribution, and leaks.
+- Updated the HUD wave-change cue to surface the latest payoff summary before the next decision instead of only saying the next wave started.
+- Extended the HUD state contract and EditMode regression coverage so the wave payoff summary remains guarded during PC-limited sessions.
+- Updated `Docs/Prototype_Update_Roadmap.md` for the 2026-05-05 PC-limited status and near-term wave payoff direction.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -59,12 +63,17 @@ Last updated: 2026-05-04 20:52 KST
 - Latest local recheck at 2026-05-04 17:35 KST: `Tools/Verify-PrototypeHudStateContract.ps1` reports `hud_contract_status=ok`, `failed_checks=0`; `Tools/Write-PrototypePlayModeResultFromSuite.ps1` parses and can draft non-PASS outcomes; `Tools/Verify-PrototypePlayModeSuite.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded` until the suite is captured; `Tools/Verify-PrototypeLayout.ps1` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded`, `playmode_suite_captured_count=0/4`; `Tools/Verify-PrototypePlayModeRecord.ps1 -JsonOnly` remains `playmode_record_status=not_recorded` with the three unrecorded manual states.
 - Latest local recheck at 2026-05-04 20:12 KST: `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` reports `playmode_screenshot_status=partial`, `screenshot_count=2`, `machine_quality_pass_count=2`, and missing labeled coverage for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat; `Tools/Verify-PrototypeHudStateContract.ps1` reports `check_count=26`, `failed_checks=0`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` now includes `playmode_screenshot_status=partial`.
 - Latest local recheck at 2026-05-04 20:52 KST: `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` reports `readiness=needs_manual_playmode`, `gate_status=ok`, `asset_status=ok`, `layout_status=ok`, `hud_contract_status=ok`, `static_status=ok`, `compile_status=inconclusive`, and `tests_status=inconclusive`; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=27`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok`; `Tools/Verify-PrototypePlayModeSuite.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded`, `captured_count=0/4`; `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` reports `playmode_screenshot_status=partial`, `screenshot_count=2`, `valid_png_count=2`, `machine_quality_pass_count=2`, `unlabeled_count=2`, `covered_state_count=0/4`; `Tools/Verify-PrototypePlayModeRecord.ps1 -JsonOnly` reports `playmode_record_status=not_recorded` with Draw Choice, Pending Placement, and Invalid Placement still `NOT_RECORDED` and Wave Combat `PASS`; `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `review_pack_status=ok`, `review_readiness=partial_evidence` without writing the review pack.
+- Latest local recheck at 2026-05-05 00:34 KST after wave payoff work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=29`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
 - `Tools/Gate-Verification.ps1`: includes asset, layout, HUD state contract, Play Mode suite evidence, and Play Mode screenshot evidence verification in JSON gate output.
 - `Tools/Verify-PrototypeLayout.ps1`: checks `CalculateGameplayFocusLayout` numeric bounds across reference portrait, narrow phone, small phone, and landscape tablet viewports; also checks core C# layout constants for source drift.
 - `Tools/Verify-PrototypeHudStateContract.ps1`: source-level contract guard for Draw Choice, Pending Placement, Invalid Placement, UX telemetry, Editor helper suite capture, suite evidence verification, and regression coverage.
+- `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: now tracks per-wave payoff stats and exposes `LastWaveOutcomeSummary` / `LastWaveOutcomeCue`.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: wave-change cue now prefers the latest payoff cue when available.
+- `Assets/Tests/EditMode/FoodTruckRunModelTests.cs`: covers wave payoff summary generation on wave advance.
+- `Tools/Verify-PrototypeHudStateContract.ps1`: now includes a `wave_outcome` group guarding payoff summary model/HUD/test coverage.
 - `Tools/Verify-PrototypePlayModeRecord.ps1`: reads the Play Mode verification document and reports `not_recorded`, `passed`, `needs_fix`, `blocked`, or `invalid_record`.
 - `Tools/Verify-PrototypePlayModeSuite.ps1`: reads `Docs/Prototype_PlayMode_Verification_Suite.txt` and reports whether all four prepared-state screenshots exist.
 - `Tools/Verify-PrototypePlayModeScreenshots.ps1`: reads screenshot PNG headers and reports file quality, portrait resolution, unlabeled captures, and missing state coverage.
@@ -111,6 +120,7 @@ Last updated: 2026-05-04 20:52 KST
 - Manual Play Mode verification is explicitly tracked and currently reports `playmode_record_status=not_recorded`; the latest manual result has Wave Combat `PASS`, but Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
 - Play Mode suite evidence currently reports `playmode_suite_status=not_recorded`, `captured_count=0/4`, and missing coverage for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat until `Capture Verification Suite` is run in Unity Play Mode.
 - Existing Play Mode screenshots currently report `playmode_screenshot_status=partial`: the two captured PNGs are valid portrait evidence, but both are unlabeled, `covered_state_count=0/4`, and none of the required suite states have labeled screenshot coverage.
+- Wave outcome/payoff summary is code-guarded, but still needs Play Mode visual review to confirm cue readability in portrait combat.
 - Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=partial_evidence`; full review pack generation should wait until suite-state captures or intentional review output writing.
 - `Tools/Write-PrototypePlayModeResultFromSuite.ps1` is the intended PASS/FIX/BLOCKED result writer, but status-only handoff passes should not run it because it writes a result draft even with `-JsonOnly`.
 - Unity MCP is currently unavailable from this session (`MCP SSE probe returned 404`).
@@ -131,6 +141,7 @@ Last updated: 2026-05-04 20:52 KST
 12. Verify that ingredient icons appear on draw cards, pending block preview, and placed inventory cells.
 13. Verify that `FoodTruck.png` appears on lane truck markers and `KitchenModule.png` appears only on active block cells.
 14. After manual visual confirmation, run `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` and keep the JSON output with the session notes.
+15. During the next Wave Combat capture, verify that the wave payoff cue is readable and does not obscure HP/Heat/lane pressure.
 
 ## Manual Play Mode Acceptance Checklist
 - Full checklist and result template: `Docs/Prototype_PlayMode_Verification.md`.

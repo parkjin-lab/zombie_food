@@ -1568,7 +1568,9 @@ namespace ZombieFoodcenter.Prototype
 
             if (model.Wave != previousWaveDisplay && previousWaveDisplay > 0)
             {
-                cueMessage = "Wave " + model.Wave + " started. Keep your lanes stable.";
+                cueMessage = !string.IsNullOrEmpty(model.LastWaveOutcomeCue)
+                    ? model.LastWaveOutcomeCue
+                    : "Wave " + model.Wave + " started. Keep your lanes stable.";
                 cueColor = new Color(0.30f, 0.70f, 0.95f, 1f);
             }
             else if (model.EventPending && !previousEventPendingState)

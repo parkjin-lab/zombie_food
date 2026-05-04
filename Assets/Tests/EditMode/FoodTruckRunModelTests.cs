@@ -220,6 +220,35 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void Tick_WhenWaveAdvances_RecordsOutcomeSummary()
+        {
+            var model = new FoodTruckRunModel(seed: 162);
+            SetPrivateField(model, "waveTimer", 19f);
+            SetAutoProperty(model, "Threat", 0f);
+            SetAutoProperty(model, "TruckHp", 95f);
+            SetAutoProperty(model, "Heat", 12f);
+            SetPrivateField(model, "waveStartTruckHp", 100f);
+            SetPrivateField(model, "waveStartHeat", 5f);
+            SetPrivateField(model, "waveStartSupplies", 10);
+            SetPrivateField(model, "waveDamageDealt", 42f);
+            SetPrivateField(model, "waveEnemiesDefeated", 2);
+            SetPrivateField(model, "waveTruckHits", 1);
+            SetPrivateField(model, "waveBestComboStreak", 3);
+            SetPrivateField(model, "wavePeakHeat", 18f);
+
+            model.Tick(1f);
+
+            Assert.AreEqual(2, model.Wave);
+            Assert.AreEqual("Wave 1: 2 KO, HP -5, Heat +7.", model.LastWaveOutcomeCue);
+            StringAssert.Contains("Wave 1:", model.LastWaveOutcomeSummary);
+            StringAssert.Contains("Sup +6", model.LastWaveOutcomeSummary);
+            StringAssert.Contains("Dmg 42", model.LastWaveOutcomeSummary);
+            StringAssert.Contains("PeakHeat +13", model.LastWaveOutcomeSummary);
+            StringAssert.Contains("Combo x3", model.LastWaveOutcomeSummary);
+            StringAssert.Contains("Leak x1", model.LastWaveOutcomeSummary);
+        }
+
+        [Test]
         public void VentHeat_WhenPrerequisitesMet_SucceedsAndConsumesResources()
         {
             var model = new FoodTruckRunModel(seed: 17);

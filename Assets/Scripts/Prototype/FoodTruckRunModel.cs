@@ -325,6 +325,17 @@ namespace ZombieFoodcenter.Prototype
         private int placementBlockedOccupiedCount;
         private int placementBlockedInvalidAnchorCount;
         private int placementBlockedNoPendingCount;
+        private int waveStartSupplies;
+        private float waveStartTruckHp;
+        private float waveStartHeat;
+        private float waveDamageDealt;
+        private int waveEnemiesDefeated;
+        private int waveTruckHits;
+        private int waveComboActions;
+        private int waveBestComboStreak;
+        private float wavePeakHeat;
+        private string lastWaveOutcomeSummary = string.Empty;
+        private string lastWaveOutcomeCue = string.Empty;
         private string drawAssistTag = "BAL";
         public event Action StateChanged;
         public event Action<string> CombatLogAppended;
@@ -387,6 +398,8 @@ namespace ZombieFoodcenter.Prototype
         public int PlacementBlockedNoPendingCount => placementBlockedNoPendingCount;
         public int DrawChoicePickTotal => drawChoicePickCounts[0] + drawChoicePickCounts[1] + drawChoicePickCounts[2];
         public float PlacementSuccessRate => placementAttemptCount > 0 ? (float)placementSuccessCount / placementAttemptCount : 0f;
+        public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;
+        public string LastWaveOutcomeCue => lastWaveOutcomeCue;
         public string DrawAssistTag => drawAssistTag;
         public IReadOnlyList<RecipeState> ActiveRecipes => activeRecipes;
         public IReadOnlyList<LaneEnemyState> LaneEnemies => laneEnemies;
@@ -433,6 +446,8 @@ namespace ZombieFoodcenter.Prototype
             activeRecipeBingoKeys.Clear();
             laneEnemies.Clear();
             placedBlocks.Clear();
+            lastWaveOutcomeSummary = string.Empty;
+            lastWaveOutcomeCue = string.Empty;
             for (int i = 0; i < blockByCell.Length; i++)
             {
                 blockByCell[i] = -1;
@@ -440,6 +455,7 @@ namespace ZombieFoodcenter.Prototype
 
             RecalculateInventoryFill();
             UpdateLanePressures();
+            CaptureWaveOutcomeBaseline();
             AppendLog("Run started. Draw, rotate, and drag blocks into the 3x3 inventory.");
             AppendLog("Progression stage 1 active: NEAREST targeting + basic shapes.");
             RaiseChanged();
@@ -1069,7 +1085,10 @@ namespace ZombieFoodcenter.Prototype
                     continue;
                 }
 
-                laneEnemies[targetIndex].Hp -= burstDamage;
+                LaneEnemyState target = laneEnemies[targetIndex];
+                float effectiveDealt = Mathf.Min(burstDamage, Mathf.Max(0f, target.Hp));
+                target.Hp -= burstDamage;
+                waveDamageDealt += effectiveDealt;
                 laneHits += 1;
             }
 
@@ -1083,6 +1102,7 @@ namespace ZombieFoodcenter.Prototype
                 }
 
                 kills += 1;
+                waveEnemiesDefeated += 1;
                 int baseGain = enemy.IsSpecial ? 4 : 2;
                 Supplies += GetHeatAdjustedSupplyGain(baseGain);
                 laneEnemies.RemoveAt(i);
@@ -1160,6 +1180,8 @@ namespace ZombieFoodcenter.Prototype
             int previous = comboStreak;
             comboStreak = Mathf.Clamp(comboStreak + 1, 1, ComboMaxStreak);
             comboTimerRemaining = ComboWindowSeconds;
+            waveComboActions += 1;
+            waveBestComboStreak = Mathf.Max(waveBestComboStreak, comboStreak);
 
             if (comboStreak >= 2 && comboStreak != previous)
             {
@@ -1227,6 +1249,7 @@ namespace ZombieFoodcenter.Prototype
                 return;
             }
 
+            bool advancedWave = false;
             if (!EventPending)
             {
                 SimulateCombat();
@@ -1234,12 +1257,18 @@ namespace ZombieFoodcenter.Prototype
                 if (waveTimer >= WaveDurationSeconds)
                 {
                     AdvanceWave();
+                    advancedWave = true;
                 }
             }
 
             Momentum = Mathf.Max(0f, Momentum - 1.05f);
             Heat = Mathf.Clamp(Heat - 0.7f, 0f, 100f);
             UpdateLanePressures();
+            if (advancedWave)
+            {
+                CaptureWaveOutcomeBaseline();
+            }
+
             RaiseChanged();
         }
 
@@ -1318,11 +1347,14 @@ namespace ZombieFoodcenter.Prototype
 
                 LaneEnemyState target = laneEnemies[targetIndex];
                 float dealt = block.Damage * damageMult;
+                float effectiveDealt = Mathf.Min(dealt, Mathf.Max(0f, target.Hp));
                 target.Hp -= dealt;
+                waveDamageDealt += effectiveDealt;
                 block.CooldownRemaining += block.CooldownSeconds;
 
                 if (target.Hp <= 0f)
                 {
+                    waveEnemiesDefeated += 1;
                     int gain = target.IsSpecial ? 4 : 2;
                     int comboSupplyBonus = Mathf.Clamp(comboStreak / 3, 0, 3);
                     Supplies += GetHeatAdjustedSupplyGain(gain + comboSupplyBonus);
@@ -1360,9 +1392,13 @@ namespace ZombieFoodcenter.Prototype
                 {
                     int idx = random.Next(0, laneEnemies.Count);
                     LaneEnemyState enemy = laneEnemies[idx];
-                    enemy.Hp -= recipe.Potency * (1.6f + Wave * 0.08f) * ComboMultiplier * GetHeatAttackMultiplier();
+                    float dealt = recipe.Potency * (1.6f + Wave * 0.08f) * ComboMultiplier * GetHeatAttackMultiplier();
+                    float effectiveDealt = Mathf.Min(dealt, Mathf.Max(0f, enemy.Hp));
+                    enemy.Hp -= dealt;
+                    waveDamageDealt += effectiveDealt;
                     if (enemy.Hp <= 0f)
                     {
+                        waveEnemiesDefeated += 1;
                         int baseGain = enemy.IsSpecial ? 3 : 1;
                         Supplies += GetHeatAdjustedSupplyGain(baseGain);
                         laneEnemies.RemoveAt(idx);
@@ -1384,6 +1420,7 @@ namespace ZombieFoodcenter.Prototype
 
                 float hitDamage = ((enemy.IsSpecial ? 9f : 5f) + Wave * 0.35f) * GetHeatRiskMultiplier();
                 TruckHp -= hitDamage;
+                waveTruckHits += 1;
                 AddHeatProgressive(enemy.IsSpecial ? 3f : 1.6f);
                 Threat += (enemy.IsSpecial ? 0.8f : 0.3f) * GetHeatRiskMultiplier();
                 laneEnemies.RemoveAt(i);
@@ -1412,10 +1449,12 @@ namespace ZombieFoodcenter.Prototype
 
         private void AdvanceWave()
         {
+            CaptureWaveOutcomeSummary();
             waveTimer = 0f;
             Wave += 1;
             Threat += 2.2f + Wave * 0.33f;
             Supplies += 4 + Mathf.FloorToInt(Wave * 0.32f);
+            AppendLog(lastWaveOutcomeSummary);
             AppendLog("Wave " + Wave + " started.");
 
             if (Wave == 4)
@@ -1451,6 +1490,54 @@ namespace ZombieFoodcenter.Prototype
                 pendingEvent = BuildEvent();
                 AppendLog("Run event triggered. Choose one option.");
             }
+        }
+
+        private void CaptureWaveOutcomeBaseline()
+        {
+            waveStartSupplies = Supplies;
+            waveStartTruckHp = TruckHp;
+            waveStartHeat = Heat;
+            waveDamageDealt = 0f;
+            waveEnemiesDefeated = 0;
+            waveTruckHits = 0;
+            waveComboActions = 0;
+            waveBestComboStreak = comboStreak;
+            wavePeakHeat = Heat;
+        }
+
+        private void CaptureWaveOutcomeSummary()
+        {
+            int completedWave = Wave;
+            int suppliesDelta = Supplies - waveStartSupplies;
+            float hpDelta = TruckHp - waveStartTruckHp;
+            float heatDelta = Heat - waveStartHeat;
+            float peakHeatDelta = wavePeakHeat - waveStartHeat;
+
+            string primaryImpact = waveEnemiesDefeated > 0
+                ? waveEnemiesDefeated + " KO"
+                : (waveDamageDealt >= 0.5f ? Mathf.RoundToInt(waveDamageDealt) + " dmg" : "held");
+            string hpPart = "HP " + FormatSignedRounded(hpDelta);
+            string heatPart = "Heat " + FormatSignedRounded(heatDelta);
+            string comboPart = waveBestComboStreak >= 2
+                ? ", Combo x" + waveBestComboStreak
+                : (waveComboActions > 0 ? ", Actions " + waveComboActions : string.Empty);
+            string leakPart = waveTruckHits > 0 ? ", Leak x" + waveTruckHits : string.Empty;
+
+            lastWaveOutcomeCue = "Wave " + completedWave + ": " + primaryImpact + ", " + hpPart + ", " + heatPart + ".";
+            lastWaveOutcomeSummary =
+                lastWaveOutcomeCue.TrimEnd('.') +
+                ", Sup " + FormatSignedRounded(suppliesDelta) +
+                ", Dmg " + Mathf.RoundToInt(waveDamageDealt) +
+                (peakHeatDelta > heatDelta + 0.5f ? ", PeakHeat " + FormatSignedRounded(peakHeatDelta) : string.Empty) +
+                comboPart +
+                leakPart +
+                ".";
+        }
+
+        private static string FormatSignedRounded(float value)
+        {
+            int rounded = Mathf.RoundToInt(value);
+            return rounded >= 0 ? "+" + rounded : rounded.ToString();
         }
 
         private void TickRecipes()
@@ -1625,6 +1712,7 @@ namespace ZombieFoodcenter.Prototype
             }
 
             Heat += amount * GetHeatGainProgressionScale();
+            wavePeakHeat = Mathf.Max(wavePeakHeat, Heat);
         }
 
         private float GetHeatLootMultiplier()

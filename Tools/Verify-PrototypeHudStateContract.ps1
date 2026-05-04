@@ -206,6 +206,22 @@ Add-ContractCheck $checks "telemetry" "hud_reports_core_ux_metrics" $sources.tel
     '"Pick Risk: LOW " + riskLow + " | MID " + riskMid + " | HIGH " + riskHigh'
 ) "The HUD must preserve the next sprint's UX instrumentation path."
 
+Add-ContractCheck $checks "wave_outcome" "model_tracks_wave_payoff_summary" $sources.model @(
+    'public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;',
+    'public string LastWaveOutcomeCue => lastWaveOutcomeCue;',
+    'CaptureWaveOutcomeBaseline();',
+    'CaptureWaveOutcomeSummary();',
+    'waveDamageDealt',
+    'waveEnemiesDefeated',
+    'waveTruckHits',
+    'FormatSignedRounded'
+) "Wave transitions must preserve a concise payoff summary that links combat results to the next decision."
+
+Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources.hud @(
+    'model.LastWaveOutcomeCue',
+    '"Wave " + model.Wave + " started. Keep your lanes stable."'
+) "Wave change feedback should prioritize the last wave payoff when one is available."
+
 Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_states" $sources.playModeVerification @(
     'public enum PlayModeVerificationState',
     'DrawChoice',
@@ -310,6 +326,7 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'TryPlacePendingAtCell_WithoutPendingBlock_RecordsNoPendingFailure',
     'TryPlacePendingAtCell_InvalidAnchor_RecordsInvalidAnchorFailure',
     'TryPlacePendingAtCell_OverlapWithTwoBlocks_DoesNotAutoMerge',
+    'Tick_WhenWaveAdvances_RecordsOutcomeSummary',
     'HudActionVisibility_CombatOnlyIdle_ShowsBuildEntryRow',
     'HudActionVisibility_CombatOnlyUrgent_ShowsOnlyReactionRow',
     'HudActionVisibility_PlacementContext_KeepsInventoryGridVisible'
@@ -332,7 +349,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, and Invalid Placement HUD states.",
