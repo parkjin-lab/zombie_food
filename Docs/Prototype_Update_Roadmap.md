@@ -18,6 +18,7 @@ evidence.
 - Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
 - Review pack: `Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `partial_evidence`.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
+- Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 
 ## Start Here
 1. Print the current session status.
@@ -84,7 +85,7 @@ The summary should highlight:
 - Next-decision hint: a short reason the next draw should value safety, greedy payoff, utility, or Heat control.
 
 ### Next Actions
-- Show `EV`, `Risk`, and `Target/Role` information on the three draw cards.
+- Verify that the three draw cards keep `Fit`, `Heat`, `Role`, `Value/Risk`, and `Target` readable in compact portrait layout.
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.
 - Strengthen Pending Placement preview: rotation, footprint, blocked cells, and targeting range.
 - Surface Invalid Placement reasons near the board: `occupied`, `out_of_bounds`, `invalid_anchor`, `no_pending`.
@@ -94,6 +95,7 @@ The summary should highlight:
 
 ### Acceptance
 - The player can explain the difference between the three draw cards within three seconds.
+- The player can compare at least one board-fit signal and one Heat/risk signal before choosing a card.
 - Repeated placement failures from the same reason decrease across playtest sessions.
 - The Wave Combat screen keeps HP, Heat, Wave, lane pressure, and truck position readable at the same time.
 - The wave outcome/payoff summary makes the last decision's effect understandable without reading logs.

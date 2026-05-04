@@ -96,6 +96,10 @@ Add-ContractCheck $checks "draw_choice" "card_text_has_tactical_labels" $sources
     'string targetLabel = GetTargetTypeLabel(choice.TargetType);',
     'string shapeLabel = GetShapeLabel(choice.ShapeKey);',
     '"  DPS " + dps.ToString("0.0")',
+    'BuildDrawChoiceTacticalChipLine(choice, resolvedAssistTag, valueBucket, riskTag)',
+    'EstimateDrawChoiceFitSlots(choice)',
+    '"Fit " + fitSlots + "  Heat +" + heatCost + "  Role " + roleLabel',
+    'GetDrawChoiceRoleLabel(choice, assistTag, valueBucket, riskTag, fitSlots)',
     '"Value " + valueBucket + "  Risk " + riskTag'
 ) "Draw cards must remain explainable without opening extra panels."
 

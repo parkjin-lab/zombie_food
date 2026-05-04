@@ -347,11 +347,12 @@ namespace ZombieFoodcenter.Prototype
             string targetLabel = GetTargetTypeLabel(choice.TargetType);
             string shapeLabel = GetShapeLabel(choice.ShapeKey);
             string resolvedAssistTag = string.IsNullOrEmpty(assistTag) ? "BAL" : assistTag;
+            string tacticalChips = BuildDrawChoiceTacticalChipLine(choice, resolvedAssistTag, valueBucket, riskTag);
             if (IsGameplayFocusHudActive())
             {
                 return choice.IngredientName + " G" + choice.Grade + " " + resolvedAssistTag + "\n"
                     + shapeLabel + " / " + targetLabel + "\n"
-                    + "ATK " + choice.Damage.ToString("0.0") + "  CD " + choice.CooldownSeconds.ToString("0.0") + "s";
+                    + tacticalChips;
             }
 
             return choice.IngredientName + "  G" + choice.Grade + "  " + resolvedAssistTag + "\n"
@@ -359,7 +360,170 @@ namespace ZombieFoodcenter.Prototype
                 + "ATK " + choice.Damage.ToString("0.0")
                 + "  CD " + choice.CooldownSeconds.ToString("0.0") + "s"
                 + "  DPS " + dps.ToString("0.0") + "\n"
+                + tacticalChips + "\n"
                 + "Value " + valueBucket + "  Risk " + riskTag;
+        }
+
+        private string BuildDrawChoiceTacticalChipLine(
+            PendingBlockState choice,
+            string assistTag,
+            string valueBucket,
+            string riskTag)
+        {
+            int fitSlots = EstimateDrawChoiceFitSlots(choice);
+            int heatCost = Mathf.CeilToInt(3f + choice.CellCount * 1.15f);
+            string roleLabel = GetDrawChoiceRoleLabel(choice, assistTag, valueBucket, riskTag, fitSlots);
+            return "Fit " + fitSlots + "  Heat +" + heatCost + "  Role " + roleLabel;
+        }
+
+        private int EstimateDrawChoiceFitSlots(PendingBlockState choice)
+        {
+            if (model == null || choice == null)
+            {
+                return 0;
+            }
+
+            HashSet<string> uniqueFootprints = new HashSet<string>();
+            for (int rotation = 0; rotation < 4; rotation++)
+            {
+                Vector2Int[] offsets = GetDrawChoiceRotatedOffsets(choice, rotation);
+                for (int anchor = 0; anchor < FoodTruckRunModel.InventoryCellCount; anchor++)
+                {
+                    if (!TryCollectDrawChoiceCells(offsets, anchor, out int[] cells))
+                    {
+                        continue;
+                    }
+
+                    Array.Sort(cells);
+                    uniqueFootprints.Add(string.Join(",", cells));
+                }
+            }
+
+            return uniqueFootprints.Count;
+        }
+
+        private bool TryCollectDrawChoiceCells(Vector2Int[] offsets, int anchorCellIndex, out int[] cells)
+        {
+            cells = null;
+            if (offsets == null || offsets.Length == 0)
+            {
+                return false;
+            }
+
+            int anchorX = anchorCellIndex % FoodTruckRunModel.InventoryWidth;
+            int anchorY = anchorCellIndex / FoodTruckRunModel.InventoryWidth;
+            int[] resolved = new int[offsets.Length];
+            for (int i = 0; i < offsets.Length; i++)
+            {
+                Vector2Int offset = offsets[i];
+                int x = anchorX + offset.x;
+                int y = anchorY + offset.y;
+                if (x < 0 || x >= FoodTruckRunModel.InventoryWidth || y < 0 || y >= FoodTruckRunModel.InventoryHeight)
+                {
+                    return false;
+                }
+
+                int index = y * FoodTruckRunModel.InventoryWidth + x;
+                if (model.GetCellBlockId(index) >= 0)
+                {
+                    return false;
+                }
+
+                resolved[i] = index;
+            }
+
+            cells = resolved;
+            return true;
+        }
+
+        private static Vector2Int[] GetDrawChoiceRotatedOffsets(PendingBlockState choice, int quarterTurns)
+        {
+            if (choice == null || choice.CellOffsets == null || choice.CellOffsets.Length == 0)
+            {
+                return Array.Empty<Vector2Int>();
+            }
+
+            Vector2Int[] source = choice.CellOffsets;
+            Vector2Int[] rotated = new Vector2Int[source.Length];
+            int minX = int.MaxValue;
+            int minY = int.MaxValue;
+            int turns = ((quarterTurns % 4) + 4) % 4;
+
+            for (int i = 0; i < source.Length; i++)
+            {
+                int x = source[i].x;
+                int y = source[i].y;
+                for (int t = 0; t < turns; t++)
+                {
+                    int nextX = y;
+                    int nextY = -x;
+                    x = nextX;
+                    y = nextY;
+                }
+
+                minX = Mathf.Min(minX, x);
+                minY = Mathf.Min(minY, y);
+                rotated[i] = new Vector2Int(x, y);
+            }
+
+            for (int i = 0; i < rotated.Length; i++)
+            {
+                rotated[i] = new Vector2Int(rotated[i].x - minX, rotated[i].y - minY);
+            }
+
+            return rotated;
+        }
+
+        private static string GetDrawChoiceRoleLabel(
+            PendingBlockState choice,
+            string assistTag,
+            string valueBucket,
+            string riskTag,
+            int fitSlots)
+        {
+            if (choice == null)
+            {
+                return "Unknown";
+            }
+
+            if (fitSlots <= 0)
+            {
+                return "No fit";
+            }
+
+            if (string.Equals(assistTag, "SAFE", StringComparison.Ordinal) ||
+                (choice.CellCount <= 1 && string.Equals(riskTag, "LOW", StringComparison.Ordinal)))
+            {
+                return "Safe fill";
+            }
+
+            switch (choice.TargetType)
+            {
+                case BlockTargetType.HighestHp:
+                    return "Boss hit";
+                case BlockTargetType.Farthest:
+                    return "Backline";
+                case BlockTargetType.RandomLane:
+                    return "Swing";
+            }
+
+            if (choice.CellCount >= 4)
+            {
+                return "Board lock";
+            }
+
+            if (string.Equals(valueBucket, "HIGH", StringComparison.Ordinal) &&
+                !string.Equals(riskTag, "HIGH", StringComparison.Ordinal))
+            {
+                return "DPS";
+            }
+
+            if (string.Equals(riskTag, "HIGH", StringComparison.Ordinal))
+            {
+                return "Greedy";
+            }
+
+            return choice.CellCount <= 2 ? "Lane patch" : "Lane cover";
         }
 
         private float EstimateDrawChoiceValue(PendingBlockState choice)
