@@ -95,6 +95,12 @@ $playModeScreenshotsResult = Invoke-JsonScript -ScriptPath $playModeScreenshotsS
     "-JsonOnly"
 )
 
+$playModeReviewPackResult = Invoke-JsonScript -ScriptPath $playModeReviewPackScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-PreviewOnly",
+    "-JsonOnly"
+)
+
 $gateData = $gateResult.data
 $assetData = $assetResult.data
 $verification = if ($null -ne $gateData) { $gateData.status } else { $null }
@@ -107,6 +113,7 @@ $playModeRecordData = $playModeRecordResult.data
 $hudContractData = $hudContractResult.data
 $playModeSuiteData = $playModeSuiteResult.data
 $playModeScreenshotsData = $playModeScreenshotsResult.data
+$playModeReviewPackData = $playModeReviewPackResult.data
 
 $assetStatus = if ($null -ne $assetData) { $assetData.asset_status } elseif ($null -ne $gateAssets) { $gateAssets.asset_status } else { "unknown" }
 $layoutStatus = if ($null -ne $gateLayout) { $gateLayout.layout_status } else { "unknown" }
@@ -122,6 +129,11 @@ $playModeScreenshotStatus = if ($null -ne $playModeScreenshotsData) { $playModeS
 $playModeScreenshotCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.screenshot_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.screenshot_count } else { $null }
 $playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.invalid_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.invalid_count } else { $null }
 $playModeScreenshotMissingStates = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.missing_states } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.missing_states } else { @() }
+$reviewPackStatus = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_pack_status } elseif (-not $playModeReviewPackResult.ok) { "failed" } else { "unknown" }
+$reviewReadiness = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_readiness } else { "unknown" }
+$reviewPackVisualReviewRequired = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.visual_review_required } else { $null }
+$reviewPackNextAction = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.next_action } else { "Run Tools\Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly to inspect review readiness." }
+$reviewPackError = if ($playModeReviewPackResult.ok) { $null } else { $playModeReviewPackResult.error }
 $staticStatus = if ($null -ne $verification) { $verification.static_status } else { "unknown" }
 $compileStatus = if ($null -ne $verification) { $verification.compile_status } else { "unknown" }
 $testsStatus = if ($null -ne $verification) { $verification.tests_status } else { "unknown" }
@@ -140,6 +152,9 @@ elseif ($playModeSuiteStatus -eq "invalid_suite") {
 elseif ($playModeScreenshotStatus -eq "invalid_screenshots") {
     $readiness = "needs_fix_before_playmode"
 }
+elseif ($reviewPackStatus -ne "ok" -and $reviewPackStatus -ne "unknown") {
+    $readiness = "needs_fix_before_playmode"
+}
 elseif ($playModeRecordStatus -eq "needs_fix" -or $playModeRecordStatus -eq "blocked") {
     $readiness = "needs_playmode_fix"
 }
@@ -152,6 +167,7 @@ if ($hudContractStatus -ne "ok") {
 $unresolvedIssues.Add("Play Mode verification suite status: " + $playModeSuiteStatus + ".") | Out-Null
 $unresolvedIssues.Add("Wave Combat action showcase ready: " + [string]$waveCombatActionShowcaseReady + " (" + $waveCombatActionShowcaseReason + ").") | Out-Null
 $unresolvedIssues.Add("Play Mode screenshot evidence status: " + $playModeScreenshotStatus + ".") | Out-Null
+$unresolvedIssues.Add("Play Mode review pack readiness: " + $reviewReadiness + ".") | Out-Null
 $unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
 $unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
 
@@ -173,6 +189,11 @@ $summary = [ordered]@{
     playmode_screenshot_count = $playModeScreenshotCount
     playmode_screenshot_invalid_count = $playModeScreenshotInvalidCount
     playmode_screenshot_missing_states = $playModeScreenshotMissingStates
+    review_pack_status = $reviewPackStatus
+    review_readiness = $reviewReadiness
+    review_pack_visual_review_required = $reviewPackVisualReviewRequired
+    review_pack_error = $reviewPackError
+    review_pack_next_action = $reviewPackNextAction
     playmode_record_status = $playModeRecordStatus
     static_status = $staticStatus
     compile_status = $compileStatus
@@ -199,6 +220,7 @@ $summary = [ordered]@{
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
         "Confirm wave_combat_action_showcase_ready=true before recording Wave Combat as PASS.",
         "Run Tools\Verify-PrototypePlayModeScreenshots.ps1 to check screenshot PNG quality and state coverage.",
+        "Check review_readiness before generating or recording manual PASS/FIX/BLOCKED evidence.",
         "Run Tools\Write-PrototypePlayModeReviewPack.ps1 to generate a single visual review sheet.",
         "Use Tools\Write-PrototypePlayModeResultFromSuite.ps1 to draft or apply PASS/FIX/BLOCKED results without hand-editing markdown.",
         "In Play Mode, use Tools > Food Truck Prototype > Prepare and Capture State for low-interaction Draw/Pending/Invalid evidence.",
@@ -232,6 +254,9 @@ Write-Host ("wave_combat_action_showcase_ready=" + [string]$summary.wave_combat_
 Write-Host ("wave_combat_action_showcase_reason=" + $summary.wave_combat_action_showcase_reason)
 Write-Host ("playmode_screenshot_status=" + $summary.playmode_screenshot_status)
 Write-Host ("playmode_screenshot_count=" + $summary.playmode_screenshot_count)
+Write-Host ("review_pack_status=" + $summary.review_pack_status)
+Write-Host ("review_readiness=" + $summary.review_readiness)
+Write-Host ("review_pack_visual_review_required=" + [string]$summary.review_pack_visual_review_required)
 Write-Host ("playmode_record_status=" + $summary.playmode_record_status)
 Write-Host ("static_status=" + $summary.static_status)
 Write-Host ("compile_status=" + $summary.compile_status)

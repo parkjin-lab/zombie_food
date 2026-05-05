@@ -393,6 +393,15 @@ Add-ContractCheck $checks "editor_helpers" "screenshot_status_is_in_gate_and_ses
     'playmode_screenshot_count'
 ) "Screenshot evidence quality should be visible in gate and session readiness output."
 
+Add-ContractCheck $checks "editor_helpers" "review_pack_status_is_in_session_status" $sources.sessionStatus @(
+    'Write-PrototypePlayModeReviewPack.ps1',
+    '"-PreviewOnly"',
+    'review_pack_status',
+    'review_readiness',
+    'review_pack_visual_review_required',
+    'Check review_readiness before generating or recording manual PASS/FIX/BLOCKED evidence.'
+) "The first session status command should expose review pack readiness before writing review output."
+
 Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_visual_decision" $sources.playModeReviewPackWriter @(
     'Prototype_PlayMode_ReviewPack.md',
     'Verify-PrototypePlayModeSuite.ps1',

@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-05 21:10 KST
+Last updated: 2026-05-05 21:30 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -66,6 +66,7 @@ Last updated: 2026-05-05 21:10 KST
 - Added machine-readable Wave Combat action showcase readiness to the suite verifier so captures can report whether the action labels are present or still missing.
 - Extended the Play Mode review pack with a Wave Combat action showcase summary and a visual acceptance checklist for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat.
 - Exposed Wave Combat action showcase readiness in the session status and gate text output so the first session command shows whether Wave Combat can be recorded as PASS evidence.
+- Exposed review pack preview status in the session status output so `review_pack_status`, `review_readiness`, and `review_pack_visual_review_required` are visible before writing the full review pack.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -99,6 +100,7 @@ Last updated: 2026-05-05 21:10 KST
 - Latest local recheck at 2026-05-05 20:44 KST after Wave Combat capture showcase setup: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=36`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 21:02 KST after review evidence status work: `Tools/Verify-PrototypePlayModeSuite.ps1 -JsonOnly` reports `playmode_suite_status=not_recorded`, `captured_count=0/4`, `wave_combat_action_showcase_ready=false`, and `wave_combat_action_showcase_reason=suite_not_recorded`; `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `review_pack_status=ok`, `review_readiness=partial_evidence`, and the same Wave Combat action showcase status; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=36`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 21:10 KST after session status exposure work: `Tools/Show-PrototypeSessionStatus.ps1` now prints `wave_combat_action_showcase_ready=False` and `wave_combat_action_showcase_reason=suite_not_recorded`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` includes the same fields in top-level JSON and unresolved issues; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=36`, `failed_checks=0`.
+- Latest local recheck at 2026-05-05 21:30 KST after review readiness status work: `Tools/Show-PrototypeSessionStatus.ps1` now prints `review_pack_status=ok`, `review_readiness=partial_evidence`, and `review_pack_visual_review_required=True`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` includes the same fields and `review_pack_next_action`; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=37`, `failed_checks=0`.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -129,7 +131,7 @@ Last updated: 2026-05-05 21:10 KST
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PendingPlacementAssist.cs`: recommendation hints now prioritize player-facing reasons over raw score text.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: placement blocked cue banners now include the same corrective next action.
 - `Assets/Tests/EditMode/FoodTruckRunModelTests.cs`: covers wave payoff summary generation on wave advance.
-- `Tools/Verify-PrototypeHudStateContract.ps1`: now includes a `wave_outcome` group guarding payoff summary model/HUD/test coverage, strengthens Draw Choice card text checks for tactical chips, guards blocked placement next-action copy, and checks that suite/review/session evidence preserves Wave Combat action showcase status.
+- `Tools/Verify-PrototypeHudStateContract.ps1`: now includes a `wave_outcome` group guarding payoff summary model/HUD/test coverage, strengthens Draw Choice card text checks for tactical chips, guards blocked placement next-action copy, and checks that suite/review/session evidence preserves Wave Combat action showcase status and review pack readiness.
 - `Tools/Verify-PrototypePlayModeRecord.ps1`: reads the Play Mode verification document and reports `not_recorded`, `passed`, `needs_fix`, `blocked`, or `invalid_record`.
 - `Tools/Verify-PrototypePlayModeSuite.ps1`: reads `Docs/Prototype_PlayMode_Verification_Suite.txt`, reports whether all four prepared-state screenshots exist, and exposes `wave_combat_action_showcase_ready/reason` for capture quality triage.
 - `Tools/Verify-PrototypePlayModeScreenshots.ps1`: reads screenshot PNG headers and reports file quality, portrait resolution, unlabeled captures, and missing state coverage.
@@ -138,7 +140,7 @@ Last updated: 2026-05-05 21:10 KST
 - `Tools/Create-PrototypeIngredientPlaceholders.ps1`: generates the 8 placeholder ingredient icons.
 - `Tools/Create-PrototypeCoreArtPlaceholders.ps1`: generates placeholder `FoodTruck.png` and `KitchenModule.png`.
 - `Tools/Ensure-PrototypeAssetMetas.ps1`: creates Unity sprite `.meta` files for missing prototype PNG metas.
-- `Tools/Show-PrototypeSessionStatus.ps1`: prints concise next-session readiness, docs, layout status, HUD state contract status, Play Mode suite evidence status, Wave Combat action showcase status, Play Mode screenshot evidence status, Play Mode record status, review pack recommendation, unresolved issues, and recommended actions.
+- `Tools/Show-PrototypeSessionStatus.ps1`: prints concise next-session readiness, docs, layout status, HUD state contract status, Play Mode suite evidence status, Wave Combat action showcase status, Play Mode screenshot evidence status, review pack readiness, Play Mode record status, review pack recommendation, unresolved issues, and recommended actions.
 - `Tools/Gate-Verification.ps1`: non-compact output now includes Wave Combat action showcase readiness and reason beside Play Mode suite status.
 - `Tools/VerificationStatusPath.ps1`: shared default status path resolver; uses project `Temp\verification-status.txt` when writable and falls back to user temp when Unity `Temp` is locked by the environment.
 - `Tools/Run-Verification.ps1`: uses the shared status path resolver and literal status-file reads/writes.
@@ -181,7 +183,7 @@ Last updated: 2026-05-05 21:10 KST
 - Draw Choice tactical chips are code-guarded, but still need Play Mode visual review to confirm the three cards remain readable in the compact portrait layout.
 - Blocked placement next-action copy is code-guarded, but still needs Play Mode visual review to confirm the cue is not too long in portrait.
 - Pending Placement recommendation reasons are code-guarded, but still need Play Mode visual review to confirm the R1/R2 text stays readable in portrait.
-- Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=partial_evidence`; it now also carries Wave Combat action showcase status and the visual acceptance checklist. Session status and gate text also surface the same showcase readiness. Full review pack generation should wait until suite-state captures or intentional review output writing.
+- Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=partial_evidence`; it now also carries Wave Combat action showcase status and the visual acceptance checklist. Session status now surfaces `review_pack_status=ok`, `review_readiness=partial_evidence`, and `review_pack_visual_review_required=True`; gate text also surfaces showcase readiness. Full review pack generation should wait until suite-state captures or intentional review output writing.
 - `Tools/Write-PrototypePlayModeResultFromSuite.ps1` is the intended PASS/FIX/BLOCKED result writer, but status-only handoff passes should not run it because it writes a result draft even with `-JsonOnly`.
 - Unity MCP is currently unavailable from this session (`MCP SSE probe returned 404`).
 - Forced headless verification is blocked while the Unity Editor process is already running; use the open Editor for manual Play Mode or close it before a headless run.
@@ -249,16 +251,16 @@ Current status:
 - Prototype resource pipeline is complete for placeholders.
 - Asset gate passes: asset_status=ok, runtime_required_missing=0, final_art_missing=0, missing_meta=0, diagnostic_warnings=0.
 - Layout numeric/source-sync guard passes: layout_status=ok, failed_checks=0, source_sync_status=ok, source_sync_failed_checks=0.
-- HUD state contract guard passes: hud_contract_status=ok, check_count=36, failed_checks=0.
+- HUD state contract guard passes: hud_contract_status=ok, check_count=37, failed_checks=0.
 - Play Mode suite evidence is tracked and currently not recorded: playmode_suite_status=not_recorded, captured_count=0/4, wave_combat_action_showcase_ready=false, wave_combat_action_showcase_reason=suite_not_recorded. This status is visible from `Tools\Show-PrototypeSessionStatus.ps1` without opening the review pack.
 - Play Mode screenshot evidence is tracked and currently partial: 2 valid portrait PNGs, unlabeled_count=2, covered_state_count=0/4, and no labeled suite-state coverage yet.
-- Play Mode review pack writer works in preview mode and currently reports review_readiness=partial_evidence until suite-state captures exist; it now includes Wave Combat action showcase status and a visual acceptance checklist. Full generation writes the review pack.
+- Play Mode review pack writer works in preview mode and currently reports review_pack_status=ok, review_readiness=partial_evidence, and review_pack_visual_review_required=True until suite-state captures exist; it now includes Wave Combat action showcase status and a visual acceptance checklist. Full generation writes the review pack.
 - Play Mode result writer can draft/apply PASS/FIX/BLOCKED outcomes from suite evidence, but even JsonOnly creates a draft, so reserve it for intentional result recording.
 - Manual Play Mode record is tracked and currently not recorded: playmode_record_status=not_recorded; Draw Choice, Pending Placement, and Invalid Placement are NOT_RECORDED while Wave Combat is PASS in the latest manual result.
 - Static guard passes: static_status=ok.
 - Integrated gate passes: gate_status=ok.
 - Unity compile/tests are inconclusive only because headless Editor verification is unreliable in this environment.
-- Latest local MCP-free recheck at 2026-05-05 21:10 KST confirmed Show-PrototypeSessionStatus text/JSON output and Verify-PrototypeHudStateContract after surfacing Wave Combat action-showcase readiness in the first status command. Write-PrototypePlayModeResultFromSuite was not re-run in this handoff-only pass because it writes a draft by design.
+- Latest local MCP-free recheck at 2026-05-05 21:30 KST confirmed Show-PrototypeSessionStatus text/JSON output and Verify-PrototypeHudStateContract after surfacing review pack readiness in the first status command. Write-PrototypePlayModeResultFromSuite was not re-run in this handoff-only pass because it writes a draft by design.
 
 Recent work:
 - Added Verify-PrototypeAssets.ps1 with PNG/meta diagnostics.
