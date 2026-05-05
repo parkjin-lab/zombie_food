@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-05 KST
+Last updated: 2026-05-05 21:02 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -16,14 +16,14 @@ evidence.
 - Play Mode suite: `playmode_suite_status=not_recorded`, `captured_count=0/4`; the PC-limited Play Mode suite is not recorded as of 2026-05-05 KST.
 - Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, but does not provide full suite coverage.
 - Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
-- Review pack: `Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `partial_evidence`.
+- Review pack: `Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `partial_evidence` and now carries Wave Combat action showcase readiness plus a visual acceptance checklist.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 - Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
 - Pending Placement update: R1/R2 recommendation copy now explains lane pressure, multi-lane coverage, and center positioning instead of leading with raw scores; Play Mode readability is still pending.
 - Battlefield readability update: placement/draw states now reserve more than half of the viewport for the truck-and-zombie play area, show one long food truck marker, and use brighter attack trails/impact flashes; Play Mode readability is still pending.
 - Combat result readability update: hits now surface floating `-damage`, `KO`, `LEAK`, and `TRUCK -HP` text in the battlefield; Play Mode readability is still pending.
-- Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play.
+- Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/review outputs now expose `wave_combat_action_showcase_ready/reason`.
 
 ## Start Here
 1. Print the current session status.
@@ -36,7 +36,7 @@ evidence.
    powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
-4. Build the review pack before manual visual judgment.
+4. Build the review pack before manual visual judgment, and check the Wave Combat action showcase status.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
@@ -58,11 +58,13 @@ evidence.
 - Confirm all suite states are represented in the suite verifier output.
 - Use screenshot verification to distinguish partial portrait evidence from full suite-ready evidence.
 - Build the review pack before visual judgment.
+- Require the review pack to show whether the Wave Combat action showcase is ready before recording Wave Combat as PASS.
 - Use `Write-PrototypePlayModeResultFromSuite.ps1` or the Unity `Record PASS Manual Result` menu only after fresh evidence exists.
 
 ### Acceptance
 - `playmode_suite_status=captured`, or the missing capture reason is explicit.
 - `playmode_screenshot_status=suite_ready`, or the partial/missing screenshot reason is explicit.
+- Wave Combat review evidence reports `wave_combat_action_showcase_ready=true`, or the missing showcase reason is explicit.
 - `Prototype_PlayMode_Verification.md` links the latest manual result to current evidence.
 - HUD changes pass `Verify-PrototypeHudStateContract.ps1`.
 - Layout changes pass `Verify-PrototypeLayout.ps1`.
@@ -96,10 +98,11 @@ Implementation status: the layout constants and layout guard now enforce a large
 battlefield during placement contexts. Enemy hit visuals now include a truck-to-zombie
 attack trail, larger impact flashes, longer hit poses, brighter lane damage flash,
 and a single longer truck marker. Floating combat text now labels enemy damage,
-knockouts, lane leaks, and truck HP loss directly over the battlefield. The remaining
-Wave Combat verification setup now injects a short action showcase for screenshots.
-The remaining product task is to retake Play Mode screenshots and judge
-overlap/readability on the actual Unity viewport.
+knockouts, lane leaks, and truck HP loss directly over the battlefield. Wave Combat
+verification setup now injects a short action showcase for screenshots, and the
+suite/review pack reports whether that showcase is present. The remaining product
+task is to retake Play Mode screenshots and judge overlap/readability on the actual
+Unity viewport.
 
 Recipe activation feedback now follows the same cause-and-effect direction. When a
 recipe comes online, the log and HUD banner should preserve the trigger source:

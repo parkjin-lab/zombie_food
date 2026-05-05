@@ -108,7 +108,44 @@ function New-NotRecordedResult {
         completed = "NOT_RECORDED"
         unity_version = "NOT_RECORDED"
         aspect_ratio_resolution = "NOT_RECORDED"
+        wave_combat_action_showcase_ready = $false
+        wave_combat_action_showcase_reason = "suite_not_recorded"
         next_action = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+    }
+}
+
+function Get-WaveCombatActionShowcaseStatus {
+    param([object]$StateResults)
+
+    if ($null -eq $StateResults -or -not $StateResults.Contains("Wave Combat")) {
+        return [ordered]@{
+            ready = $false
+            reason = "wave_combat_state_missing"
+        }
+    }
+
+    $waveCombat = $StateResults["Wave Combat"]
+    $prepared = if ($waveCombat.Contains("prepared")) { [string]$waveCombat["prepared"] } else { "NOT_RECORDED" }
+    $prepareResult = if ($waveCombat.Contains("prepare_result")) { [string]$waveCombat["prepare_result"] } else { "NOT_RECORDED" }
+    $screenshotExists = if ($waveCombat.Contains("screenshot_exists")) { [bool]$waveCombat["screenshot_exists"] } else { $false }
+
+    if ($prepared.ToLowerInvariant() -eq "yes" -and $prepareResult.Contains("attack labels")) {
+        return [ordered]@{
+            ready = $true
+            reason = "prepare_result_mentions_attack_labels"
+        }
+    }
+
+    if ($screenshotExists) {
+        return [ordered]@{
+            ready = $false
+            reason = "legacy_wave_combat_capture_without_attack_labels"
+        }
+    }
+
+    return [ordered]@{
+        ready = $false
+        reason = "wave_combat_not_captured"
     }
 }
 
@@ -209,6 +246,8 @@ elseif ($missingStates.Count -gt 0 -or $unpreparedStates.Count -gt 0 -or $missin
     $nextAction = "Rerun Capture Verification Suite or retake missing states with Prepare and Capture State."
 }
 
+$waveCombatActionShowcase = Get-WaveCombatActionShowcaseStatus -StateResults $stateResults
+
 $result = [ordered]@{
     playmode_suite_status = $playModeSuiteStatus
     suite_path = $suitePath
@@ -224,6 +263,8 @@ $result = [ordered]@{
     completed = if ($topFields.ContainsKey("Completed")) { $topFields["Completed"] } else { "NOT_RECORDED" }
     unity_version = if ($topFields.ContainsKey("Unity version")) { $topFields["Unity version"] } else { "NOT_RECORDED" }
     aspect_ratio_resolution = if ($topFields.ContainsKey("Aspect ratio / resolution")) { $topFields["Aspect ratio / resolution"] } else { "NOT_RECORDED" }
+    wave_combat_action_showcase_ready = [bool]$waveCombatActionShowcase.ready
+    wave_combat_action_showcase_reason = [string]$waveCombatActionShowcase.reason
     next_action = $nextAction
 }
 
@@ -234,6 +275,8 @@ else {
     Write-Host ("playmode_suite_status=" + $playModeSuiteStatus)
     Write-Host ("suite_status_field=" + $suiteStatusField)
     Write-Host ("captured_count=" + $capturedCount + "/" + $requiredStates.Count)
+    Write-Host ("wave_combat_action_showcase_ready=" + [string]$waveCombatActionShowcase.ready)
+    Write-Host ("wave_combat_action_showcase_reason=" + [string]$waveCombatActionShowcase.reason)
     foreach ($state in $requiredStates) {
         $stateResult = $stateResults[$state]
         Write-Host ("- " + $state + ": prepared=" + $stateResult["prepared"] + ", screenshot_exists=" + $stateResult["screenshot_exists"])

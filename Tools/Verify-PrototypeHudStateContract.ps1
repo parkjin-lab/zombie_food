@@ -361,7 +361,10 @@ Add-ContractCheck $checks "editor_helpers" "suite_evidence_is_machine_checkable"
     'missing_states',
     'missing_screenshots',
     'captured_count',
-    'expected_state_count'
+    'expected_state_count',
+    'wave_combat_action_showcase_ready',
+    'wave_combat_action_showcase_reason',
+    'Get-WaveCombatActionShowcaseStatus'
 ) "The low-interaction suite evidence must be parsable before manual PASS/FIX recording."
 
 Add-ContractCheck $checks "editor_helpers" "screenshot_evidence_quality_is_machine_checkable" $sources.playModeScreenshotVerifier @(
@@ -393,6 +396,9 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     'Verify-PrototypePlayModeScreenshots.ps1',
     'Verify-PrototypePlayModeRecord.ps1',
     'Screenshot Contact Sheet',
+    'Visual Acceptance Checklist',
+    'Wave Combat action showcase',
+    '`-12`, `KO`, `LEAK`, `TRUCK -7`',
     'Recommended Result Commands',
     'Write-TextWithFallback',
     'visual_review_required'

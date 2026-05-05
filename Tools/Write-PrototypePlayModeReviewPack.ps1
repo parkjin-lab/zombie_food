@@ -176,6 +176,18 @@ function Get-ReviewReadiness {
     return "needs_suite_capture"
 }
 
+function Get-WaveCombatActionShowcaseLine {
+    param([object]$SuiteData)
+
+    $ready = Get-ObjectProperty -ObjectValue $SuiteData -PropertyName "wave_combat_action_showcase_ready"
+    $reason = Get-ObjectProperty -ObjectValue $SuiteData -PropertyName "wave_combat_action_showcase_reason"
+    if ($null -eq $ready) {
+        return '`unknown` (suite verifier did not report action showcase status)'
+    }
+
+    return '`' + [string]$ready + '` (' + [string]$reason + ')'
+}
+
 function Build-StateEvidenceLine {
     param(
         [object]$SuiteData,
@@ -221,6 +233,7 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine('- Screenshot status: `' + $ScreenshotData.playmode_screenshot_status + '` (' + $ScreenshotData.machine_quality_pass_count + '/' + $ScreenshotData.screenshot_count + ' quality pass)')
     [void]$builder.AppendLine('- Unlabeled screenshots: `' + $ScreenshotData.unlabeled_count + '`')
     [void]$builder.AppendLine('- Manual record status: `' + $RecordData.playmode_record_status + '`')
+    [void]$builder.AppendLine('- Wave Combat action showcase: ' + (Get-WaveCombatActionShowcaseLine -SuiteData $SuiteData))
     if ($ScreenshotData.missing_states.Count -gt 0) {
         [void]$builder.AppendLine("- Missing labeled states: " + ($ScreenshotData.missing_states -join ", "))
     }
@@ -249,6 +262,15 @@ function Build-ReviewPackMarkdown {
             [void]$builder.AppendLine()
         }
     }
+
+    [void]$builder.AppendLine("## Visual Acceptance Checklist")
+    [void]$builder.AppendLine("| State | Must see in screenshot | Record as FIX when missing |")
+    [void]$builder.AppendLine("| --- | --- | --- |")
+    [void]$builder.AppendLine("| Draw Choice | Three comparable cards with shape, ingredient, value/risk, `Fit`, `Heat`, and `Role` visible. | `FIX_LAYOUT` if clipped or overlapping; `FIX_FEEDBACK` if the choice tradeoff is unclear. |")
+    [void]$builder.AppendLine("| Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |")
+    [void]$builder.AppendLine("| Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |")
+    [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and action labels `-12`, `KO`, `LEAK`, `TRUCK -7` plus lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if action labels or payoff cues are missing. |")
+    [void]$builder.AppendLine()
 
     [void]$builder.AppendLine("## Recommended Result Commands")
     [void]$builder.AppendLine("All PASS after visual review:")
@@ -290,6 +312,8 @@ $result = [ordered]@{
     machine_quality_pass_count = $screenshotData.machine_quality_pass_count
     missing_states = $screenshotData.missing_states
     manual_record_status = $recordData.playmode_record_status
+    wave_combat_action_showcase_ready = $suiteData.wave_combat_action_showcase_ready
+    wave_combat_action_showcase_reason = $suiteData.wave_combat_action_showcase_reason
     visual_review_required = $screenshotData.visual_review_required
     next_action = if ($readiness -eq "ready_for_visual_review") { "Open the review pack, make visual PASS/FIX/BLOCKED decisions, then apply the result writer command." } else { "Use Capture Verification Suite or focused retakes, then regenerate this review pack." }
 }
