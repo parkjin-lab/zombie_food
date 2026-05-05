@@ -2262,6 +2262,12 @@ namespace ZombieFoodcenter.Prototype
                 CreateChip("Last: " + lastRecipeCue, new Color(0.74f, 0.52f, 0.18f, 1f), 300f, 340f, 13);
             }
 
+            string lastWaveCue = model != null ? model.LastWaveOutcomeCue : string.Empty;
+            if (!string.IsNullOrEmpty(lastWaveCue))
+            {
+                CreateChip("Wave: " + BuildWaveOutcomeChipText(lastWaveCue), new Color(0.22f, 0.50f, 0.68f, 1f), 320f, 360f, 13);
+            }
+
             if (model.ActiveRecipes.Count == 0)
             {
                 string lastRecipeResultCue = model != null ? model.LastRecipeResultCue : string.Empty;
@@ -2349,6 +2355,16 @@ namespace ZombieFoodcenter.Prototype
             return string.Equals(progress, "No payoff recorded", StringComparison.Ordinal)
                 ? "Warming up"
                 : progress;
+        }
+
+        public static string BuildWaveOutcomeChipText(string cue)
+        {
+            if (string.IsNullOrEmpty(cue))
+            {
+                return "No wave payoff";
+            }
+
+            return cue.TrimEnd('.');
         }
 
     }

@@ -79,6 +79,9 @@ Implementation status: the model now records a concise wave payoff summary and t
 HUD wave-change cue surfaces it. The remaining product task is to verify readability
 in portrait Play Mode and decide whether the cue should become a persistent panel.
 
+The payoff is now also suitable for a compact persistent chip so the player can
+re-read the last wave result while making the next placement or draw decision.
+
 Recipe activation feedback now follows the same cause-and-effect direction. When a
 recipe comes online, the log and HUD banner should preserve the trigger source:
 placement bonus, auto-merge bonus, manual merge bonus, Recipe Rush event, or a 3x
@@ -116,6 +119,7 @@ The summary should highlight:
 - Verify recipe expiry payoff cues are readable and do not compete with urgent combat warnings.
 - Verify live recipe progress chips stay readable as payoff starts at zero and ramps up.
 - Verify the wave outcome/payoff cue at the end of Wave Combat before the next draw.
+- Verify the persistent wave payoff chip stays readable beside recipe cues.
 - If the cue is too fleeting or crowded, promote it into a compact persistent payoff panel.
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.
 

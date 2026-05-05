@@ -239,6 +239,8 @@ Add-ContractCheck $checks "wave_outcome" "model_tracks_wave_payoff_summary" $sou
 
 Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources.hud @(
     'model.LastWaveOutcomeCue',
+    'CreateChip("Wave: " + BuildWaveOutcomeChipText(lastWaveCue)',
+    'public static string BuildWaveOutcomeChipText(string cue)',
     '"Wave " + model.Wave + " started. Keep your lanes stable."'
 ) "Wave change feedback should prioritize the last wave payoff when one is available."
 
@@ -399,6 +401,7 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'BuildRecipeLiveProgressChipText_UsesPayoffOrWarmup',
     'BuildRecipeImpactSummary_ReportsAccumulatedPayoff',
     'BuildRecipeImpactSummary_WhenNoPayoff_ReportsNoPayoff',
+    'BuildWaveOutcomeChipText_TrimsTrailingPeriod',
     'model.LastRecipeActivationCue',
     'Tick_WhenWaveAdvances_RecordsOutcomeSummary',
     'HudActionVisibility_CombatOnlyIdle_ShowsBuildEntryRow',

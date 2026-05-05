@@ -58,6 +58,7 @@ Last updated: 2026-05-05 01:08 KST
 - Added recipe payoff tracking so expired recipes report accumulated damage, KOs, HP restored, and Heat relieved in the log/HUD cue.
 - Added a Synergy Bar result chip for the latest expired recipe when no recipe is active.
 - Expanded active recipe chips so they also show live progress such as `Dmg 18`, `KO 1`, or `Warming up` before expiry.
+- Added a persistent Wave payoff chip to the Synergy Bar so the latest wave result stays visible after the banner fades.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -97,6 +98,7 @@ Last updated: 2026-05-05 01:08 KST
 - `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: exposes `LastRecipeActivationName`, `LastRecipeActivationSummary`, and `LastRecipeActivationCue` for persistent HUD feedback.
 - `Assets/Scripts/Prototype/FoodTruckRunModel.cs`: recipe states now accumulate payoff stats and emit a recipe-expired result cue.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: wave-change cue now prefers the latest payoff cue when available.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: Synergy Bar now keeps the latest wave payoff as a persistent chip.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: Synergy Bar now keeps a recent-recipe cue chip visible while active recipe chips continue to show duration.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: active recipe chips now include a compact effect role label for passive recovery/cooling or active lane hits.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: active recipe chips now show live progress before expiry, or `Warming up` while no payoff has been accumulated yet.
@@ -273,3 +275,4 @@ Recent work:
 Next priority:
 Use `Tools > Food Truck Prototype > Capture Verification Suite` in Play Mode to capture Draw Choice, Pending Placement, Invalid Placement, and Wave Combat with minimal direct input, then run Tools/Verify-PrototypePlayModeSuite.ps1, Tools/Verify-PrototypePlayModeScreenshots.ps1, and Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly to confirm files exist, are valid portrait PNGs, have labeled state coverage, and are ready for a review pack. Generate the full review pack and use Tools/Write-PrototypePlayModeResultFromSuite.ps1 or the PASS menu only when ready to record the visual result. Continue code-level next work without blocking on longer Play Mode input from this PC.
 ```
+- Latest local recheck at 2026-05-05 17:51 KST after persistent wave payoff chip work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=34`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with a refreshed status timestamp and compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.

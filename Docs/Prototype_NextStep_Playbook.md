@@ -4,7 +4,7 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-05 17:21 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 live recipe progress chip 변경 후에도 통과한다.
+- 2026-05-05 17:51 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 persistent wave payoff chip 변경 후에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=not_recorded`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과하지만 suite 라벨 커버리지가 없어 최종 판정 증거로는 아직 `partial`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -17,6 +17,7 @@
 - Active recipe 칩은 이제 남은 시간뿐 아니라 `Regen/Cool` 또는 `Lane Hit` 역할을 함께 보여주는 방향으로 보강 중이다.
 - Recipe expiry 피드백은 이제 레시피가 실제로 만든 피해, KO, 회복, Heat 완화 성과를 짧게 남기는 방향으로 보강 중이다.
 - Active recipe 칩은 이제 만료 전에도 `Dmg`, `KO`, `HP`, `Heat` 진행 성과나 `Warming up` 상태를 보여주는 방향으로 보강 중이다.
+- 최신 웨이브 payoff는 이제 Synergy Bar의 별도 칩으로도 남겨, 다음 드로우/배치 판단 중 다시 확인할 수 있게 하는 방향으로 보강 중이다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.

@@ -855,6 +855,14 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildWaveOutcomeChipText_TrimsTrailingPeriod()
+        {
+            string chipText = FoodTruckPrototypeHud.BuildWaveOutcomeChipText("Wave 1: 2 KO, HP -5, Heat +7.");
+
+            Assert.AreEqual("Wave 1: 2 KO, HP -5, Heat +7", chipText);
+        }
+
+        [Test]
         public void HudFocusLayout_CombatOnly_ExpandsBattlefieldPanel()
         {
             FoodTruckPrototypeHud.GameplayFocusLayoutMetrics layout =
