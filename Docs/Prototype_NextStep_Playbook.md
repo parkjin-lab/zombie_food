@@ -4,7 +4,7 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-05 20:00 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 전투 플로팅 텍스트 변경 후에도 통과한다.
+- 2026-05-05 20:44 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 Wave Combat 캡처 showcase 변경 후에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=not_recorded`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과하지만 suite 라벨 커버리지가 없어 최종 판정 증거로는 아직 `partial`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -20,6 +20,7 @@
 - 최신 웨이브 payoff는 이제 Synergy Bar의 별도 칩으로도 남겨, 다음 드로우/배치 판단 중 다시 확인할 수 있게 하는 방향으로 보강 중이다.
 - 전장 레이아웃은 이제 Draw/Pending Placement에서도 푸드트럭과 좀비가 화면의 절반 이상을 차지하도록 보강됐다. 트럭은 lane마다 반복하지 않고 한 대의 긴 마커로 보여주며, 피격 순간에는 공격 궤적과 충격 플래시가 더 크게 보이도록 보강됐다.
 - 전투 결과 판독성은 이제 좀비 피격 `-damage`, 처치 `KO`, 트럭 도달 `LEAK`, 트럭 피해 `TRUCK -HP` 플로팅 텍스트로 보강됐다.
+- Wave Combat suite 캡처는 이제 검증용 액션 showcase를 포함해 `-12`, `KO`, `LEAK`, `TRUCK -7` 표식과 lane flash가 찍히도록 보강됐다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
@@ -47,6 +48,7 @@
 - Invalid Placement retake에서는 실패 사유와 `Next` 행동 힌트가 보드 근처/cue에서 동시에 읽히는지 확인한다.
 - Pending Placement retake에서는 R1/R2 추천 이유가 보드 조작을 방해하지 않는 길이로 읽히는지 확인한다.
 - Wave Combat/Draw/Pending retake에서는 푸드트럭과 좀비 전장이 실제 화면의 50% 이상으로 느껴지는지, 트럭이 한 대만 보이는지, 공격 궤적과 피격 플래시만 보고도 어떤 좀비가 맞았는지 이해되는지 확인한다.
+- Wave Combat retake에서는 suite 캡처 직후 액션 showcase 표식(`-12`, `KO`, `LEAK`, `TRUCK -7`)이 겹치지 않고 읽히는지 확인한다.
 
 ### P2 (중기: 자동화와 제품 확장)
 - review pack 산출물을 세션별로 비교하기 쉽게 보관하고, suite 스크린샷의 의미적 차이는 아직 수동 판정으로 남긴다.

@@ -315,6 +315,19 @@ Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_state
     'BuildPlayModeVerificationStateSummary()'
 ) "PC-limited sessions need one-click setup for each remaining manual capture state."
 
+Add-ContractCheck $checks "editor_helpers" "wave_combat_capture_has_action_showcase" ($sources.playModeVerification + $sources.enemyVisuals) @(
+    'SpawnWaveCombatVerificationShowcase();',
+    'ClearTransientCombatVisuals();',
+    'Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack labels, and Wave status should be readable.',
+    'SpawnVerificationCombatLabel(',
+    'SpawnTruckDamageFloater(7f);',
+    '"-12"',
+    '"KO"',
+    '"LEAK"',
+    'TriggerLaneHitFlash(1);',
+    'TriggerLaneHitFlash(2);'
+) "Wave Combat captures should include a readable action moment, not only a static lane overview."
+
 Add-ContractCheck $checks "editor_helpers" "menu_exposes_prepare_and_capture_actions" $sources.editorMenu @(
     'Prepare State/Draw Choice',
     'Prepare State/Pending Placement',

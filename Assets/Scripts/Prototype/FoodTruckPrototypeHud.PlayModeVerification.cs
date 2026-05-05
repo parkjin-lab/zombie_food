@@ -45,6 +45,11 @@ namespace ZombieFoodcenter.Prototype
             if (prepared)
             {
                 RefreshAfterPlayModeVerificationSetup();
+                if (state == PlayModeVerificationState.WaveCombat)
+                {
+                    SpawnWaveCombatVerificationShowcase();
+                    Canvas.ForceUpdateCanvases();
+                }
             }
 
             return prepared;
@@ -144,7 +149,7 @@ namespace ZombieFoodcenter.Prototype
                 model.Tick(1f);
             }
 
-            message = "Prepared Wave Combat: lanes, truck, enemies, HP, Heat, and Wave status should be readable.";
+            message = "Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack labels, and Wave status should be readable.";
             ShowCueBanner("Verification state: Wave Combat.", AccentOrange);
             return true;
         }
@@ -152,6 +157,7 @@ namespace ZombieFoodcenter.Prototype
         private void ResetRunForPlayModeVerification()
         {
             model.ResetRun();
+            ClearTransientCombatVisuals();
             lastPlacementBlockedHint = string.Empty;
             lastPlacementBlockedFailReason = PlacementFailReason.None;
             ResetPendingPlacementAssist(true);
@@ -177,6 +183,79 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return -1;
+        }
+
+        private void SpawnWaveCombatVerificationShowcase()
+        {
+            if (laneTrackRoots == null || laneTrackRoots.Length < 3)
+            {
+                return;
+            }
+
+            TriggerLaneHitFlash(1);
+            TriggerLaneHitFlash(2);
+
+            SpawnVerificationCombatLabel(
+                0,
+                0.62f,
+                0.18f,
+                "-12",
+                new Color(1f, 0.64f, 0.28f, 1f),
+                1.35f);
+            SpawnVerificationCombatLabel(
+                1,
+                0.52f,
+                0.22f,
+                "KO",
+                new Color(1f, 0.94f, 0.42f, 1f),
+                1.45f);
+            SpawnVerificationCombatLabel(
+                2,
+                0.28f,
+                0.16f,
+                "LEAK",
+                new Color(1f, 0.32f, 0.22f, 1f),
+                1.35f);
+            SpawnTruckDamageFloater(7f);
+        }
+
+        private void SpawnVerificationCombatLabel(
+            int laneIndex,
+            float x01,
+            float yOffset01,
+            string label,
+            Color color,
+            float durationScale)
+        {
+            if (laneIndex < 0 || laneIndex >= laneTrackRoots.Length)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[laneIndex];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            SpawnCombatFloatingText(
+                laneRoot,
+                BuildVerificationCombatLabelPosition(laneRoot, x01, yOffset01),
+                label,
+                color,
+                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.20f), 13, 24),
+                durationScale);
+        }
+
+        private static Vector2 BuildVerificationCombatLabelPosition(RectTransform laneRoot, float x01, float yOffset01)
+        {
+            float laneWidth = laneRoot != null ? Mathf.Max(80f, laneRoot.rect.width) : 80f;
+            float laneHeight = laneRoot != null ? Mathf.Max(1f, laneRoot.rect.height) : 1f;
+            float safeInset = Mathf.Clamp(laneHeight * 0.64f, 42f, 86f);
+            float x = Mathf.Clamp(laneWidth * Mathf.Clamp01(x01), safeInset, Mathf.Max(safeInset, laneWidth - safeInset));
+            float y = laneHeight * Mathf.Clamp(yOffset01, -0.35f, 0.35f);
+            return new Vector2(x, y);
         }
 
         private void RefreshAfterPlayModeVerificationSetup()

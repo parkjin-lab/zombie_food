@@ -295,6 +295,47 @@ namespace ZombieFoodcenter.Prototype
             laneHitFlashTimers[laneIndex] = Mathf.Max(laneHitFlashTimers[laneIndex], laneHitFlashDuration);
         }
 
+        private void ClearTransientCombatVisuals()
+        {
+            for (int i = enemyAfterVisuals.Count - 1; i >= 0; i--)
+            {
+                EnemyAfterVisualWidget after = enemyAfterVisuals[i];
+                if (after != null && after.Rect != null)
+                {
+                    Destroy(after.Rect.gameObject);
+                }
+            }
+
+            enemyAfterVisuals.Clear();
+
+            for (int i = enemyHitEffects.Count - 1; i >= 0; i--)
+            {
+                EnemyHitEffectWidget effect = enemyHitEffects[i];
+                if (effect != null && effect.Rect != null)
+                {
+                    Destroy(effect.Rect.gameObject);
+                }
+            }
+
+            enemyHitEffects.Clear();
+
+            for (int i = combatFloatingTexts.Count - 1; i >= 0; i--)
+            {
+                CombatFloatingTextWidget floating = combatFloatingTexts[i];
+                if (floating != null && floating.Rect != null)
+                {
+                    Destroy(floating.Rect.gameObject);
+                }
+            }
+
+            combatFloatingTexts.Clear();
+
+            for (int i = 0; i < laneHitFlashTimers.Length; i++)
+            {
+                laneHitFlashTimers[i] = 0f;
+            }
+        }
+
         private void UpdateLaneHitFlashVisuals(float dt)
         {
             for (int i = 0; i < laneHitFlashTimers.Length; i++)

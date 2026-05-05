@@ -23,6 +23,7 @@ evidence.
 - Pending Placement update: R1/R2 recommendation copy now explains lane pressure, multi-lane coverage, and center positioning instead of leading with raw scores; Play Mode readability is still pending.
 - Battlefield readability update: placement/draw states now reserve more than half of the viewport for the truck-and-zombie play area, show one long food truck marker, and use brighter attack trails/impact flashes; Play Mode readability is still pending.
 - Combat result readability update: hits now surface floating `-damage`, `KO`, `LEAK`, and `TRUCK -HP` text in the battlefield; Play Mode readability is still pending.
+- Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play.
 
 ## Start Here
 1. Print the current session status.
@@ -96,8 +97,9 @@ battlefield during placement contexts. Enemy hit visuals now include a truck-to-
 attack trail, larger impact flashes, longer hit poses, brighter lane damage flash,
 and a single longer truck marker. Floating combat text now labels enemy damage,
 knockouts, lane leaks, and truck HP loss directly over the battlefield. The remaining
-product task is to retake Play Mode screenshots and judge overlap/readability on the
-actual Unity viewport.
+Wave Combat verification setup now injects a short action showcase for screenshots.
+The remaining product task is to retake Play Mode screenshots and judge
+overlap/readability on the actual Unity viewport.
 
 Recipe activation feedback now follows the same cause-and-effect direction. When a
 recipe comes online, the log and HUD banner should preserve the trigger source:
