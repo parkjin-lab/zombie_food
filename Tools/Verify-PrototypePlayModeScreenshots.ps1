@@ -10,6 +10,7 @@ $ErrorActionPreference = "Stop"
 
 $screenshotDirectory = Join-Path $ProjectPath "Docs\PlayModeScreenshots"
 $suiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
+$triagePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Screenshot_Triage.txt"
 $requiredStates = @("Draw Choice", "Pending Placement", "Invalid Placement", "Wave Combat")
 
 function Resolve-EvidencePath {
@@ -61,6 +62,53 @@ function New-ManualRegistrationCommand {
 
     $relativePath = Get-ProjectRelativePath -TargetPath $TargetPath -RootPath $RootPath
     return 'powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "' + $RootPath + '" -State "' + $StateName + '" -ScreenshotPath "' + $relativePath + '" -PreviewOnly -JsonOnly'
+}
+
+function Get-ScreenshotTriageMap {
+    param(
+        [string]$Path,
+        [string]$RootPath
+    )
+
+    $map = @{}
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $map
+    }
+
+    $lines = [System.IO.File]::ReadAllLines($Path)
+    $current = $null
+    foreach ($line in $lines) {
+        if ($line -match "^\s*-\s+Screenshot:\s*(.+?)\s*$") {
+            $candidate = Resolve-EvidencePath -EvidencePath $matches[1].Trim() -RootPath $RootPath
+            if ($candidate -ne "NOT_RECORDED") {
+                $current = [ordered]@{
+                    path = $candidate
+                    relative_path = Get-ProjectRelativePath -TargetPath $candidate -RootPath $RootPath
+                    status = "reviewed"
+                    required_state_match = "unknown"
+                    reason = "NOT_RECORDED"
+                }
+                $map[$candidate.ToLowerInvariant()] = $current
+            }
+            continue
+        }
+
+        if ($null -eq $current) {
+            continue
+        }
+
+        if ($line -match "^\s+Triage status:\s*(.+?)\s*$") {
+            $current.status = $matches[1].Trim()
+        }
+        elseif ($line -match "^\s+Required state match:\s*(.+?)\s*$") {
+            $current.required_state_match = $matches[1].Trim()
+        }
+        elseif ($line -match "^\s+Reason:\s*(.+?)\s*$") {
+            $current.reason = $matches[1].Trim()
+        }
+    }
+
+    return $map
 }
 
 function Read-PngHeader {
@@ -173,6 +221,7 @@ function Get-SuiteEvidenceMap {
 }
 
 $suiteEvidenceMap = Get-SuiteEvidenceMap -ScriptPath $suiteScript -RootPath $ProjectPath
+$triageMap = Get-ScreenshotTriageMap -Path $triagePath -RootPath $ProjectPath
 $candidatePaths = New-Object System.Collections.Generic.List[string]
 $seenPaths = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::OrdinalIgnoreCase)
 
@@ -197,12 +246,17 @@ $lowResolutionScreenshots = New-Object System.Collections.Generic.List[string]
 $smallFileScreenshots = New-Object System.Collections.Generic.List[string]
 $coveredStates = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::OrdinalIgnoreCase)
 $manualRegistrationCandidates = New-Object System.Collections.Generic.List[object]
+$triagedNonStateScreenshots = New-Object System.Collections.Generic.List[object]
 $unlabeledCount = 0
 
 foreach ($path in $candidatePaths) {
     $fullPath = [System.IO.Path]::GetFullPath($path)
     $pathKey = $fullPath.ToLowerInvariant()
-    $state = if ($suiteEvidenceMap.ContainsKey($pathKey)) { $suiteEvidenceMap[$pathKey] } else { Get-StateFromFileName -Path $fullPath }
+    $triage = if ($triageMap.ContainsKey($pathKey)) { $triageMap[$pathKey] } else { $null }
+    $triageStatus = if ($null -ne $triage) { [string]$triage.status } else { "unreviewed" }
+    $triageReason = if ($null -ne $triage) { [string]$triage.reason } else { "NOT_RECORDED" }
+    $isTriagedNonState = $triageStatus -eq "ignored_non_state"
+    $state = if ($suiteEvidenceMap.ContainsKey($pathKey)) { $suiteEvidenceMap[$pathKey] } elseif ($isTriagedNonState) { "Triaged Non-State" } else { Get-StateFromFileName -Path $fullPath }
     $fileInfo = if (Test-Path -LiteralPath $fullPath -PathType Leaf) { Get-Item -LiteralPath $fullPath } else { $null }
     $header = Read-PngHeader -Path $fullPath
     $sizeBytes = if ($null -ne $fileInfo) { [int64]$fileInfo.Length } else { 0 }
@@ -241,10 +295,19 @@ foreach ($path in $candidatePaths) {
         meets_min_resolution = $meetsResolution
         meets_min_bytes = $meetsSize
         machine_quality_pass = $machineQuality
+        triage_status = $triageStatus
+        triage_reason = $triageReason
         error = $header.error
     }) | Out-Null
 
-    if ($state -eq "Unlabeled" -and $machineQuality) {
+    if ($isTriagedNonState) {
+        $triagedNonStateScreenshots.Add([ordered]@{
+            path = $fullPath
+            relative_path = Get-ProjectRelativePath -TargetPath $fullPath -RootPath $ProjectPath
+            reason = $triageReason
+        }) | Out-Null
+    }
+    elseif ($state -eq "Unlabeled" -and $machineQuality) {
         $manualRegistrationCandidates.Add([ordered]@{
             path = $fullPath
             relative_path = Get-ProjectRelativePath -TargetPath $fullPath -RootPath $ProjectPath
@@ -302,6 +365,8 @@ $result = [ordered]@{
     small_file_count = $smallFileScreenshots.Count
     unlabeled_count = $unlabeledCount
     manual_registration_candidate_count = $manualRegistrationCandidates.Count
+    triage_manifest_path = $triagePath
+    triaged_non_state_count = $triagedNonStateScreenshots.Count
     covered_state_count = $coveredStates.Count
     expected_state_count = $requiredStates.Count
     missing_states = $missingStates
@@ -311,6 +376,7 @@ $result = [ordered]@{
     screenshots = $screenshots.ToArray()
     manual_registration_candidates = $manualRegistrationCandidates.ToArray()
     manual_registration_commands = $manualRegistrationCommands.ToArray()
+    triaged_non_state_screenshots = $triagedNonStateScreenshots.ToArray()
     visual_review_required = $true
     next_action = $nextAction
 }
@@ -325,6 +391,7 @@ else {
     Write-Host ("covered_state_count=" + $coveredStates.Count + "/" + $requiredStates.Count)
     Write-Host ("unlabeled_count=" + $unlabeledCount)
     Write-Host ("manual_registration_candidate_count=" + $manualRegistrationCandidates.Count)
+    Write-Host ("triaged_non_state_count=" + $triagedNonStateScreenshots.Count)
     if ($missingStates.Count -gt 0) {
         Write-Host ("missing_states=" + ($missingStates -join ", "))
     }

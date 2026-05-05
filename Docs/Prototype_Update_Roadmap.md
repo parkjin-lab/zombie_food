@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-06 01:50 KST
+Last updated: 2026-05-06 01:58 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -14,9 +14,9 @@ evidence.
 - Code guard status: `gate_status=ok`, `layout_status=ok`, `hud_contract_status=ok`, `static_status=ok`.
 - Environment limit: Unity compile/tests remain `inconclusive` in the current PC/headless setup.
 - Play Mode suite: `playmode_suite_status=manual_partial`, `captured_count=1/4`, `suite_capture_source=manual screenshot registration`; Wave Combat has one manually registered PNG, while Draw Choice, Pending Placement, and Invalid Placement remain missing.
-- Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, Wave Combat is labeled through the suite manifest, `manual_registration_candidate_count=1`, but full suite coverage is still missing.
+- Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, Wave Combat is labeled through the suite manifest, `manual_registration_candidate_count=0`, `triaged_non_state_count=1`, but full suite coverage is still missing.
 - Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
-- Session status/review pack: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `top_issue`, `next_evidence_action`, and `next_code_target`; review pack also includes suite evidence source, visual acceptance checklist, and manual registration command hints.
+- Session status/review pack: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, triaged non-state count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `top_issue`, `next_evidence_action`, and `next_code_target`; review pack also includes suite evidence source, visual acceptance checklist, manual registration command hints, and triaged non-state screenshots.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 - Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
@@ -64,6 +64,7 @@ evidence.
 - Treat `top_issue` and `next_evidence_action` as the first action filter before choosing new gameplay code work.
 - Use `Register-PrototypePlayModeManualEvidence.ps1` when the PC can capture a standalone PNG but cannot complete direct Play Mode input or the full suite menu.
 - Use screenshot verifier or review pack preview `manual_registration_commands` so standalone PNGs are registered only after visual confirmation of the matching state.
+- Record visually reviewed non-required PNGs in the screenshot triage manifest so they stop appearing as manual registration candidates.
 - Confirm all suite states are represented in the suite verifier output.
 - Use screenshot verification to distinguish partial portrait evidence from full suite-ready evidence.
 - Build the review pack before visual judgment.
@@ -77,6 +78,7 @@ evidence.
 - Session status reports a concrete `top_issue`, `next_evidence_action`, and `next_code_target`.
 - Session/review output reports `suite_capture_source` so manual evidence is not confused with a full Unity suite capture.
 - Screenshot/review output reports manual registration candidates and command templates for any unlabeled PNGs that pass machine quality.
+- Screenshot/review output reports triaged non-state screenshots separately from usable manual registration candidates.
 - Wave Combat session/review evidence reports `wave_combat_action_showcase_ready=true`, or the missing showcase reason is explicit.
 - `Prototype_PlayMode_Verification.md` links the latest manual result to current evidence.
 - HUD changes pass `Verify-PrototypeHudStateContract.ps1`.

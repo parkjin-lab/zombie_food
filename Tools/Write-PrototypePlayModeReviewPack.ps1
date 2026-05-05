@@ -165,6 +165,16 @@ function Get-ManualRegistrationCommands {
     return @($ScreenshotData.manual_registration_commands)
 }
 
+function Get-TriagedNonStateScreenshots {
+    param([object]$ScreenshotData)
+
+    if ($null -eq $ScreenshotData -or $null -eq $ScreenshotData.triaged_non_state_screenshots) {
+        return @()
+    }
+
+    return @($ScreenshotData.triaged_non_state_screenshots)
+}
+
 function Get-ReviewReadiness {
     param(
         [object]$SuiteData,
@@ -232,6 +242,7 @@ function Build-ReviewPackMarkdown {
     $readiness = Get-ReviewReadiness -SuiteData $SuiteData -ScreenshotData $ScreenshotData
     $screenshotRows = Get-ScreenshotRows -ScreenshotData $ScreenshotData
     $manualRegistrationCommands = Get-ManualRegistrationCommands -ScreenshotData $ScreenshotData
+    $triagedNonStateScreenshots = Get-TriagedNonStateScreenshots -ScreenshotData $ScreenshotData
     $builder = New-Object System.Text.StringBuilder
 
     [void]$builder.AppendLine("# Prototype Play Mode Review Pack")
@@ -249,6 +260,9 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine('- Unlabeled screenshots: `' + $ScreenshotData.unlabeled_count + '`')
     if ($null -ne $ScreenshotData.manual_registration_candidate_count) {
         [void]$builder.AppendLine('- Manual registration candidates: `' + $ScreenshotData.manual_registration_candidate_count + '`')
+    }
+    if ($null -ne $ScreenshotData.triaged_non_state_count) {
+        [void]$builder.AppendLine('- Triaged non-state screenshots: `' + $ScreenshotData.triaged_non_state_count + '`')
     }
     [void]$builder.AppendLine('- Manual record status: `' + $RecordData.playmode_record_status + '`')
     [void]$builder.AppendLine('- Wave Combat action showcase: ' + (Get-WaveCombatActionShowcaseLine -SuiteData $SuiteData))
@@ -307,6 +321,17 @@ function Build-ReviewPackMarkdown {
     }
     [void]$builder.AppendLine()
 
+    [void]$builder.AppendLine("## Triaged Non-State Screenshots")
+    if ($triagedNonStateScreenshots.Count -eq 0) {
+        [void]$builder.AppendLine("No screenshots have been triaged as non-required states.")
+    }
+    else {
+        foreach ($triaged in $triagedNonStateScreenshots) {
+            [void]$builder.AppendLine('- `' + $triaged.relative_path + '`: ' + $triaged.reason)
+        }
+    }
+    [void]$builder.AppendLine()
+
     [void]$builder.AppendLine("## Recommended Result Commands")
     [void]$builder.AppendLine("All PASS after visual review:")
     [void]$builder.AppendLine('```powershell')
@@ -337,6 +362,16 @@ if (-not $PreviewOnly) {
     $actualOutputPath = Write-TextWithFallback -PreferredPath $OutputPath -Contents $markdown
 }
 
+$nextAction = if ($readiness -eq "ready_for_visual_review") {
+    "Open the review pack, make visual PASS/FIX/BLOCKED decisions, then apply the result writer command."
+}
+elseif ($screenshotData.manual_registration_candidate_count -gt 0) {
+    "Visually inspect unlabeled PNG candidates, then register any matching missing state with Tools\Register-PrototypePlayModeManualEvidence.ps1."
+}
+else {
+    "Use Capture Verification Suite or focused retakes for missing states, then regenerate this review pack."
+}
+
 $result = [ordered]@{
     review_pack_status = "ok"
     review_readiness = $readiness
@@ -349,11 +384,13 @@ $result = [ordered]@{
     missing_states = $screenshotData.missing_states
     manual_registration_candidate_count = $screenshotData.manual_registration_candidate_count
     manual_registration_commands = $screenshotData.manual_registration_commands
+    triaged_non_state_count = $screenshotData.triaged_non_state_count
+    triaged_non_state_screenshots = $screenshotData.triaged_non_state_screenshots
     manual_record_status = $recordData.playmode_record_status
     wave_combat_action_showcase_ready = $suiteData.wave_combat_action_showcase_ready
     wave_combat_action_showcase_reason = $suiteData.wave_combat_action_showcase_reason
     visual_review_required = $screenshotData.visual_review_required
-    next_action = if ($readiness -eq "ready_for_visual_review") { "Open the review pack, make visual PASS/FIX/BLOCKED decisions, then apply the result writer command." } else { "Use Capture Verification Suite, focused retakes, or Tools\Register-PrototypePlayModeManualEvidence.ps1, then regenerate this review pack." }
+    next_action = $nextAction
 }
 
 if ($JsonOnly) {

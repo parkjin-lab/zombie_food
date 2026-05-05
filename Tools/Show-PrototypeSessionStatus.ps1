@@ -133,6 +133,7 @@ $playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $pla
 $playModeScreenshotMissingStates = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.missing_states } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.missing_states } else { @() }
 $playModeManualRegistrationCandidateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_candidate_count) { $playModeScreenshotsData.manual_registration_candidate_count } else { 0 }
 $playModeManualRegistrationCommands = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_commands) { $playModeScreenshotsData.manual_registration_commands } else { @() }
+$playModeTriagedNonStateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.triaged_non_state_count) { $playModeScreenshotsData.triaged_non_state_count } else { 0 }
 $reviewPackStatus = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_pack_status } elseif (-not $playModeReviewPackResult.ok) { "failed" } else { "unknown" }
 $reviewReadiness = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_readiness } else { "unknown" }
 $reviewPackVisualReviewRequired = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.visual_review_required } else { $null }
@@ -187,7 +188,7 @@ elseif (-not $suiteEvidenceReady) {
             $nextEvidenceAction = "Review " + $playModeManualRegistrationCandidateCount + " unlabeled PNG candidate(s), then register any matching missing state with Tools\Register-PrototypePlayModeManualEvidence.ps1."
         }
         else {
-            $nextEvidenceAction = "Register missing standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1, or run Capture Verification Suite when Play Mode input is reliable."
+            $nextEvidenceAction = "No standalone PNG candidates remain; capture or focused-retake Draw Choice, Pending Placement, and Invalid Placement evidence."
         }
     }
     else {
@@ -256,6 +257,7 @@ $summary = [ordered]@{
     playmode_screenshot_missing_states = $playModeScreenshotMissingStates
     playmode_manual_registration_candidate_count = $playModeManualRegistrationCandidateCount
     playmode_manual_registration_commands = $playModeManualRegistrationCommands
+    playmode_triaged_non_state_count = $playModeTriagedNonStateCount
     review_pack_status = $reviewPackStatus
     review_readiness = $reviewReadiness
     review_pack_visual_review_required = $reviewPackVisualReviewRequired
@@ -331,6 +333,7 @@ Write-Host ("wave_combat_action_showcase_reason=" + $summary.wave_combat_action_
 Write-Host ("playmode_screenshot_status=" + $summary.playmode_screenshot_status)
 Write-Host ("playmode_screenshot_count=" + $summary.playmode_screenshot_count)
 Write-Host ("playmode_manual_registration_candidate_count=" + $summary.playmode_manual_registration_candidate_count)
+Write-Host ("playmode_triaged_non_state_count=" + $summary.playmode_triaged_non_state_count)
 Write-Host ("review_pack_status=" + $summary.review_pack_status)
 Write-Host ("review_readiness=" + $summary.review_readiness)
 Write-Host ("review_pack_visual_review_required=" + [string]$summary.review_pack_visual_review_required)

@@ -1,0 +1,13 @@
+FoodTruck Prototype Play Mode Screenshot Triage
+Date: 2026-05-06 02:02 KST
+
+Purpose:
+This file records Play Mode screenshots that were visually inspected but should not
+be used as required Draw Choice, Pending Placement, Invalid Placement, or Wave
+Combat evidence.
+
+Ignored screenshots:
+- Screenshot: Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010245.png
+  Triage status: ignored_non_state
+  Required state match: none
+  Reason: Build Flow idle screenshot; it does not show 3 Draw Choice cards, a pending block, or invalid placement feedback.

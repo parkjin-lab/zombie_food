@@ -4,9 +4,9 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-06 01:50 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 standalone PNG 수동 등록 명령 템플릿을 추가한 뒤에도 통과한다.
+- 2026-05-06 01:58 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 screenshot triage 경로를 추가한 뒤에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
-- 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 남은 unlabeled PNG 1장은 `manual_registration_candidate_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이다.
+- 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
 - PC 제한 상황에서도 코어 루프 개선은 진행 중이다. 최신 코드 단계는 Wave Combat 종료 후 KO/damage, HP/Heat 변화, supplies, peak Heat, combo/leak 정보를 짧은 payoff cue로 남긴다.
 - Draw Choice 카드는 이제 `Fit`, `Heat`, `Role` 칩으로 세 카드의 즉시 차이를 더 빨리 비교하게 만드는 방향으로 보강됐다.
@@ -26,6 +26,7 @@
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`도 첫 화면과 JSON에 함께 출력한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `top_issue`, `next_evidence_action`, `next_code_target`까지 출력해 다음 세션의 첫 행동을 분명히 한다.
 - `Tools\Register-PrototypePlayModeManualEvidence.ps1`은 standalone PNG를 상태별 suite 증거로 등록한다. 직접 Play Mode 조작이 불안정할 때 Capture Verification Suite의 보조 경로로 사용하며, screenshot verifier와 review pack preview가 상태별 command template을 생성한다.
+- `Docs\Prototype_PlayMode_Screenshot_Triage.txt`는 시각 검토 후 필수 상태 증거가 아니라고 판단한 PNG를 기록한다. triage된 PNG는 더 이상 manual registration candidate로 추천되지 않는다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
@@ -38,7 +39,7 @@
 - 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다.
 - Unity Play Mode에서 `Tools > Food Truck Prototype > Capture Verification Suite`를 실행해 Draw Choice, Pending Placement, Invalid Placement, Wave Combat 네 상태를 한 번에 캡처한다.
 - 직접 suite 캡처가 어렵지만 PNG는 확보했다면 `Tools\Register-PrototypePlayModeManualEvidence.ps1`로 해당 PNG를 상태별 suite 증거에 등록한다.
-- 등록할 상태가 애매하면 `Tools\Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` 또는 review pack preview의 `manual_registration_commands`를 먼저 보고, 시각적으로 맞는 상태에만 적용한다.
+- 등록할 상태가 애매하면 `Tools\Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` 또는 review pack preview의 `manual_registration_commands`를 먼저 보고, 시각적으로 맞는 상태에만 적용한다. 시각적으로 맞지 않으면 triage manifest에 남긴다.
 - suite 캡처 직후 `Tools\Verify-PrototypePlayModeSuite.ps1`로 네 상태의 manifest와 스크린샷 파일 존재를 확인한다.
 - 이어서 `Tools\Verify-PrototypePlayModeScreenshots.ps1`로 PNG 유효성, 세로 해상도, 파일 크기, suite 라벨 커버리지를 확인한다.
 - `Tools\Write-PrototypePlayModeReviewPack.ps1`로 suite 상태, screenshot 상태, record 상태, contact sheet, 결과 명령 템플릿을 한 장에 모은다.
@@ -73,6 +74,7 @@
 - Review pack status: `review_pack_status=ok`, `review_pack_visual_review_required=True/False`
 - Work focus: `top_issue`, `next_evidence_action`, `next_code_target`
 - Manual registration candidates: `manual_registration_candidate_count`, `manual_registration_commands`
+- Screenshot triage: `triaged_non_state_count`, `triaged_non_state_screenshots`
 - Wave Combat action showcase: `wave_combat_action_showcase_ready=true`와 reason 확인
 - Manual record: `passed`, `needs_fix`, `blocked`, `not_recorded`, `invalid_record`
 - 배치 성공률: `placed_success / place_attempt`

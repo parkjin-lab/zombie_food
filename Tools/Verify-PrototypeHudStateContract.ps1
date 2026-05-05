@@ -394,6 +394,9 @@ Add-ContractCheck $checks "editor_helpers" "screenshot_evidence_quality_is_machi
     'manual_registration_candidate_count',
     'manual_registration_commands',
     'New-ManualRegistrationCommand',
+    'Prototype_PlayMode_Screenshot_Triage.txt',
+    'triaged_non_state_count',
+    'Triaged Non-State',
     'visual_review_required'
 ) "Captured Play Mode screenshots should have a local quality and coverage check before manual review."
 
@@ -428,6 +431,7 @@ Add-ContractCheck $checks "editor_helpers" "session_status_reports_next_work_foc
     'next_evidence_action',
     'next_code_target',
     'playmode_manual_registration_candidate_count',
+    'playmode_triaged_non_state_count',
     'unlabeled PNG candidate',
     'Register-PrototypePlayModeManualEvidence.ps1',
     'captured_manual',
@@ -447,6 +451,8 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     'Register-PrototypePlayModeManualEvidence.ps1',
     'Manual Evidence Registration Hints',
     'manual_registration_commands',
+    'Triaged Non-State Screenshots',
+    'triaged_non_state_count',
     'Screenshot Contact Sheet',
     'Visual Acceptance Checklist',
     'Wave Combat action showcase',
