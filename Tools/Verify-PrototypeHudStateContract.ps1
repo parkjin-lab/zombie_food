@@ -268,9 +268,12 @@ Add-ContractCheck $checks "recipe_feedback" "hud_keeps_recent_recipe_cause_visib
 Add-ContractCheck $checks "recipe_feedback" "active_recipe_chips_describe_effect_role" $sources.hud @(
     'BuildRecipeEffectChipText(recipe)',
     'public static string BuildRecipeEffectChipText(RecipeState recipe)',
+    'BuildRecipeLiveProgressChipText(recipe)',
+    'public static string BuildRecipeLiveProgressChipText(RecipeState recipe)',
     '"Regen/Cool " + power',
     '"Lane Hit " + power',
-    'CreateChip(chipText, color, 260f, 310f, 13)'
+    '"Warming up"',
+    'CreateChip(chipText, color, 320f, 380f, 13)'
 ) "Active recipe chips should show what the recipe is doing, not only name and remaining time."
 
 Add-ContractCheck $checks "recipe_feedback" "recipe_expiry_reports_accumulated_payoff" ($sources.model + $sources.hud + $sources.presentation) @(
@@ -393,6 +396,7 @@ Add-ContractCheck $checks "regression_tests" "editmode_covers_fail_reasons_and_l
     'TryPlacePendingAtCell_ThirdMatchingBlock_ActivatesRecipeBingo',
     'TriggerRandomRecipe_LogsActivationCause',
     'BuildRecipeEffectChipText_DescribesPassiveAndActiveRoles',
+    'BuildRecipeLiveProgressChipText_UsesPayoffOrWarmup',
     'BuildRecipeImpactSummary_ReportsAccumulatedPayoff',
     'BuildRecipeImpactSummary_WhenNoPayoff_ReportsNoPayoff',
     'model.LastRecipeActivationCue',

@@ -808,6 +808,24 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildRecipeLiveProgressChipText_UsesPayoffOrWarmup()
+        {
+            var cold = new RecipeState("Veggie Stir-fry", RecipeTier.Basic, true, 0.45f, 20f);
+            var hot = new RecipeState("Seafood Pasta", RecipeTier.Intermediate, false, 0.90f, 12f)
+            {
+                DamageDealt = 18.4f,
+                EnemiesDefeated = 1
+            };
+
+            string coldText = FoodTruckPrototypeHud.BuildRecipeLiveProgressChipText(cold);
+            string hotText = FoodTruckPrototypeHud.BuildRecipeLiveProgressChipText(hot);
+
+            StringAssert.Contains("Warming up", coldText);
+            StringAssert.Contains("Dmg 18", hotText);
+            StringAssert.Contains("KO 1", hotText);
+        }
+
+        [Test]
         public void BuildRecipeImpactSummary_ReportsAccumulatedPayoff()
         {
             var recipe = new RecipeState("Seafood Pasta", RecipeTier.Intermediate, false, 0.90f, 12f)

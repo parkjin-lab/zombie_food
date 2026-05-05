@@ -2287,10 +2287,12 @@ namespace ZombieFoodcenter.Prototype
                     recipe.Name +
                     " | " +
                     BuildRecipeEffectChipText(recipe) +
+                    " | " +
+                    BuildRecipeLiveProgressChipText(recipe) +
                     " [" +
                     recipe.RemainingSeconds.ToString("0") +
                     "s]";
-                RectTransform chip = CreateChip(chipText, color, 260f, 310f, 13);
+                RectTransform chip = CreateChip(chipText, color, 320f, 380f, 13);
                 if (chip != null
                     && synergyChipPulseTimer > 0f
                     && string.Equals(recipe.Name, lastActivatedRecipeName, StringComparison.Ordinal))
@@ -2339,6 +2341,14 @@ namespace ZombieFoodcenter.Prototype
             return recipe.IsPassive
                 ? "Regen/Cool " + power
                 : "Lane Hit " + power;
+        }
+
+        public static string BuildRecipeLiveProgressChipText(RecipeState recipe)
+        {
+            string progress = FoodTruckRunModel.BuildRecipeImpactSummary(recipe);
+            return string.Equals(progress, "No payoff recorded", StringComparison.Ordinal)
+                ? "Warming up"
+                : progress;
         }
 
     }
