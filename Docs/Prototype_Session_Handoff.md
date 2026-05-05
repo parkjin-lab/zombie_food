@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-05 19:34 KST
+Last updated: 2026-05-05 20:00 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -61,6 +61,7 @@ Last updated: 2026-05-05 19:34 KST
 - Added a persistent Wave payoff chip to the Synergy Bar so the latest wave result stays visible after the banner fades.
 - Expanded the placement/draw battlefield layout so the truck-and-zombie play area now reserves more than half of the viewport instead of letting build controls dominate the screen.
 - Changed lane truck rendering to a single longer food truck marker, and strengthened combat readability with attack trails, larger impact flashes, longer hit poses, and brighter lane damage flash.
+- Added battlefield floating combat text for enemy damage, KO, lane leaks, and truck HP loss so hit results are readable even when particles overlap.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -90,6 +91,7 @@ Last updated: 2026-05-05 19:34 KST
 - Latest local recheck at 2026-05-05 01:52 KST after recipe expiry payoff work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=34`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 17:21 KST after live recipe progress chip work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=34`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with a refreshed status timestamp and compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 - Latest local recheck at 2026-05-05 19:36 KST after battlefield readability work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=34`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
+- Latest local recheck at 2026-05-05 20:00 KST after combat floating text work: `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `hud_contract_status=ok`, `check_count=35`, `failed_checks=0`; `Tools/Verify-PrototypeLayout.ps1 -JsonOnly` reports `layout_status=ok`, `failed_checks=0`, `source_sync_status=ok`; `Tools/Verify-PrototypeStatic.ps1` reports `static_status=ok`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` with compile/tests still `inconclusive` due current environment; `git diff --check` reports no whitespace errors.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -107,7 +109,9 @@ Last updated: 2026-05-05 19:34 KST
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: active recipe chips now show live progress before expiry, or `Warming up` while no payoff has been accumulated yet.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: Synergy Bar now shows the latest recipe result when no recipe remains active.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: placement/draw gameplay focus now reserves more than half of the viewport for the battlefield and enlarges lane rows during build decisions.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: tracks short-lived battlefield combat floating text widgets and spawns truck-damage labels when HP drops.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.EnemyVisuals.cs`: lane truck markers now collapse to one long truck, while enemy hits spawn visible attack trails and larger impact flashes.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.EnemyVisuals.cs`: enemy hits now spawn `-damage`, `KO`, and `LEAK` floating text near the relevant lane target.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: recipe activation pulse now resolves the actual recipe name from model state or payload fallback.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: recipe expiry now has its own payoff cue presentation.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.DrawChoiceFlow.cs`: Draw Choice card text now includes fit count, estimated Heat cost, and a tactical role label.

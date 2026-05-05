@@ -4,7 +4,7 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-05 19:36 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 전장 확대/공격 판독성 변경 후에도 통과한다.
+- 2026-05-05 20:00 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 전투 플로팅 텍스트 변경 후에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=not_recorded`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과하지만 suite 라벨 커버리지가 없어 최종 판정 증거로는 아직 `partial`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -19,6 +19,7 @@
 - Active recipe 칩은 이제 만료 전에도 `Dmg`, `KO`, `HP`, `Heat` 진행 성과나 `Warming up` 상태를 보여주는 방향으로 보강 중이다.
 - 최신 웨이브 payoff는 이제 Synergy Bar의 별도 칩으로도 남겨, 다음 드로우/배치 판단 중 다시 확인할 수 있게 하는 방향으로 보강 중이다.
 - 전장 레이아웃은 이제 Draw/Pending Placement에서도 푸드트럭과 좀비가 화면의 절반 이상을 차지하도록 보강됐다. 트럭은 lane마다 반복하지 않고 한 대의 긴 마커로 보여주며, 피격 순간에는 공격 궤적과 충격 플래시가 더 크게 보이도록 보강됐다.
+- 전투 결과 판독성은 이제 좀비 피격 `-damage`, 처치 `KO`, 트럭 도달 `LEAK`, 트럭 피해 `TRUCK -HP` 플로팅 텍스트로 보강됐다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
@@ -65,7 +66,7 @@
 - 웨이브당 과열(Overheat) 발생 횟수
 - 웨이브 결과 요약 가독성: KO/damage, HP/Heat 변화, combo/leak 중 최소 1개 이상이 즉시 읽히는지
 - 전장 비중: Draw/Pending/Wave 상태에서 푸드트럭과 좀비가 있는 영역이 화면의 50% 이상으로 체감되는지
-- 공격 판독성: 공격 궤적과 피격 플래시만 보고도 맞은 좀비와 HP 감소 원인을 이해할 수 있는지
+- 공격 판독성: 공격 궤적, 피격 플래시, `-damage`/`KO`/`LEAK`/`TRUCK -HP` 표식만 보고도 맞은 대상과 HP 감소 원인을 이해할 수 있는지
 - 드로우 카드 비교성: `Fit`, `Heat`, `Role`, `Value/Risk` 중 최소 3개가 3초 안에 비교되는지
 - 배치 실패 회복성: 실패 후 다음 행동을 읽고 다시 시도할 수 있는지
 - 배치 추천 설명성: 추천 슬롯이 어느 lane/coverage/center 이유로 좋은지 바로 이해되는지

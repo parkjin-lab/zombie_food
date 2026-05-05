@@ -53,6 +53,7 @@ $relativeFiles = [ordered]@{
     pendingAssist = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PendingPlacementAssist.cs"
     placementFeedback = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PlacementFeedback.cs"
     presentation = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PresentationActions.cs"
+    enemyVisuals = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.EnemyVisuals.cs"
     prototypeVfx = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PrototypeVfx.cs"
     telemetry = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.Telemetry.cs"
     editorMenu = "Assets\Scripts\Editor\FoodTruckPrototypePlayModeVerificationMenu.cs"
@@ -244,6 +245,19 @@ Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources
     '"Wave " + model.Wave + " started. Keep your lanes stable."'
 ) "Wave change feedback should prioritize the last wave payoff when one is available."
 
+Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
+    'private sealed class CombatFloatingTextWidget',
+    'private readonly List<CombatFloatingTextWidget> combatFloatingTexts',
+    'UpdateCombatFloatingTexts(dt);',
+    'SpawnTruckDamageFloater(truckDamageThisFrame);',
+    'SpawnEnemyDamageFloater(widget, damageTaken, knockout);',
+    'SpawnEnemyLeakFloater(widget);',
+    'SpawnCombatFloatingText(',
+    '"TRUCK " + BuildCombatDamageLabel(damageAmount)',
+    '"LEAK"',
+    '"KO"'
+) "Combat feedback should label enemy damage, knockouts, leaks, and truck HP loss directly in the battlefield."
+
 Add-ContractCheck $checks "recipe_feedback" "recipe_activation_payload_explains_cause" $sources.model @(
     'public string LastRecipeActivationName => lastRecipeActivationName;',
     'public string LastRecipeActivationSummary => lastRecipeActivationSummary;',
@@ -426,7 +440,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

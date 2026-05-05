@@ -31,6 +31,7 @@ namespace ZombieFoodcenter.Prototype
             public float LastDistance01;
             public float HitTimer;
             public float AnimationOffset;
+            public bool KnockoutFloaterSpawned;
         }
 
 
@@ -51,6 +52,16 @@ namespace ZombieFoodcenter.Prototype
             public float Remaining;
             public float Duration;
         }
+
+        private sealed class CombatFloatingTextWidget
+        {
+            public RectTransform Rect;
+            public Text Text;
+            public Vector2 Velocity;
+            public float Remaining;
+            public float Duration;
+        }
+
         private sealed class UndeadSpriteSet
         {
             public Sprite[] RunFrames;
@@ -227,6 +238,7 @@ namespace ZombieFoodcenter.Prototype
         private readonly Dictionary<int, EnemyVisualWidget> enemyVisuals = new Dictionary<int, EnemyVisualWidget>();
         private readonly List<EnemyAfterVisualWidget> enemyAfterVisuals = new List<EnemyAfterVisualWidget>();
         private readonly List<EnemyHitEffectWidget> enemyHitEffects = new List<EnemyHitEffectWidget>();
+        private readonly List<CombatFloatingTextWidget> combatFloatingTexts = new List<CombatFloatingTextWidget>();
         private readonly Image[] laneTrackImages = new Image[3];
         private readonly Image[] laneTruckImages = new Image[3];
         private readonly Text[] laneTruckTexts = new Text[3];
@@ -409,6 +421,15 @@ namespace ZombieFoodcenter.Prototype
 
         [SerializeField]
         private float enemyHitEffectTravelSpeed = 92f;
+
+        [SerializeField]
+        private float combatFloatingTextDuration = 0.78f;
+
+        [SerializeField]
+        private float combatFloatingTextRiseSpeed = 46f;
+
+        [SerializeField]
+        private float combatFloatingTextSideDrift = 20f;
 
         [SerializeField]
         private float enemyHitShakeDistance = 14f;
@@ -913,6 +934,7 @@ namespace ZombieFoodcenter.Prototype
             UpdateTelemetryAutomation(dt);
             UpdateEnemyAfterVisuals(dt);
             UpdateEnemyHitEffects(dt);
+            UpdateCombatFloatingTexts(dt);
             UpdateLaneHitFlashVisuals(dt);
 
             HandleKeyboardShortcuts();
@@ -1372,7 +1394,10 @@ namespace ZombieFoodcenter.Prototype
                 return;
             }
 
-            bool truckDamagedThisFrame = previousTruckHp >= 0f && model.TruckHp + 0.01f < previousTruckHp;
+            float truckDamageThisFrame = previousTruckHp >= 0f
+                ? Mathf.Max(0f, previousTruckHp - model.TruckHp)
+                : 0f;
+            bool truckDamagedThisFrame = truckDamageThisFrame > 0.01f;
             bool focusPlacementMode = model.HasPendingBlock && (isDraggingPending || pendingHoverAnchorCell >= 0);
             bool gameplayFocusHud = IsGameplayFocusHudActive();
             ApplyGameplayHudContext(focusPlacementMode, gameplayFocusHud);
@@ -1545,6 +1570,11 @@ namespace ZombieFoodcenter.Prototype
                     "Lane " + (lane + 1) +
                     "  z:" + model.GetLaneEnemyCount(lane) +
                     "  p:" + model.GetLanePressure(lane).ToString("0.0");
+            }
+
+            if (truckDamagedThisFrame)
+            {
+                SpawnTruckDamageFloater(truckDamageThisFrame);
             }
 
             RefreshEnemyVisuals(truckDamagedThisFrame);

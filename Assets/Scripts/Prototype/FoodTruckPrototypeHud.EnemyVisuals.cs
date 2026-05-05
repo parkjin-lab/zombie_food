@@ -223,6 +223,7 @@ namespace ZombieFoodcenter.Prototype
             if (likelyReachedTruck)
             {
                 TriggerLaneHitFlash(widget.LaneIndex);
+                SpawnEnemyLeakFloater(widget);
                 return;
             }
 
@@ -231,6 +232,11 @@ namespace ZombieFoodcenter.Prototype
                 ? spriteSet.DeadFrame
                 : widget.Icon.sprite;
 
+            if (!widget.KnockoutFloaterSpawned)
+            {
+                SpawnEnemyDamageFloater(widget, Mathf.Max(1f, widget.LastHp), true);
+                widget.KnockoutFloaterSpawned = true;
+            }
             SpawnEnemyAfterVisual(widget, deadSprite);
         }
 
@@ -489,6 +495,158 @@ namespace ZombieFoodcenter.Prototype
             enemyHitEffects.Add(effect);
         }
 
+        private void SpawnEnemyDamageFloater(EnemyVisualWidget source, float damageAmount, bool knockout)
+        {
+            if (source == null || source.Rect == null || source.LaneIndex < 0 || source.LaneIndex >= laneTrackRoots.Length)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[source.LaneIndex];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            string label = knockout ? "KO" : BuildCombatDamageLabel(damageAmount);
+            Color color = knockout
+                ? new Color(1f, 0.94f, 0.42f, 1f)
+                : new Color(1f, 0.64f, 0.28f, 1f);
+            int fontSize = knockout
+                ? Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.24f), 15, 26)
+                : Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.20f), 13, 22);
+            Vector2 position = source.Rect.anchoredPosition + new Vector2(0f, Mathf.Clamp(laneHeight * 0.22f, 12f, 32f));
+            SpawnCombatFloatingText(laneRoot, position, label, color, fontSize, 1f);
+        }
+
+        private void SpawnEnemyLeakFloater(EnemyVisualWidget source)
+        {
+            if (source == null || source.Rect == null || source.LaneIndex < 0 || source.LaneIndex >= laneTrackRoots.Length)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[source.LaneIndex];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            Vector2 position = source.Rect.anchoredPosition + new Vector2(0f, Mathf.Clamp(laneHeight * 0.16f, 10f, 26f));
+            SpawnCombatFloatingText(
+                laneRoot,
+                position,
+                "LEAK",
+                new Color(1f, 0.32f, 0.22f, 1f),
+                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.20f), 13, 23),
+                1f);
+        }
+
+        private void SpawnTruckDamageFloater(float damageAmount)
+        {
+            if (laneTrackRoots.Length < 2)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[1];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            float truckX = foodTruckSprite != null
+                ? Mathf.Clamp(laneHeight * 1.16f, 86f, 190f)
+                : Mathf.Clamp(laneHeight * 0.58f, 52f, 112f);
+            SpawnCombatFloatingText(
+                laneRoot,
+                new Vector2(truckX, Mathf.Clamp(laneHeight * 0.14f, 10f, 26f)),
+                "TRUCK " + BuildCombatDamageLabel(damageAmount),
+                new Color(1f, 0.40f, 0.26f, 1f),
+                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.18f), 13, 22),
+                1.12f);
+        }
+
+        private void SpawnCombatFloatingText(
+            RectTransform laneRoot,
+            Vector2 anchoredPosition,
+            string label,
+            Color color,
+            int fontSize,
+            float durationScale)
+        {
+            if (laneRoot == null || string.IsNullOrEmpty(label))
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            Text text = CreateText(laneRoot, "CombatFloatText", fontSize, FontStyle.Bold, TextAnchor.MiddleCenter, color);
+            text.raycastTarget = false;
+            text.text = label;
+
+            RectTransform rect = text.rectTransform;
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = new Vector2(Mathf.Clamp(laneHeight * 1.45f, 86f, 170f), Mathf.Clamp(laneHeight * 0.36f, 26f, 58f));
+            rect.SetAsLastSibling();
+
+            CombatFloatingTextWidget floating = new CombatFloatingTextWidget();
+            floating.Rect = rect;
+            floating.Text = text;
+            floating.Duration = Mathf.Max(0.12f, combatFloatingTextDuration * Mathf.Max(0.2f, durationScale));
+            floating.Remaining = floating.Duration;
+            floating.Velocity = new Vector2(
+                UnityEngine.Random.Range(-combatFloatingTextSideDrift, combatFloatingTextSideDrift),
+                Mathf.Max(6f, combatFloatingTextRiseSpeed));
+            combatFloatingTexts.Add(floating);
+        }
+
+        private void UpdateCombatFloatingTexts(float dt)
+        {
+            float delta = Mathf.Max(0f, dt);
+            for (int i = combatFloatingTexts.Count - 1; i >= 0; i--)
+            {
+                CombatFloatingTextWidget floating = combatFloatingTexts[i];
+                if (floating == null || floating.Rect == null)
+                {
+                    combatFloatingTexts.RemoveAt(i);
+                    continue;
+                }
+
+                floating.Remaining -= delta;
+                if (floating.Remaining <= 0f)
+                {
+                    Destroy(floating.Rect.gameObject);
+                    combatFloatingTexts.RemoveAt(i);
+                    continue;
+                }
+
+                float life01 = floating.Duration > 0.001f
+                    ? 1f - Mathf.Clamp01(floating.Remaining / floating.Duration)
+                    : 1f;
+                floating.Rect.anchoredPosition += floating.Velocity * delta;
+                floating.Rect.localScale = Vector3.one * Mathf.Lerp(1.14f, 0.88f, life01);
+
+                if (floating.Text != null)
+                {
+                    Color c = floating.Text.color;
+                    c.a = Mathf.Lerp(1f, 0f, life01);
+                    floating.Text.color = c;
+                }
+            }
+        }
+
+        private static string BuildCombatDamageLabel(float amount)
+        {
+            return "-" + Mathf.CeilToInt(Mathf.Max(1f, amount));
+        }
+
         private void UpdateEnemyHitEffects(float dt)
         {
             float delta = Mathf.Max(0f, dt);
@@ -592,6 +750,7 @@ namespace ZombieFoodcenter.Prototype
             widget.LastDistance01 = enemy.DistanceToTruck01;
             widget.HitTimer = 0f;
             widget.AnimationOffset = (enemy.Id % 17) * 0.071f;
+            widget.KnockoutFloaterSpawned = false;
             return widget;
         }
 
@@ -639,10 +798,17 @@ namespace ZombieFoodcenter.Prototype
             bool tookHit = enemy.Hp + 0.01f < widget.LastHp;
             if (tookHit)
             {
+                float damageTaken = Mathf.Max(0f, widget.LastHp - enemy.Hp);
                 widget.HitTimer = Mathf.Max(widget.HitTimer, enemyHitPoseDuration);
                 SpawnEnemyAttackTrail(widget);
                 SpawnEnemyHitEffect(widget);
                 SpawnEnemyHitEffect(widget);
+                bool knockout = enemy.Hp <= 0.01f;
+                SpawnEnemyDamageFloater(widget, damageTaken, knockout);
+                if (knockout)
+                {
+                    widget.KnockoutFloaterSpawned = true;
+                }
             }
 
             widget.LastHp = enemy.Hp;
