@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-05 21:02 KST
+Last updated: 2026-05-05 21:10 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -16,17 +16,17 @@ evidence.
 - Play Mode suite: `playmode_suite_status=not_recorded`, `captured_count=0/4`; the PC-limited Play Mode suite is not recorded as of 2026-05-05 KST.
 - Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, but does not provide full suite coverage.
 - Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
-- Review pack: `Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports `partial_evidence` and now carries Wave Combat action showcase readiness plus a visual acceptance checklist.
+- Session status/review pack: `Show-PrototypeSessionStatus.ps1` and `Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` now carry Wave Combat action showcase readiness; review pack also includes the visual acceptance checklist.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 - Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
 - Pending Placement update: R1/R2 recommendation copy now explains lane pressure, multi-lane coverage, and center positioning instead of leading with raw scores; Play Mode readability is still pending.
 - Battlefield readability update: placement/draw states now reserve more than half of the viewport for the truck-and-zombie play area, show one long food truck marker, and use brighter attack trails/impact flashes; Play Mode readability is still pending.
 - Combat result readability update: hits now surface floating `-damage`, `KO`, `LEAK`, and `TRUCK -HP` text in the battlefield; Play Mode readability is still pending.
-- Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/review outputs now expose `wave_combat_action_showcase_ready/reason`.
+- Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
 
 ## Start Here
-1. Print the current session status.
+1. Print the current session status, including Wave Combat action showcase readiness.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
@@ -55,6 +55,7 @@ evidence.
 
 ### Next Actions
 - Keep `Show-PrototypeSessionStatus.ps1` as the session-start command.
+- Treat `wave_combat_action_showcase_ready=false` in session status as an evidence gap, not a Wave Combat visual PASS.
 - Confirm all suite states are represented in the suite verifier output.
 - Use screenshot verification to distinguish partial portrait evidence from full suite-ready evidence.
 - Build the review pack before visual judgment.
@@ -64,7 +65,7 @@ evidence.
 ### Acceptance
 - `playmode_suite_status=captured`, or the missing capture reason is explicit.
 - `playmode_screenshot_status=suite_ready`, or the partial/missing screenshot reason is explicit.
-- Wave Combat review evidence reports `wave_combat_action_showcase_ready=true`, or the missing showcase reason is explicit.
+- Wave Combat session/review evidence reports `wave_combat_action_showcase_ready=true`, or the missing showcase reason is explicit.
 - `Prototype_PlayMode_Verification.md` links the latest manual result to current evidence.
 - HUD changes pass `Verify-PrototypeHudStateContract.ps1`.
 - Layout changes pass `Verify-PrototypeLayout.ps1`.

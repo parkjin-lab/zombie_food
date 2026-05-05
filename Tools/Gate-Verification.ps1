@@ -455,6 +455,8 @@ if (-not $SkipPlayModeSuite) {
     if (-not $Compact -and $null -ne $playModeSuiteObj) {
         Write-Host ("playmode_suite_status=" + $playModeSuiteObj.playmode_suite_status)
         Write-Host ("playmode_suite_captured_count=" + $playModeSuiteObj.captured_count + "/" + $playModeSuiteObj.expected_state_count)
+        Write-Host ("wave_combat_action_showcase_ready=" + [string]$playModeSuiteObj.wave_combat_action_showcase_ready)
+        Write-Host ("wave_combat_action_showcase_reason=" + $playModeSuiteObj.wave_combat_action_showcase_reason)
     }
 
     if ($playModeSuiteResult.exit_code -ne 0) {

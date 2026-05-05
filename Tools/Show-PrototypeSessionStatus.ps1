@@ -116,6 +116,8 @@ $playModeRecordStatus = if ($null -ne $playModeRecordData) { $playModeRecordData
 $playModeSuiteStatus = if ($null -ne $playModeSuiteData) { $playModeSuiteData.playmode_suite_status } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.playmode_suite_status } else { "unknown" }
 $playModeSuiteCapturedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.captured_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.captured_count } else { $null }
 $playModeSuiteExpectedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.expected_state_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.expected_state_count } else { $null }
+$waveCombatActionShowcaseReady = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_ready } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.wave_combat_action_showcase_ready } else { $null }
+$waveCombatActionShowcaseReason = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_reason } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.wave_combat_action_showcase_reason } else { "unknown" }
 $playModeScreenshotStatus = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.playmode_screenshot_status } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.playmode_screenshot_status } else { "unknown" }
 $playModeScreenshotCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.screenshot_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.screenshot_count } else { $null }
 $playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.invalid_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.invalid_count } else { $null }
@@ -148,6 +150,7 @@ if ($hudContractStatus -ne "ok") {
     $unresolvedIssues.Add("HUD state contract status: " + $hudContractStatus + ".") | Out-Null
 }
 $unresolvedIssues.Add("Play Mode verification suite status: " + $playModeSuiteStatus + ".") | Out-Null
+$unresolvedIssues.Add("Wave Combat action showcase ready: " + [string]$waveCombatActionShowcaseReady + " (" + $waveCombatActionShowcaseReason + ").") | Out-Null
 $unresolvedIssues.Add("Play Mode screenshot evidence status: " + $playModeScreenshotStatus + ".") | Out-Null
 $unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
 $unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
@@ -164,6 +167,8 @@ $summary = [ordered]@{
     playmode_suite_status = $playModeSuiteStatus
     playmode_suite_captured_count = $playModeSuiteCapturedCount
     playmode_suite_expected_count = $playModeSuiteExpectedCount
+    wave_combat_action_showcase_ready = $waveCombatActionShowcaseReady
+    wave_combat_action_showcase_reason = $waveCombatActionShowcaseReason
     playmode_screenshot_status = $playModeScreenshotStatus
     playmode_screenshot_count = $playModeScreenshotCount
     playmode_screenshot_invalid_count = $playModeScreenshotInvalidCount
@@ -192,6 +197,7 @@ $summary = [ordered]@{
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
+        "Confirm wave_combat_action_showcase_ready=true before recording Wave Combat as PASS.",
         "Run Tools\Verify-PrototypePlayModeScreenshots.ps1 to check screenshot PNG quality and state coverage.",
         "Run Tools\Write-PrototypePlayModeReviewPack.ps1 to generate a single visual review sheet.",
         "Use Tools\Write-PrototypePlayModeResultFromSuite.ps1 to draft or apply PASS/FIX/BLOCKED results without hand-editing markdown.",
@@ -222,6 +228,8 @@ Write-Host ("hud_contract_status=" + $summary.hud_contract_status)
 Write-Host ("hud_contract_failed_checks=" + $summary.hud_contract_failed_checks)
 Write-Host ("playmode_suite_status=" + $summary.playmode_suite_status)
 Write-Host ("playmode_suite_captured_count=" + $summary.playmode_suite_captured_count + "/" + $summary.playmode_suite_expected_count)
+Write-Host ("wave_combat_action_showcase_ready=" + [string]$summary.wave_combat_action_showcase_ready)
+Write-Host ("wave_combat_action_showcase_reason=" + $summary.wave_combat_action_showcase_reason)
 Write-Host ("playmode_screenshot_status=" + $summary.playmode_screenshot_status)
 Write-Host ("playmode_screenshot_count=" + $summary.playmode_screenshot_count)
 Write-Host ("playmode_record_status=" + $summary.playmode_record_status)

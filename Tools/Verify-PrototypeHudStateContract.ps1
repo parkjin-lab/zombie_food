@@ -380,7 +380,10 @@ Add-ContractCheck $checks "editor_helpers" "suite_status_is_in_gate_and_session_
     'Verify-PrototypePlayModeSuite.ps1',
     'playmode_suite',
     'playmode_suite_status',
-    'playmode_suite_captured_count'
+    'playmode_suite_captured_count',
+    'wave_combat_action_showcase_ready',
+    'wave_combat_action_showcase_reason',
+    'Confirm wave_combat_action_showcase_ready=true before recording Wave Combat as PASS.'
 ) "The suite evidence status should be visible in gate and session readiness output."
 
 Add-ContractCheck $checks "editor_helpers" "screenshot_status_is_in_gate_and_session_status" ($sources.gate + $sources.sessionStatus) @(
