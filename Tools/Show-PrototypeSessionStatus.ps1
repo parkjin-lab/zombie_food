@@ -131,6 +131,8 @@ $playModeScreenshotStatus = if ($null -ne $playModeScreenshotsData) { $playModeS
 $playModeScreenshotCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.screenshot_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.screenshot_count } else { $null }
 $playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.invalid_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.invalid_count } else { $null }
 $playModeScreenshotMissingStates = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.missing_states } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.missing_states } else { @() }
+$playModeManualRegistrationCandidateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_candidate_count) { $playModeScreenshotsData.manual_registration_candidate_count } else { 0 }
+$playModeManualRegistrationCommands = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_commands) { $playModeScreenshotsData.manual_registration_commands } else { @() }
 $reviewPackStatus = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_pack_status } elseif (-not $playModeReviewPackResult.ok) { "failed" } else { "unknown" }
 $reviewReadiness = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_readiness } else { "unknown" }
 $reviewPackVisualReviewRequired = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.visual_review_required } else { $null }
@@ -181,7 +183,12 @@ if ($reviewPackStatus -ne "ok" -and $reviewPackStatus -ne "unknown") {
 elseif (-not $suiteEvidenceReady) {
     if ($playModeSuiteStatus -eq "manual_partial") {
         $topIssue = "Manual Play Mode evidence is partial: " + $playModeSuiteCapturedCount + "/" + $playModeSuiteExpectedCount + " states registered."
-        $nextEvidenceAction = "Register missing standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1, or run Capture Verification Suite when Play Mode input is reliable."
+        if ($playModeManualRegistrationCandidateCount -gt 0) {
+            $nextEvidenceAction = "Review " + $playModeManualRegistrationCandidateCount + " unlabeled PNG candidate(s), then register any matching missing state with Tools\Register-PrototypePlayModeManualEvidence.ps1."
+        }
+        else {
+            $nextEvidenceAction = "Register missing standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1, or run Capture Verification Suite when Play Mode input is reliable."
+        }
     }
     else {
         $topIssue = "Play Mode verification suite is not captured: " + $playModeSuiteStatus + "."
@@ -247,6 +254,8 @@ $summary = [ordered]@{
     playmode_screenshot_count = $playModeScreenshotCount
     playmode_screenshot_invalid_count = $playModeScreenshotInvalidCount
     playmode_screenshot_missing_states = $playModeScreenshotMissingStates
+    playmode_manual_registration_candidate_count = $playModeManualRegistrationCandidateCount
+    playmode_manual_registration_commands = $playModeManualRegistrationCommands
     review_pack_status = $reviewPackStatus
     review_readiness = $reviewReadiness
     review_pack_visual_review_required = $reviewPackVisualReviewRequired
@@ -277,6 +286,7 @@ $summary = [ordered]@{
         ($nextEvidenceAction),
         ("Next code target: " + $nextCodeTarget),
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
+        "Open the review pack or screenshot verifier output to copy manual registration command templates for unlabeled PNGs.",
         "If only standalone PNGs are available, register them with Tools\Register-PrototypePlayModeManualEvidence.ps1 before generating the review pack.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
@@ -320,6 +330,7 @@ Write-Host ("wave_combat_action_showcase_ready=" + [string]$summary.wave_combat_
 Write-Host ("wave_combat_action_showcase_reason=" + $summary.wave_combat_action_showcase_reason)
 Write-Host ("playmode_screenshot_status=" + $summary.playmode_screenshot_status)
 Write-Host ("playmode_screenshot_count=" + $summary.playmode_screenshot_count)
+Write-Host ("playmode_manual_registration_candidate_count=" + $summary.playmode_manual_registration_candidate_count)
 Write-Host ("review_pack_status=" + $summary.review_pack_status)
 Write-Host ("review_readiness=" + $summary.review_readiness)
 Write-Host ("review_pack_visual_review_required=" + [string]$summary.review_pack_visual_review_required)

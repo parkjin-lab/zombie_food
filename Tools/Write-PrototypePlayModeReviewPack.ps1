@@ -155,6 +155,16 @@ function Get-ScreenshotRows {
     return @($ScreenshotData.screenshots)
 }
 
+function Get-ManualRegistrationCommands {
+    param([object]$ScreenshotData)
+
+    if ($null -eq $ScreenshotData -or $null -eq $ScreenshotData.manual_registration_commands) {
+        return @()
+    }
+
+    return @($ScreenshotData.manual_registration_commands)
+}
+
 function Get-ReviewReadiness {
     param(
         [object]$SuiteData,
@@ -221,6 +231,7 @@ function Build-ReviewPackMarkdown {
 
     $readiness = Get-ReviewReadiness -SuiteData $SuiteData -ScreenshotData $ScreenshotData
     $screenshotRows = Get-ScreenshotRows -ScreenshotData $ScreenshotData
+    $manualRegistrationCommands = Get-ManualRegistrationCommands -ScreenshotData $ScreenshotData
     $builder = New-Object System.Text.StringBuilder
 
     [void]$builder.AppendLine("# Prototype Play Mode Review Pack")
@@ -236,6 +247,9 @@ function Build-ReviewPackMarkdown {
     }
     [void]$builder.AppendLine('- Screenshot status: `' + $ScreenshotData.playmode_screenshot_status + '` (' + $ScreenshotData.machine_quality_pass_count + '/' + $ScreenshotData.screenshot_count + ' quality pass)')
     [void]$builder.AppendLine('- Unlabeled screenshots: `' + $ScreenshotData.unlabeled_count + '`')
+    if ($null -ne $ScreenshotData.manual_registration_candidate_count) {
+        [void]$builder.AppendLine('- Manual registration candidates: `' + $ScreenshotData.manual_registration_candidate_count + '`')
+    }
     [void]$builder.AppendLine('- Manual record status: `' + $RecordData.playmode_record_status + '`')
     [void]$builder.AppendLine('- Wave Combat action showcase: ' + (Get-WaveCombatActionShowcaseLine -SuiteData $SuiteData))
     if ($ScreenshotData.missing_states.Count -gt 0) {
@@ -274,6 +288,23 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine("| Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |")
     [void]$builder.AppendLine("| Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |")
     [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and action labels `-12`, `KO`, `LEAK`, `TRUCK -7` plus lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if action labels or payoff cues are missing. |")
+    [void]$builder.AppendLine()
+
+    [void]$builder.AppendLine("## Manual Evidence Registration Hints")
+    if ($manualRegistrationCommands.Count -eq 0) {
+        [void]$builder.AppendLine("No unlabeled machine-quality PNG candidates are available for manual registration.")
+    }
+    else {
+        [void]$builder.AppendLine("Use these only after visually confirming the PNG actually matches the target state.")
+        foreach ($commandTemplate in $manualRegistrationCommands) {
+            [void]$builder.AppendLine()
+            [void]$builder.AppendLine("### " + $commandTemplate.state)
+            [void]$builder.AppendLine('- Candidate: `' + $commandTemplate.relative_path + '`')
+            [void]$builder.AppendLine('```powershell')
+            [void]$builder.AppendLine([string]$commandTemplate.command)
+            [void]$builder.AppendLine('```')
+        }
+    }
     [void]$builder.AppendLine()
 
     [void]$builder.AppendLine("## Recommended Result Commands")
@@ -316,6 +347,8 @@ $result = [ordered]@{
     screenshot_count = $screenshotData.screenshot_count
     machine_quality_pass_count = $screenshotData.machine_quality_pass_count
     missing_states = $screenshotData.missing_states
+    manual_registration_candidate_count = $screenshotData.manual_registration_candidate_count
+    manual_registration_commands = $screenshotData.manual_registration_commands
     manual_record_status = $recordData.playmode_record_status
     wave_combat_action_showcase_ready = $suiteData.wave_combat_action_showcase_ready
     wave_combat_action_showcase_reason = $suiteData.wave_combat_action_showcase_reason

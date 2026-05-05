@@ -29,6 +29,40 @@ function Resolve-EvidencePath {
     return [System.IO.Path]::GetFullPath((Join-Path $RootPath $EvidencePath))
 }
 
+function Get-ProjectRelativePath {
+    param(
+        [string]$TargetPath,
+        [string]$RootPath
+    )
+
+    try {
+        $root = [System.IO.Path]::GetFullPath($RootPath).TrimEnd("\") + "\"
+        $target = [System.IO.Path]::GetFullPath($TargetPath)
+        $rootUri = New-Object System.Uri $root
+        $targetUri = New-Object System.Uri $target
+        $relative = $rootUri.MakeRelativeUri($targetUri).ToString()
+        if (-not $relative.StartsWith("..")) {
+            return [System.Uri]::UnescapeDataString($relative).Replace("/", "\")
+        }
+    }
+    catch {
+        return $TargetPath
+    }
+
+    return $TargetPath
+}
+
+function New-ManualRegistrationCommand {
+    param(
+        [string]$StateName,
+        [string]$TargetPath,
+        [string]$RootPath
+    )
+
+    $relativePath = Get-ProjectRelativePath -TargetPath $TargetPath -RootPath $RootPath
+    return 'powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "' + $RootPath + '" -State "' + $StateName + '" -ScreenshotPath "' + $relativePath + '" -PreviewOnly -JsonOnly'
+}
+
 function Read-PngHeader {
     param([string]$Path)
 
@@ -162,6 +196,7 @@ $invalidScreenshots = New-Object System.Collections.Generic.List[string]
 $lowResolutionScreenshots = New-Object System.Collections.Generic.List[string]
 $smallFileScreenshots = New-Object System.Collections.Generic.List[string]
 $coveredStates = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::OrdinalIgnoreCase)
+$manualRegistrationCandidates = New-Object System.Collections.Generic.List[object]
 $unlabeledCount = 0
 
 foreach ($path in $candidatePaths) {
@@ -208,9 +243,31 @@ foreach ($path in $candidatePaths) {
         machine_quality_pass = $machineQuality
         error = $header.error
     }) | Out-Null
+
+    if ($state -eq "Unlabeled" -and $machineQuality) {
+        $manualRegistrationCandidates.Add([ordered]@{
+            path = $fullPath
+            relative_path = Get-ProjectRelativePath -TargetPath $fullPath -RootPath $ProjectPath
+            width = $header.width
+            height = $header.height
+            size_bytes = $sizeBytes
+        }) | Out-Null
+    }
 }
 
 $missingStates = @($requiredStates | Where-Object { -not $coveredStates.Contains($_) })
+$manualRegistrationCommands = New-Object System.Collections.Generic.List[object]
+foreach ($missingState in $missingStates) {
+    foreach ($candidate in $manualRegistrationCandidates) {
+        $manualRegistrationCommands.Add([ordered]@{
+            state = $missingState
+            screenshot = $candidate.path
+            relative_path = $candidate.relative_path
+            command = New-ManualRegistrationCommand -StateName $missingState -TargetPath $candidate.path -RootPath $ProjectPath
+        }) | Out-Null
+    }
+}
+
 $status = "not_recorded"
 $nextAction = "Capture Play Mode evidence with Tools > Food Truck Prototype > Capture Verification Suite."
 
@@ -225,7 +282,12 @@ if ($screenshots.Count -gt 0) {
     }
     else {
         $status = "partial"
-        $nextAction = "Use Capture Verification Suite or focused retakes so each required state has a labeled screenshot."
+        if ($manualRegistrationCandidates.Count -gt 0) {
+            $nextAction = "Visually inspect unlabeled PNG candidates, then register matching states with Tools\Register-PrototypePlayModeManualEvidence.ps1 or retake missing states."
+        }
+        else {
+            $nextAction = "Use Capture Verification Suite or focused retakes so each required state has a labeled screenshot."
+        }
     }
 }
 
@@ -239,6 +301,7 @@ $result = [ordered]@{
     low_resolution_count = $lowResolutionScreenshots.Count
     small_file_count = $smallFileScreenshots.Count
     unlabeled_count = $unlabeledCount
+    manual_registration_candidate_count = $manualRegistrationCandidates.Count
     covered_state_count = $coveredStates.Count
     expected_state_count = $requiredStates.Count
     missing_states = $missingStates
@@ -246,6 +309,8 @@ $result = [ordered]@{
     low_resolution_screenshots = $lowResolutionScreenshots.ToArray()
     small_file_screenshots = $smallFileScreenshots.ToArray()
     screenshots = $screenshots.ToArray()
+    manual_registration_candidates = $manualRegistrationCandidates.ToArray()
+    manual_registration_commands = $manualRegistrationCommands.ToArray()
     visual_review_required = $true
     next_action = $nextAction
 }
@@ -259,8 +324,15 @@ else {
     Write-Host ("machine_quality_pass_count=" + $result.machine_quality_pass_count + "/" + $screenshots.Count)
     Write-Host ("covered_state_count=" + $coveredStates.Count + "/" + $requiredStates.Count)
     Write-Host ("unlabeled_count=" + $unlabeledCount)
+    Write-Host ("manual_registration_candidate_count=" + $manualRegistrationCandidates.Count)
     if ($missingStates.Count -gt 0) {
         Write-Host ("missing_states=" + ($missingStates -join ", "))
+    }
+    if ($manualRegistrationCommands.Count -gt 0) {
+        Write-Host "manual_registration_commands:"
+        foreach ($commandTemplate in $manualRegistrationCommands) {
+            Write-Host ("- " + $commandTemplate.state + ": " + $commandTemplate.command)
+        }
     }
     Write-Host "visual_review_required=true"
     Write-Host ("next_action=" + $nextAction)

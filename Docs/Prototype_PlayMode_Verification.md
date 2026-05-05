@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Verification
 
-Last updated: 2026-05-06 01:32 KST
+Last updated: 2026-05-06 01:50 KST
 
 ## Purpose
 Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
@@ -21,7 +21,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - Play Mode 중 `Tools > Food Truck Prototype > Capture Play Mode Snapshot`을 실행하면 `Docs/PlayModeScreenshots`에 스크린샷을 저장하고 `Docs/Prototype_PlayMode_Verification_Draft.txt`에 현재 Unity 버전/해상도/리소스 로드 상태를 기록한다.
 - 한 번에 전체 상태 증거를 모으려면 Play Mode 중 `Tools > Food Truck Prototype > Capture Verification Suite`를 실행한다. Draw Choice, Pending Placement, Invalid Placement, Wave Combat을 순차 준비/캡처하고 `Docs/Prototype_PlayMode_Verification_Suite.txt`에 상태별 스크린샷, 준비 결과, HUD 요약을 남긴다.
 - suite 캡처 뒤에는 `Tools\Verify-PrototypePlayModeSuite.ps1`을 실행해 네 상태의 스크린샷 파일이 모두 존재하는지 확인한다. 이 검증은 시각적 PASS를 대신하지 않고, 증거 파일 누락만 잡는다.
-- 직접 suite 캡처가 어렵지만 standalone PNG가 있다면 `Tools\Register-PrototypePlayModeManualEvidence.ps1`로 Draw Choice, Pending Placement, Invalid Placement, 또는 Wave Combat 증거를 suite manifest에 수동 등록한다. 이 경로는 `manual_partial` 또는 `captured_manual`로 표시되며, Unity suite capture로 위장하지 않는다.
+- 직접 suite 캡처가 어렵지만 standalone PNG가 있다면 `Tools\Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` 또는 `Tools\Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly`에서 생성되는 `manual_registration_commands`를 확인한 뒤, 시각적으로 맞는 상태만 `Tools\Register-PrototypePlayModeManualEvidence.ps1`로 suite manifest에 수동 등록한다. 이 경로는 `manual_partial` 또는 `captured_manual`로 표시되며, Unity suite capture로 위장하지 않는다.
 - suite 또는 snapshot 캡처 뒤에는 `Tools\Verify-PrototypePlayModeScreenshots.ps1`을 실행해 PNG 유효성, 최소 세로 해상도, 파일 크기, 상태 라벨 커버리지를 확인한다. 이 검증도 시각적 PASS를 대신하지 않고, 판정 전에 증거 품질을 정리한다.
 - 시각 판정 직전에는 `Tools\Write-PrototypePlayModeReviewPack.ps1`로 suite/screenshot/record 상태와 스크린샷 contact sheet를 한 장짜리 review pack으로 생성한다. 기본 출력은 `Docs\Prototype_PlayMode_ReviewPack.md`이고, 현재 환경에서 Docs 쓰기가 막히면 JSON의 `output_path` temp 경로로 저장된다.
 - Play Mode 입력이 불안정하면 `Tools > Food Truck Prototype > Prepare and Capture State` 아래의 Draw Choice / Pending Placement / Invalid Placement / Wave Combat 메뉴를 사용한다. 각 메뉴는 해당 상태를 자동으로 만든 뒤 스크린샷과 draft에 준비 상태 요약을 남긴다.
@@ -74,7 +74,7 @@ Screenshots captured: 2
 2. Docs/PlayModeScreenshots/foodtruck-playmode-20260504-010245.png
 Top issue: Current PC cannot reliably continue direct Play Mode interaction. Captured Wave Combat was readable, but the bottom build panel occupied too much portrait space when no block was pending.
 Next code target: Completed 2026-05-04 20:24 KST; visual review can now be assembled into a single review pack before PASS/FIX/BLOCKED recording.
-Verification command result: Partial Play Mode record remains `not_recorded` until Draw Choice, Pending Placement, and Invalid Placement can be captured; suite evidence now reports `manual_partial` with Wave Combat registered from an existing PNG and 3 states missing; screenshot evidence reports `partial` with 2 valid portrait PNGs, 1 labeled Wave Combat state, and missing Draw Choice/Pending Placement/Invalid Placement coverage; `Tools\Verify-PrototypeHudStateContract.ps1`, `Tools\Verify-PrototypePlayModeSuite.ps1`, `Tools\Verify-PrototypePlayModeScreenshots.ps1`, `Tools\Write-PrototypePlayModeReviewPack.ps1`, `Tools\Verify-PrototypeLayout.ps1`, `Tools\Verify-PrototypeStatic.ps1`, and `Tools\Gate-Verification.ps1 -RunTests -JsonOnly` pass.
+Verification command result: Partial Play Mode record remains `not_recorded` until Draw Choice, Pending Placement, and Invalid Placement can be captured; suite evidence now reports `manual_partial` with Wave Combat registered from an existing PNG and 3 states missing; screenshot evidence reports `partial` with 2 valid portrait PNGs, 1 labeled Wave Combat state, `manual_registration_candidate_count=1`, and missing Draw Choice/Pending Placement/Invalid Placement coverage; `Tools\Verify-PrototypeHudStateContract.ps1`, `Tools\Verify-PrototypePlayModeSuite.ps1`, `Tools\Verify-PrototypePlayModeScreenshots.ps1`, `Tools\Write-PrototypePlayModeReviewPack.ps1`, `Tools\Verify-PrototypeLayout.ps1`, `Tools\Verify-PrototypeStatic.ps1`, and `Tools\Gate-Verification.ps1 -RunTests -JsonOnly` pass.
 
 ## Result Template
 ```text
