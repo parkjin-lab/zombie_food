@@ -1,0 +1,48 @@
+FoodTruck Prototype Play Mode Verification Suite
+Date: 2026-05-06 01:28 KST
+Completed: 2026-05-06 01:28 KST
+Unity version: manual evidence; Unity version unavailable
+Aspect ratio / resolution: 1170x2532 (195:422)
+Suite status: manual_partial
+Evidence source: manual screenshot registration
+
+Captured states:
+1. Draw Choice: not_recorded | not captured
+2. Pending Placement: not_recorded | not captured
+3. Invalid Placement: not_recorded | not captured
+4. Wave Combat: manual_registered | Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010153.png
+
+State details:
+- Draw Choice
+  Prepared: NOT_RECORDED
+  Prepare result: NOT_RECORDED
+  HUD state summary: NOT_RECORDED
+  Evidence source: NOT_RECORDED
+  Screenshot: not captured
+- Pending Placement
+  Prepared: NOT_RECORDED
+  Prepare result: NOT_RECORDED
+  HUD state summary: NOT_RECORDED
+  Evidence source: NOT_RECORDED
+  Screenshot: not captured
+- Invalid Placement
+  Prepared: NOT_RECORDED
+  Prepare result: NOT_RECORDED
+  HUD state summary: NOT_RECORDED
+  Evidence source: NOT_RECORDED
+  Screenshot: not captured
+- Wave Combat
+  Prepared: yes
+  Prepare result: Manual screenshot registered from existing Play Mode evidence.
+  HUD state summary: Manual evidence registered; visual review required.
+  Evidence source: manual_registration
+  Screenshot: Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010153.png
+
+Manual result template:
+Draw Choice: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED
+Pending Placement: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED
+Invalid Placement: PASS / FIX_FEEDBACK / FIX_LAYOUT / BLOCKED
+Wave Combat: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED
+
+After recording, run:
+powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly

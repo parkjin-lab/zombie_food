@@ -165,7 +165,8 @@ function Get-ReviewReadiness {
         return "needs_screenshot_fix"
     }
 
-    if ($SuiteData.playmode_suite_status -eq "captured" -and $ScreenshotData.playmode_screenshot_status -eq "suite_ready") {
+    $suiteReady = $SuiteData.playmode_suite_status -eq "captured" -or $SuiteData.playmode_suite_status -eq "captured_manual"
+    if ($suiteReady -and $ScreenshotData.playmode_screenshot_status -eq "suite_ready") {
         return "ready_for_visual_review"
     }
 
@@ -230,6 +231,9 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine()
     [void]$builder.AppendLine("## Machine Summary")
     [void]$builder.AppendLine('- Suite status: `' + $SuiteData.playmode_suite_status + '` (' + $SuiteData.captured_count + '/' + $SuiteData.expected_state_count + ')')
+    if ($null -ne $SuiteData.suite_capture_source) {
+        [void]$builder.AppendLine('- Suite evidence source: `' + $SuiteData.suite_capture_source + '`')
+    }
     [void]$builder.AppendLine('- Screenshot status: `' + $ScreenshotData.playmode_screenshot_status + '` (' + $ScreenshotData.machine_quality_pass_count + '/' + $ScreenshotData.screenshot_count + ' quality pass)')
     [void]$builder.AppendLine('- Unlabeled screenshots: `' + $ScreenshotData.unlabeled_count + '`')
     [void]$builder.AppendLine('- Manual record status: `' + $RecordData.playmode_record_status + '`')
@@ -307,6 +311,7 @@ $result = [ordered]@{
     review_readiness = $readiness
     output_path = $actualOutputPath
     suite_status = $suiteData.playmode_suite_status
+    suite_capture_source = $suiteData.suite_capture_source
     screenshot_status = $screenshotData.playmode_screenshot_status
     screenshot_count = $screenshotData.screenshot_count
     machine_quality_pass_count = $screenshotData.machine_quality_pass_count
@@ -315,7 +320,7 @@ $result = [ordered]@{
     wave_combat_action_showcase_ready = $suiteData.wave_combat_action_showcase_ready
     wave_combat_action_showcase_reason = $suiteData.wave_combat_action_showcase_reason
     visual_review_required = $screenshotData.visual_review_required
-    next_action = if ($readiness -eq "ready_for_visual_review") { "Open the review pack, make visual PASS/FIX/BLOCKED decisions, then apply the result writer command." } else { "Use Capture Verification Suite or focused retakes, then regenerate this review pack." }
+    next_action = if ($readiness -eq "ready_for_visual_review") { "Open the review pack, make visual PASS/FIX/BLOCKED decisions, then apply the result writer command." } else { "Use Capture Verification Suite, focused retakes, or Tools\Register-PrototypePlayModeManualEvidence.ps1, then regenerate this review pack." }
 }
 
 if ($JsonOnly) {

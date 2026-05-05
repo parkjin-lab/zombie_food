@@ -62,6 +62,7 @@ $relativeFiles = [ordered]@{
     playModeSuiteVerifier = "Tools\Verify-PrototypePlayModeSuite.ps1"
     playModeScreenshotVerifier = "Tools\Verify-PrototypePlayModeScreenshots.ps1"
     playModeReviewPackWriter = "Tools\Write-PrototypePlayModeReviewPack.ps1"
+    playModeManualEvidenceRegister = "Tools\Register-PrototypePlayModeManualEvidence.ps1"
     playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
     sessionStatus = "Tools\Show-PrototypeSessionStatus.ps1"
@@ -362,10 +363,27 @@ Add-ContractCheck $checks "editor_helpers" "suite_evidence_is_machine_checkable"
     'missing_screenshots',
     'captured_count',
     'expected_state_count',
+    'manual_partial',
+    'captured_manual',
+    'suite_capture_source',
     'wave_combat_action_showcase_ready',
     'wave_combat_action_showcase_reason',
     'Get-WaveCombatActionShowcaseStatus'
 ) "The low-interaction suite evidence must be parsable before manual PASS/FIX recording."
+
+Add-ContractCheck $checks "editor_helpers" "manual_screenshot_evidence_can_update_suite_manifest" $sources.playModeManualEvidenceRegister @(
+    'Register-PrototypePlayModeManualEvidence.ps1',
+    '[ValidateSet("Draw Choice", "Pending Placement", "Invalid Placement", "Wave Combat")]',
+    'manual screenshot registration',
+    'manual_partial',
+    'manual_completed',
+    'WaveCombatActionShowcase',
+    'Prototype_PlayMode_Verification_Suite.txt',
+    'Read-PngHeader',
+    'Write-TextWithFallback',
+    'manual_evidence_status',
+    'registered_count'
+) "PC-limited sessions should be able to register standalone PNG evidence into the suite manifest without pretending it was captured by direct play."
 
 Add-ContractCheck $checks "editor_helpers" "screenshot_evidence_quality_is_machine_checkable" $sources.playModeScreenshotVerifier @(
     'Read-PngHeader',
@@ -406,6 +424,9 @@ Add-ContractCheck $checks "editor_helpers" "session_status_reports_next_work_foc
     'top_issue',
     'next_evidence_action',
     'next_code_target',
+    'Register-PrototypePlayModeManualEvidence.ps1',
+    'captured_manual',
+    'Manual Play Mode evidence is partial',
     'Play Mode verification suite is not captured',
     'Review pack preview failed',
     'Next code target: '
@@ -416,6 +437,9 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     'Verify-PrototypePlayModeSuite.ps1',
     'Verify-PrototypePlayModeScreenshots.ps1',
     'Verify-PrototypePlayModeRecord.ps1',
+    'captured_manual',
+    'suite_capture_source',
+    'Register-PrototypePlayModeManualEvidence.ps1',
     'Screenshot Contact Sheet',
     'Visual Acceptance Checklist',
     'Wave Combat action showcase',

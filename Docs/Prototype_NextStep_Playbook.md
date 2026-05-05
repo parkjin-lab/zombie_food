@@ -4,9 +4,9 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-06 00:41 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 session status에 top issue와 next target을 추가한 뒤에도 통과한다.
-- 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=not_recorded`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
-- 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과하지만 suite 라벨 커버리지가 없어 최종 판정 증거로는 아직 `partial`이다.
+- 2026-05-06 01:32 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 standalone PNG 수동 등록 경로를 추가한 뒤에도 통과한다.
+- 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
+- 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었지만, Draw Choice/Pending Placement/Invalid Placement는 아직 missing이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
 - PC 제한 상황에서도 코어 루프 개선은 진행 중이다. 최신 코드 단계는 Wave Combat 종료 후 KO/damage, HP/Heat 변화, supplies, peak Heat, combo/leak 정보를 짧은 payoff cue로 남긴다.
 - Draw Choice 카드는 이제 `Fit`, `Heat`, `Role` 칩으로 세 카드의 즉시 차이를 더 빨리 비교하게 만드는 방향으로 보강됐다.
@@ -25,6 +25,7 @@
 - `Tools\Show-PrototypeSessionStatus.ps1`도 이제 `wave_combat_action_showcase_ready/reason`을 첫 화면과 JSON에 함께 출력한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`도 첫 화면과 JSON에 함께 출력한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `top_issue`, `next_evidence_action`, `next_code_target`까지 출력해 다음 세션의 첫 행동을 분명히 한다.
+- `Tools\Register-PrototypePlayModeManualEvidence.ps1`은 standalone PNG를 상태별 suite 증거로 등록한다. 직접 Play Mode 조작이 불안정할 때 Capture Verification Suite의 보조 경로로 사용한다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
@@ -34,8 +35,9 @@
 ## 우선순위
 ### P0 (즉시: Play Mode 증거와 결과 기록)
 - 첫 상태 확인은 `Tools\Show-PrototypeSessionStatus.ps1`로 시작한다. suite/스크린샷/review pack/record/showcase 상태가 기대와 다르면 먼저 인계 문서를 확인한다.
-- 현재 `top_issue`가 suite 미촬영이면 새 gameplay code보다 Capture Verification Suite 또는 focused retake 증거 확보를 우선한다.
+- 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다.
 - Unity Play Mode에서 `Tools > Food Truck Prototype > Capture Verification Suite`를 실행해 Draw Choice, Pending Placement, Invalid Placement, Wave Combat 네 상태를 한 번에 캡처한다.
+- 직접 suite 캡처가 어렵지만 PNG는 확보했다면 `Tools\Register-PrototypePlayModeManualEvidence.ps1`로 해당 PNG를 상태별 suite 증거에 등록한다.
 - suite 캡처 직후 `Tools\Verify-PrototypePlayModeSuite.ps1`로 네 상태의 manifest와 스크린샷 파일 존재를 확인한다.
 - 이어서 `Tools\Verify-PrototypePlayModeScreenshots.ps1`로 PNG 유효성, 세로 해상도, 파일 크기, suite 라벨 커버리지를 확인한다.
 - `Tools\Write-PrototypePlayModeReviewPack.ps1`로 suite 상태, screenshot 상태, record 상태, contact sheet, 결과 명령 템플릿을 한 장에 모은다.
@@ -117,6 +119,11 @@ powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1"
 - Unity Editor에서 Play Mode 진입
 - `Tools > Food Truck Prototype > Capture Verification Suite`
 - 일부 상태만 다시 찍을 때: `Tools > Food Truck Prototype > Prepare and Capture State > Draw Choice/Pending Placement/Invalid Placement/Wave Combat`
+- standalone PNG만 있을 때: 아래 수동 등록 명령으로 해당 상태를 suite manifest에 연결
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -State "Wave Combat" -ScreenshotPath "Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010153.png" -PreviewOnly -JsonOnly
+```
 
 ### 3. suite와 스크린샷 기계 검증
 ```powershell
@@ -154,5 +161,5 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: local scripts/file inspection first; MCP 연결 문제로 completion-critical UX 검증을 멈추지 않는다.
 - Immediate next validation: Play Mode에서 `Capture Verification Suite`를 실행한 뒤 suite verifier, screenshot verifier, review pack, result writer 순서로 닫는다.
-- Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
+- Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, manual PNG evidence registration, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
 - Manual record remains open until Draw Choice, Pending Placement, Invalid Placement, Wave Combat suite evidence is captured, visually reviewed, and recorded.

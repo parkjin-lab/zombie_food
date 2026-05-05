@@ -108,9 +108,10 @@ function New-NotRecordedResult {
         completed = "NOT_RECORDED"
         unity_version = "NOT_RECORDED"
         aspect_ratio_resolution = "NOT_RECORDED"
+        suite_capture_source = "not_recorded"
         wave_combat_action_showcase_ready = $false
         wave_combat_action_showcase_reason = "suite_not_recorded"
-        next_action = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+        next_action = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode, or register standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1."
     }
 }
 
@@ -157,7 +158,7 @@ if (-not (Test-Path -LiteralPath $suitePath -PathType Leaf)) {
     else {
         Write-Host "playmode_suite_status=not_recorded"
         Write-Host ("suite_path=" + $suitePath)
-        Write-Host "next_action=Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+        Write-Host "next_action=Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode, or register standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1."
     }
     exit 0
 }
@@ -181,7 +182,9 @@ foreach ($field in @("Date", "Completed", "Unity version", "Aspect ratio / resol
 
 $suiteStatusField = if ($topFields.ContainsKey("Suite status")) { $topFields["Suite status"] } else { "NOT_RECORDED" }
 $suiteStatusNormalized = $suiteStatusField.ToLowerInvariant()
-if ($suiteStatusNormalized -ne "completed" -and $suiteStatusNormalized -ne "aborted" -and $suiteStatusNormalized -ne "not_recorded") {
+$manualSuiteStatuses = @("manual_partial", "manual_completed")
+$isManualSuite = $manualSuiteStatuses -contains $suiteStatusNormalized
+if ($suiteStatusNormalized -ne "completed" -and $suiteStatusNormalized -ne "aborted" -and $suiteStatusNormalized -ne "not_recorded" -and -not $isManualSuite) {
     $invalidFields.Add("Suite status=" + $suiteStatusField)
 }
 
@@ -230,20 +233,43 @@ foreach ($state in $requiredStates) {
     }
 }
 
-$playModeSuiteStatus = "captured"
-$nextAction = "Review the suite screenshots visually, then record PASS or FIX_* in Docs\Prototype_PlayMode_Verification.md."
+$suiteCaptureSource = if ($topFields.ContainsKey("Evidence source")) {
+    $topFields["Evidence source"]
+}
+elseif ($isManualSuite) {
+    "manual screenshot registration"
+}
+elseif ($suiteStatusNormalized -eq "completed") {
+    "unity capture suite"
+}
+else {
+    "not_recorded"
+}
+
+$playModeSuiteStatus = if ($isManualSuite) { "captured_manual" } else { "captured" }
+$nextAction = if ($isManualSuite) { "Review the manually registered screenshots visually, then record PASS or FIX_* in Docs\Prototype_PlayMode_Verification.md." } else { "Review the suite screenshots visually, then record PASS or FIX_* in Docs\Prototype_PlayMode_Verification.md." }
 
 if ($invalidFields.Count -gt 0) {
     $playModeSuiteStatus = "invalid_suite"
     $nextAction = "Fix Docs\Prototype_PlayMode_Verification_Suite.txt or rerun Capture Verification Suite."
+}
+elseif ($suiteStatusNormalized -eq "not_recorded") {
+    $playModeSuiteStatus = "not_recorded"
+    $nextAction = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode, or register standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1."
 }
 elseif ($suiteStatusNormalized -eq "aborted") {
     $playModeSuiteStatus = "aborted"
     $nextAction = "Rerun Capture Verification Suite in Unity Play Mode."
 }
 elseif ($missingStates.Count -gt 0 -or $unpreparedStates.Count -gt 0 -or $missingScreenshots.Count -gt 0) {
-    $playModeSuiteStatus = "incomplete"
-    $nextAction = "Rerun Capture Verification Suite or retake missing states with Prepare and Capture State."
+    if ($isManualSuite) {
+        $playModeSuiteStatus = "manual_partial"
+        $nextAction = "Register missing state screenshots with Tools\Register-PrototypePlayModeManualEvidence.ps1, or rerun Capture Verification Suite when Play Mode input is reliable."
+    }
+    else {
+        $playModeSuiteStatus = "incomplete"
+        $nextAction = "Rerun Capture Verification Suite or retake missing states with Prepare and Capture State."
+    }
 }
 
 $waveCombatActionShowcase = Get-WaveCombatActionShowcaseStatus -StateResults $stateResults
@@ -263,6 +289,7 @@ $result = [ordered]@{
     completed = if ($topFields.ContainsKey("Completed")) { $topFields["Completed"] } else { "NOT_RECORDED" }
     unity_version = if ($topFields.ContainsKey("Unity version")) { $topFields["Unity version"] } else { "NOT_RECORDED" }
     aspect_ratio_resolution = if ($topFields.ContainsKey("Aspect ratio / resolution")) { $topFields["Aspect ratio / resolution"] } else { "NOT_RECORDED" }
+    suite_capture_source = $suiteCaptureSource
     wave_combat_action_showcase_ready = [bool]$waveCombatActionShowcase.ready
     wave_combat_action_showcase_reason = [string]$waveCombatActionShowcase.reason
     next_action = $nextAction
@@ -274,6 +301,7 @@ if ($JsonOnly) {
 else {
     Write-Host ("playmode_suite_status=" + $playModeSuiteStatus)
     Write-Host ("suite_status_field=" + $suiteStatusField)
+    Write-Host ("suite_capture_source=" + $suiteCaptureSource)
     Write-Host ("captured_count=" + $capturedCount + "/" + $requiredStates.Count)
     Write-Host ("wave_combat_action_showcase_ready=" + [string]$waveCombatActionShowcase.ready)
     Write-Host ("wave_combat_action_showcase_reason=" + [string]$waveCombatActionShowcase.reason)

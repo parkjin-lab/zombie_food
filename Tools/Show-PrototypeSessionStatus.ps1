@@ -59,6 +59,7 @@ $playModeRecordScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRe
 $playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
 $playModeReviewPackScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeReviewPack.ps1"
+$playModeManualEvidenceScript = Join-Path $ProjectPath "Tools\Register-PrototypePlayModeManualEvidence.ps1"
 $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
 $playbookPath = Join-Path $ProjectPath "Docs\Prototype_NextStep_Playbook.md"
@@ -121,6 +122,7 @@ $hudContractStatus = if ($null -ne $hudContractData) { $hudContractData.hud_cont
 $hudContractFailedChecks = if ($null -ne $hudContractData) { $hudContractData.failed_checks } elseif ($null -ne $gateHudContract) { $gateHudContract.failed_checks } else { $null }
 $playModeRecordStatus = if ($null -ne $playModeRecordData) { $playModeRecordData.playmode_record_status } else { "unknown" }
 $playModeSuiteStatus = if ($null -ne $playModeSuiteData) { $playModeSuiteData.playmode_suite_status } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.playmode_suite_status } else { "unknown" }
+$playModeSuiteCaptureSource = if ($null -ne $playModeSuiteData) { $playModeSuiteData.suite_capture_source } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.suite_capture_source } else { "unknown" }
 $playModeSuiteCapturedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.captured_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.captured_count } else { $null }
 $playModeSuiteExpectedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.expected_state_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.expected_state_count } else { $null }
 $waveCombatActionShowcaseReady = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_ready } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.wave_combat_action_showcase_ready } else { $null }
@@ -169,15 +171,22 @@ else {
 $topIssue = "Manual Play Mode evidence is still open."
 $nextEvidenceAction = "Use Tools > Food Truck Prototype > Capture Verification Suite, then rerun the suite, screenshot, and review pack verifiers."
 $nextCodeTarget = "No new gameplay code target until fresh suite evidence is available; continue PC-limited evidence tooling only if Play Mode input remains unreliable."
+$suiteEvidenceReady = $playModeSuiteStatus -eq "captured" -or $playModeSuiteStatus -eq "captured_manual"
 
 if ($reviewPackStatus -ne "ok" -and $reviewPackStatus -ne "unknown") {
     $topIssue = "Review pack preview failed: " + $reviewPackStatus + "."
     $nextEvidenceAction = "Fix review pack preview before generating or recording PASS/FIX/BLOCKED evidence."
     $nextCodeTarget = "Fix Tools\Write-PrototypePlayModeReviewPack.ps1 or the verifier input that blocks preview mode."
 }
-elseif ($playModeSuiteStatus -ne "captured") {
-    $topIssue = "Play Mode verification suite is not captured: " + $playModeSuiteStatus + "."
-    $nextEvidenceAction = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+elseif (-not $suiteEvidenceReady) {
+    if ($playModeSuiteStatus -eq "manual_partial") {
+        $topIssue = "Manual Play Mode evidence is partial: " + $playModeSuiteCapturedCount + "/" + $playModeSuiteExpectedCount + " states registered."
+        $nextEvidenceAction = "Register missing standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1, or run Capture Verification Suite when Play Mode input is reliable."
+    }
+    else {
+        $topIssue = "Play Mode verification suite is not captured: " + $playModeSuiteStatus + "."
+        $nextEvidenceAction = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode, or register standalone PNGs with Tools\Register-PrototypePlayModeManualEvidence.ps1."
+    }
 }
 elseif ($playModeScreenshotStatus -ne "suite_ready") {
     $topIssue = "Play Mode screenshot evidence is not suite-ready: " + $playModeScreenshotStatus + " (missing: " + $missingStateText + ")."
@@ -229,6 +238,7 @@ $summary = [ordered]@{
     hud_contract_status = $hudContractStatus
     hud_contract_failed_checks = $hudContractFailedChecks
     playmode_suite_status = $playModeSuiteStatus
+    playmode_suite_capture_source = $playModeSuiteCaptureSource
     playmode_suite_captured_count = $playModeSuiteCapturedCount
     playmode_suite_expected_count = $playModeSuiteExpectedCount
     wave_combat_action_showcase_ready = $waveCombatActionShowcaseReady
@@ -259,6 +269,7 @@ $summary = [ordered]@{
         playmode_suite_verifier = (Test-Path -LiteralPath $playModeSuiteScript)
         playmode_screenshot_verifier = (Test-Path -LiteralPath $playModeScreenshotsScript)
         playmode_review_pack_writer = (Test-Path -LiteralPath $playModeReviewPackScript)
+        playmode_manual_evidence_register = (Test-Path -LiteralPath $playModeManualEvidenceScript)
         playmode_record_verifier = (Test-Path -LiteralPath $playModeRecordScript)
     }
     unresolved_issues = $unresolvedIssues.ToArray()
@@ -266,6 +277,7 @@ $summary = [ordered]@{
         ($nextEvidenceAction),
         ("Next code target: " + $nextCodeTarget),
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
+        "If only standalone PNGs are available, register them with Tools\Register-PrototypePlayModeManualEvidence.ps1 before generating the review pack.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
         "Confirm wave_combat_action_showcase_ready=true before recording Wave Combat as PASS.",
@@ -302,6 +314,7 @@ Write-Host ("layout_status=" + $summary.layout_status)
 Write-Host ("hud_contract_status=" + $summary.hud_contract_status)
 Write-Host ("hud_contract_failed_checks=" + $summary.hud_contract_failed_checks)
 Write-Host ("playmode_suite_status=" + $summary.playmode_suite_status)
+Write-Host ("playmode_suite_capture_source=" + $summary.playmode_suite_capture_source)
 Write-Host ("playmode_suite_captured_count=" + $summary.playmode_suite_captured_count + "/" + $summary.playmode_suite_expected_count)
 Write-Host ("wave_combat_action_showcase_ready=" + [string]$summary.wave_combat_action_showcase_ready)
 Write-Host ("wave_combat_action_showcase_reason=" + $summary.wave_combat_action_showcase_reason)
