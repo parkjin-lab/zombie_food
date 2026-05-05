@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-05 21:30 KST
+Last updated: 2026-05-06 00:41 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -16,7 +16,7 @@ evidence.
 - Play Mode suite: `playmode_suite_status=not_recorded`, `captured_count=0/4`; the PC-limited Play Mode suite is not recorded as of 2026-05-05 KST.
 - Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, but does not provide full suite coverage.
 - Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
-- Session status/review pack: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, `review_pack_status`, `review_readiness`, and `review_pack_visual_review_required`; review pack also includes the visual acceptance checklist.
+- Session status/review pack: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `top_issue`, `next_evidence_action`, and `next_code_target`; review pack also includes the visual acceptance checklist.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 - Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
@@ -26,7 +26,7 @@ evidence.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
 
 ## Start Here
-1. Print the current session status, including Wave Combat action showcase readiness and review pack readiness.
+1. Print the current session status, including Wave Combat action showcase readiness, review pack readiness, and next-work focus.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
@@ -57,6 +57,7 @@ evidence.
 - Keep `Show-PrototypeSessionStatus.ps1` as the session-start command.
 - Treat `wave_combat_action_showcase_ready=false` in session status as an evidence gap, not a Wave Combat visual PASS.
 - Treat `review_readiness=partial_evidence` in session status as a prompt to capture/retake evidence before recording manual results.
+- Treat `top_issue` and `next_evidence_action` as the first action filter before choosing new gameplay code work.
 - Confirm all suite states are represented in the suite verifier output.
 - Use screenshot verification to distinguish partial portrait evidence from full suite-ready evidence.
 - Build the review pack before visual judgment.
@@ -67,6 +68,7 @@ evidence.
 - `playmode_suite_status=captured`, or the missing capture reason is explicit.
 - `playmode_screenshot_status=suite_ready`, or the partial/missing screenshot reason is explicit.
 - `review_pack_status=ok` and `review_readiness=ready_for_visual_review`, or the partial evidence reason is explicit.
+- Session status reports a concrete `top_issue`, `next_evidence_action`, and `next_code_target`.
 - Wave Combat session/review evidence reports `wave_combat_action_showcase_ready=true`, or the missing showcase reason is explicit.
 - `Prototype_PlayMode_Verification.md` links the latest manual result to current evidence.
 - HUD changes pass `Verify-PrototypeHudStateContract.ps1`.

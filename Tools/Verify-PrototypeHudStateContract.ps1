@@ -402,6 +402,15 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_status_is_in_session_sta
     'Check review_readiness before generating or recording manual PASS/FIX/BLOCKED evidence.'
 ) "The first session status command should expose review pack readiness before writing review output."
 
+Add-ContractCheck $checks "editor_helpers" "session_status_reports_next_work_focus" $sources.sessionStatus @(
+    'top_issue',
+    'next_evidence_action',
+    'next_code_target',
+    'Play Mode verification suite is not captured',
+    'Review pack preview failed',
+    'Next code target: '
+) "The session status should translate readiness into the next evidence action and code target."
+
 Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_visual_decision" $sources.playModeReviewPackWriter @(
     'Prototype_PlayMode_ReviewPack.md',
     'Verify-PrototypePlayModeSuite.ps1',

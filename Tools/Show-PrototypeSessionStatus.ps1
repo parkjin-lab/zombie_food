@@ -159,6 +159,50 @@ elseif ($playModeRecordStatus -eq "needs_fix" -or $playModeRecordStatus -eq "blo
     $readiness = "needs_playmode_fix"
 }
 
+$missingStateText = if ($null -ne $playModeScreenshotMissingStates -and $playModeScreenshotMissingStates.Count -gt 0) {
+    $playModeScreenshotMissingStates -join ", "
+}
+else {
+    "none"
+}
+
+$topIssue = "Manual Play Mode evidence is still open."
+$nextEvidenceAction = "Use Tools > Food Truck Prototype > Capture Verification Suite, then rerun the suite, screenshot, and review pack verifiers."
+$nextCodeTarget = "No new gameplay code target until fresh suite evidence is available; continue PC-limited evidence tooling only if Play Mode input remains unreliable."
+
+if ($reviewPackStatus -ne "ok" -and $reviewPackStatus -ne "unknown") {
+    $topIssue = "Review pack preview failed: " + $reviewPackStatus + "."
+    $nextEvidenceAction = "Fix review pack preview before generating or recording PASS/FIX/BLOCKED evidence."
+    $nextCodeTarget = "Fix Tools\Write-PrototypePlayModeReviewPack.ps1 or the verifier input that blocks preview mode."
+}
+elseif ($playModeSuiteStatus -ne "captured") {
+    $topIssue = "Play Mode verification suite is not captured: " + $playModeSuiteStatus + "."
+    $nextEvidenceAction = "Run Tools > Food Truck Prototype > Capture Verification Suite in Unity Play Mode."
+}
+elseif ($playModeScreenshotStatus -ne "suite_ready") {
+    $topIssue = "Play Mode screenshot evidence is not suite-ready: " + $playModeScreenshotStatus + " (missing: " + $missingStateText + ")."
+    $nextEvidenceAction = "Capture or retake missing states with Capture Verification Suite or focused Prepare and Capture State."
+}
+elseif ($waveCombatActionShowcaseReady -ne $true) {
+    $topIssue = "Wave Combat action showcase is not ready: " + $waveCombatActionShowcaseReason + "."
+    $nextEvidenceAction = "Retake Wave Combat evidence and confirm action labels before recording PASS."
+    $nextCodeTarget = "If retake still misses labels, fix the Wave Combat verification showcase setup."
+}
+elseif ($reviewReadiness -ne "ready_for_visual_review") {
+    $topIssue = "Review pack is not ready for visual judgment: " + $reviewReadiness + "."
+    $nextEvidenceAction = $reviewPackNextAction
+}
+elseif ($playModeRecordStatus -ne "passed") {
+    $topIssue = "Manual Play Mode result is not recorded as passed: " + $playModeRecordStatus + "."
+    $nextEvidenceAction = "Generate the review pack, make PASS/FIX/BLOCKED judgments, then apply the result writer."
+    $nextCodeTarget = "Use recorded FIX_LAYOUT/FIX_ASSET/FIX_FEEDBACK/BLOCKED result to choose the next code target."
+}
+else {
+    $topIssue = "No current evidence blocker."
+    $nextEvidenceAction = "Keep the current evidence pack with the session notes."
+    $nextCodeTarget = "Proceed to the next planned core loop improvement."
+}
+
 $unresolvedIssues = New-Object System.Collections.Generic.List[string]
 $unresolvedIssues.Add("Unity headless compile/tests remain inconclusive in this environment.") | Out-Null
 if ($hudContractStatus -ne "ok") {
@@ -169,12 +213,16 @@ $unresolvedIssues.Add("Wave Combat action showcase ready: " + [string]$waveComba
 $unresolvedIssues.Add("Play Mode screenshot evidence status: " + $playModeScreenshotStatus + ".") | Out-Null
 $unresolvedIssues.Add("Play Mode review pack readiness: " + $reviewReadiness + ".") | Out-Null
 $unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
+$unresolvedIssues.Add("Top issue: " + $topIssue) | Out-Null
 $unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
 
 $summary = [ordered]@{
     project_path = $ProjectPath
     generated_at = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
     readiness = $readiness
+    top_issue = $topIssue
+    next_evidence_action = $nextEvidenceAction
+    next_code_target = $nextCodeTarget
     gate_status = if ($null -ne $gateData) { $gateData.gate_status } else { "unknown" }
     asset_status = $assetStatus
     layout_status = $layoutStatus
@@ -215,6 +263,8 @@ $summary = [ordered]@{
     }
     unresolved_issues = $unresolvedIssues.ToArray()
     recommended_next_actions = @(
+        ($nextEvidenceAction),
+        ("Next code target: " + $nextCodeTarget),
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
         "After suite capture, run Tools\Verify-PrototypePlayModeSuite.ps1 to confirm all screenshots exist.",
@@ -243,6 +293,9 @@ if ($JsonOnly) {
 }
 
 Write-Host ("prototype_session_readiness=" + $summary.readiness)
+Write-Host ("top_issue=" + $summary.top_issue)
+Write-Host ("next_evidence_action=" + $summary.next_evidence_action)
+Write-Host ("next_code_target=" + $summary.next_code_target)
 Write-Host ("gate_status=" + $summary.gate_status)
 Write-Host ("asset_status=" + $summary.asset_status)
 Write-Host ("layout_status=" + $summary.layout_status)
