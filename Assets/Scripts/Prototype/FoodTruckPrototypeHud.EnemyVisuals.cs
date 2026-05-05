@@ -323,7 +323,20 @@ namespace ZombieFoodcenter.Prototype
             {
                 Image truckImage = laneTruckImages[i];
                 RectTransform lane = laneTrackRoots[i];
+                Text truckText = laneTruckTexts[i];
                 if (truckImage == null || lane == null)
+                {
+                    continue;
+                }
+
+                bool mainTruckLane = i == 1;
+                truckImage.gameObject.SetActive(mainTruckLane);
+                if (truckText != null)
+                {
+                    truckText.gameObject.SetActive(false);
+                }
+
+                if (!mainTruckLane)
                 {
                     continue;
                 }
@@ -332,12 +345,12 @@ namespace ZombieFoodcenter.Prototype
                 float laneHeight = Mathf.Max(1f, lane.rect.height);
                 bool hasTruckSprite = foodTruckSprite != null;
                 float width = hasTruckSprite
-                    ? Mathf.Clamp(laneHeight * 0.95f, 64f, 140f)
-                    : Mathf.Clamp(laneHeight * 0.42f, 38f, 78f);
-                truckRect.anchorMin = new Vector2(0f, 0.11f);
-                truckRect.anchorMax = new Vector2(0f, 0.89f);
+                    ? Mathf.Clamp(laneHeight * 2.10f, 128f, 280f)
+                    : Mathf.Clamp(laneHeight * 1.35f, 96f, 220f);
+                truckRect.anchorMin = new Vector2(0f, 0.05f);
+                truckRect.anchorMax = new Vector2(0f, 0.95f);
                 truckRect.pivot = new Vector2(0f, 0.5f);
-                truckRect.anchoredPosition = new Vector2(8f, 0f);
+                truckRect.anchoredPosition = new Vector2(12f, 0f);
                 truckRect.sizeDelta = new Vector2(width, 0f);
 
                 Color healthy = new Color(0.95f, 0.72f, 0.34f, 0.97f);
@@ -348,12 +361,11 @@ namespace ZombieFoodcenter.Prototype
                     ? Color.Lerp(new Color(1f, 0.44f, 0.36f, 1f), Color.white, hp01)
                     : Color.Lerp(damaged, healthy, hp01);
 
-                Text truckText = laneTruckTexts[i];
                 if (truckText != null)
                 {
                     truckText.gameObject.SetActive(!hasTruckSprite);
                     truckText.fontSize = Mathf.Clamp(Mathf.RoundToInt(width * 0.24f), 9, 15);
-                    truckText.text = i == 1 ? "FOOD\nTRUCK" : "TRK";
+                    truckText.text = "FOOD\nTRUCK";
                 }
             }
         }
@@ -415,14 +427,14 @@ namespace ZombieFoodcenter.Prototype
             rect.pivot = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = source.Rect.anchoredPosition;
             float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
-            float width = Mathf.Max(enemyHitEffectSize, laneHeight * 0.34f);
-            rect.sizeDelta = new Vector2(width, width * 0.40f);
-            rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-26f, 26f));
+            float width = Mathf.Max(enemyHitEffectSize, laneHeight * 0.56f);
+            rect.sizeDelta = new Vector2(width, width * 0.32f);
+            rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-18f, 18f));
             rect.localScale = Vector3.one;
 
             Image image = rect.GetComponent<Image>();
             image.raycastTarget = false;
-            image.color = new Color(1f, 0.78f, 0.42f, 0.92f);
+            image.color = new Color(1f, 0.92f, 0.34f, 0.96f);
 
             Vector2 direction = new Vector2(1f, UnityEngine.Random.Range(-0.45f, 0.45f)).normalized;
             EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
@@ -431,6 +443,49 @@ namespace ZombieFoodcenter.Prototype
             effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration);
             effect.Remaining = effect.Duration;
             effect.Velocity = direction * Mathf.Max(8f, enemyHitEffectTravelSpeed);
+            enemyHitEffects.Add(effect);
+        }
+
+        private void SpawnEnemyAttackTrail(EnemyVisualWidget source)
+        {
+            if (source == null || source.Rect == null || source.LaneIndex < 0 || source.LaneIndex >= laneTrackRoots.Length)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[source.LaneIndex];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            RectTransform rect = new GameObject("EnemyAttackTrail", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            rect.transform.SetParent(laneRoot, false);
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.pivot = new Vector2(0f, 0.5f);
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            float truckEndX = foodTruckSprite != null
+                ? Mathf.Clamp(laneHeight * 1.66f, 118f, 252f)
+                : Mathf.Clamp(laneHeight * 0.82f, 64f, 136f);
+            Vector2 target = source.Rect.anchoredPosition;
+            float width = Mathf.Max(laneHeight * 0.34f, target.x - truckEndX);
+            rect.anchoredPosition = new Vector2(Mathf.Min(truckEndX, target.x - width), target.y + UnityEngine.Random.Range(-3f, 3f));
+            rect.sizeDelta = new Vector2(width, Mathf.Clamp(laneHeight * 0.08f, 8f, 18f));
+            rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-5f, 5f));
+            rect.localScale = Vector3.one;
+
+            Image image = rect.GetComponent<Image>();
+            image.raycastTarget = false;
+            image.color = new Color(1f, 0.92f, 0.28f, 0.72f);
+
+            EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
+            effect.Rect = rect;
+            effect.Image = image;
+            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration * 0.72f);
+            effect.Remaining = effect.Duration;
+            effect.Velocity = new Vector2(Mathf.Max(24f, enemyHitEffectTravelSpeed * 0.38f), 0f);
             enemyHitEffects.Add(effect);
         }
 
@@ -574,7 +629,7 @@ namespace ZombieFoodcenter.Prototype
             float width = Mathf.Max(80f, lane.rect.width);
             float laneHeight = Mathf.Max(1f, lane.rect.height);
             float sideMargin = foodTruckSprite != null
-                ? Mathf.Clamp(laneHeight * 1.05f, 72f, 152f)
+                ? Mathf.Clamp(laneHeight * 1.72f, 118f, 260f)
                 : Mathf.Clamp(laneHeight * 0.46f, 48f, 92f);
             float x = Mathf.Lerp(sideMargin, width - sideMargin, enemy.DistanceToTruck01);
             float y = ((enemy.Id % 3) - 1) * Mathf.Clamp(laneHeight * 0.09f, 7f, 16f);
@@ -585,6 +640,8 @@ namespace ZombieFoodcenter.Prototype
             if (tookHit)
             {
                 widget.HitTimer = Mathf.Max(widget.HitTimer, enemyHitPoseDuration);
+                SpawnEnemyAttackTrail(widget);
+                SpawnEnemyHitEffect(widget);
                 SpawnEnemyHitEffect(widget);
             }
 

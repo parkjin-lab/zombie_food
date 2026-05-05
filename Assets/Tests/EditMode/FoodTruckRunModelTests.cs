@@ -906,9 +906,10 @@ namespace ZombieFoodcenter.Tests.EditMode
                     dragFocus: false,
                     minimalCombatStripRequested: false);
 
-            Assert.GreaterOrEqual(1f - layout.TopStart01, 0.32f);
-            Assert.GreaterOrEqual(layout.BottomTop01, 0.52f);
-            Assert.LessOrEqual(layout.BottomTop01, 0.60f);
+            Assert.GreaterOrEqual(1f - layout.TopStart01, 0.50f);
+            Assert.GreaterOrEqual(layout.BottomTop01, 0.34f);
+            Assert.LessOrEqual(layout.BottomTop01, 0.40f);
+            Assert.GreaterOrEqual(layout.CenterViewport01, 0.04f);
             Assert.LessOrEqual(layout.CenterViewport01, 0.12f);
         }
 

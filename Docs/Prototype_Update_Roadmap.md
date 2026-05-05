@@ -21,6 +21,7 @@ evidence.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 - Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
 - Pending Placement update: R1/R2 recommendation copy now explains lane pressure, multi-lane coverage, and center positioning instead of leading with raw scores; Play Mode readability is still pending.
+- Battlefield readability update: placement/draw states now reserve more than half of the viewport for the truck-and-zombie play area, show one long food truck marker, and use brighter attack trails/impact flashes; Play Mode readability is still pending.
 
 ## Start Here
 1. Print the current session status.
@@ -81,6 +82,19 @@ in portrait Play Mode and decide whether the cue should become a persistent pane
 
 The payoff is now also suitable for a compact persistent chip so the player can
 re-read the last wave result while making the next placement or draw decision.
+
+### Short-Term Focus: Battlefield Readability
+The play area should look like the main game, even while the player is choosing or
+placing blocks. Keep the truck-and-zombie area above 50% of the viewport during
+Draw Choice and Pending Placement, use one clear food truck marker, and make each
+attack show a visible trail plus impact so the player can understand why enemies
+lose HP or why truck HP changes.
+
+Implementation status: the layout constants and layout guard now enforce a larger
+battlefield during placement contexts. Enemy hit visuals now include a truck-to-zombie
+attack trail, larger impact flashes, longer hit poses, brighter lane damage flash,
+and a single longer truck marker. The remaining product task is to retake Play Mode
+screenshots and judge overlap/readability on the actual Unity viewport.
 
 Recipe activation feedback now follows the same cause-and-effect direction. When a
 recipe comes online, the log and HUD banner should preserve the trigger source:

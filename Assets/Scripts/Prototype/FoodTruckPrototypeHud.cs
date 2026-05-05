@@ -136,7 +136,7 @@ namespace ZombieFoodcenter.Prototype
             }
             else
             {
-                topStartFocus = Mathf.Lerp(0.62f, 0.66f, portrait01);
+                topStartFocus = Mathf.Lerp(0.40f, 0.43f, portrait01);
             }
 
             float bottomTopFocus;
@@ -146,7 +146,7 @@ namespace ZombieFoodcenter.Prototype
             }
             else if (hasPlacementContext)
             {
-                bottomTopFocus = Mathf.Lerp(0.54f, 0.58f, portrait01);
+                bottomTopFocus = Mathf.Lerp(0.34f, 0.38f, portrait01);
             }
             else
             {
@@ -390,7 +390,7 @@ namespace ZombieFoodcenter.Prototype
         private float enemyRunAnimationFps = 10f;
 
         [SerializeField]
-        private float enemyHitPoseDuration = 0.14f;
+        private float enemyHitPoseDuration = 0.24f;
 
         [SerializeField]
         private float enemyIconSize = 34f;
@@ -402,28 +402,28 @@ namespace ZombieFoodcenter.Prototype
         private float enemyDeathFadeSeconds = 0.24f;
 
         [SerializeField]
-        private float enemyHitEffectDuration = 0.20f;
+        private float enemyHitEffectDuration = 0.36f;
 
         [SerializeField]
-        private float enemyHitEffectSize = 16f;
+        private float enemyHitEffectSize = 26f;
 
         [SerializeField]
-        private float enemyHitEffectTravelSpeed = 56f;
+        private float enemyHitEffectTravelSpeed = 92f;
 
         [SerializeField]
-        private float enemyHitShakeDistance = 8f;
+        private float enemyHitShakeDistance = 14f;
 
         [SerializeField]
-        private float enemyHitScalePulse = 0.16f;
+        private float enemyHitScalePulse = 0.28f;
 
         [SerializeField]
-        private float laneHitFlashDuration = 0.22f;
+        private float laneHitFlashDuration = 0.32f;
 
         [SerializeField]
         private Color laneBaseColor = new Color(0.11f, 0.14f, 0.18f, 1f);
 
         [SerializeField]
-        private Color laneHitFlashColor = new Color(0.72f, 0.18f, 0.14f, 0.98f);
+        private Color laneHitFlashColor = new Color(0.98f, 0.34f, 0.12f, 0.98f);
 
         [SerializeField]
         private float eventResolvePanelPulseDuration = 0.32f;
@@ -1802,7 +1802,7 @@ namespace ZombieFoodcenter.Prototype
 
             bool drawChoiceFocus = gameplayFocusHud && hasDrawChoice;
             float laneHeight = gameplayFocusHud
-                ? (focusPlacementMode ? 220f : (drawChoiceFocus ? 238f : (hasPlacementContext ? 300f : 480f)))
+                ? (focusPlacementMode ? 420f : (drawChoiceFocus ? 560f : (hasPlacementContext ? 620f : 480f)))
                 : 196f;
             float meterHeight = gameplayFocusHud
                 ? (drawChoiceFocus ? 0f : (hasPlacementContext ? 86f : 58f))
@@ -1853,8 +1853,12 @@ namespace ZombieFoodcenter.Prototype
             bool showPendingRow = hasPendingBlock || hasDrawChoice;
             bool showInventoryGrid = actionVisibility.ShowInventoryGrid;
             bool showBottomPanel = showPendingRow || showInventoryGrid || actionVisibility.ShowsAnyActionRow;
-            float laneRowHeight = gameplayFocusHud ? (focusPlacementMode ? 64f : (hasPlacementContext ? 86f : 136f)) : 60f;
-            float laneRowMinHeight = gameplayFocusHud ? (focusPlacementMode ? 54f : (hasPlacementContext ? 72f : 112f)) : 56f;
+            float laneRowHeight = gameplayFocusHud
+                ? (focusPlacementMode ? 128f : (drawChoiceFocus ? 176f : (hasPlacementContext ? 190f : 136f)))
+                : 60f;
+            float laneRowMinHeight = gameplayFocusHud
+                ? (focusPlacementMode ? 96f : (drawChoiceFocus ? 132f : (hasPlacementContext ? 140f : 112f)))
+                : 56f;
 
             VerticalLayoutGroup topLayout = topPanelRect != null ? topPanelRect.GetComponent<VerticalLayoutGroup>() : null;
             if (topLayout != null)
