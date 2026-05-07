@@ -63,6 +63,7 @@ $relativeFiles = [ordered]@{
     playModeScreenshotVerifier = "Tools\Verify-PrototypePlayModeScreenshots.ps1"
     playModeReviewPackWriter = "Tools\Write-PrototypePlayModeReviewPack.ps1"
     playModeRetakePlanWriter = "Tools\Write-PrototypePlayModeRetakePlan.ps1"
+    playModeRetakePlanVerifier = "Tools\Verify-PrototypePlayModeRetakePlan.ps1"
     playModeManualEvidenceRegister = "Tools\Register-PrototypePlayModeManualEvidence.ps1"
     playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
@@ -429,12 +430,22 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_status_is_in_session_sta
 
 Add-ContractCheck $checks "editor_helpers" "retake_plan_status_is_in_session_status" $sources.sessionStatus @(
     'Write-PrototypePlayModeRetakePlan.ps1',
+    'Verify-PrototypePlayModeRetakePlan.ps1',
     '"-PreviewOnly"',
     'retake_plan_status',
     'retake_plan_focused_retake_count',
+    'retake_plan_doc_status',
     'retake_plan_next_action',
     'Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity.'
 ) "The first session status command should expose focused retake plan readiness before opening Unity."
+
+Add-ContractCheck $checks "editor_helpers" "retake_plan_status_is_in_gate" $sources.gate @(
+    'Verify-PrototypePlayModeRetakePlan.ps1',
+    'SkipPlayModeRetakePlan',
+    'playmode_retake_plan',
+    'retake_plan_doc_status',
+    'failed_playmode_retake_plan'
+) "The integrated gate should detect stale or missing focused retake plan docs."
 
 Add-ContractCheck $checks "editor_helpers" "session_status_reports_next_work_focus" $sources.sessionStatus @(
     'top_issue',
@@ -484,6 +495,18 @@ Add-ContractCheck $checks "editor_helpers" "retake_plan_collects_focused_capture
     'retake_plan_status',
     'focused_retake_count'
 ) "Focused retake planning should translate partial evidence into state-specific capture work."
+
+Add-ContractCheck $checks "editor_helpers" "retake_plan_doc_is_machine_checkable" $sources.playModeRetakePlanVerifier @(
+    'Verify-PrototypePlayModeRetakePlan.ps1',
+    'Write-PrototypePlayModeRetakePlan.ps1',
+    'Prototype_PlayMode_RetakePlan.md',
+    'retake_plan_doc_status',
+    'stale_doc',
+    'missing_needles',
+    'expected_focused_retake_count',
+    'documented_focused_retake_count',
+    'Prepare and Capture State'
+) "Focused retake plan docs should fail fast when current evidence and the written checklist drift apart."
 
 Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_evidence" $sources.editorMenu @(
     'CollectManualResultScreenshotEvidence',

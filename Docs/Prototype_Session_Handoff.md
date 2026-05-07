@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-05-08 00:09 KST
+Last updated: 2026-05-08 00:46 KST
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -74,6 +74,7 @@ Last updated: 2026-05-08 00:09 KST
 - Added `Docs/Prototype_PlayMode_Screenshot_Triage.txt` and triage-aware screenshot verification so visually reviewed non-required screenshots stop appearing as registration candidates.
 - Added `Tools/Write-PrototypePlayModeRetakePlan.ps1` and `Docs/Prototype_PlayMode_RetakePlan.md` so partial Play Mode evidence now produces a focused Draw/Pending/Invalid retake checklist before opening Unity.
 - Exposed focused retake plan status in `Tools/Show-PrototypeSessionStatus.ps1`, and extended the HUD state contract so retake plan/session status fields stay guarded.
+- Added `Tools/Verify-PrototypePlayModeRetakePlan.ps1` and wired it into `Tools/Gate-Verification.ps1` / `Tools/Show-PrototypeSessionStatus.ps1` so stale retake plan docs fail before manual capture work.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -113,6 +114,7 @@ Last updated: 2026-05-08 00:09 KST
 - Latest local recheck at 2026-05-06 01:50 KST after manual registration hint work: `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` reports `manual_registration_candidate_count=1` and emits command templates for Draw Choice, Pending Placement, and Invalid Placement using the remaining unlabeled PNG; `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` carries the same templates and `manual_registration_candidate_count=1`; `Tools/Show-PrototypeSessionStatus.ps1` now prints `playmode_manual_registration_candidate_count=1` and updates `next_evidence_action` to review the unlabeled candidate; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=39`, `failed_checks=0`.
 - Latest local recheck at 2026-05-06 01:58 KST after screenshot triage work: the remaining unlabeled PNG was visually inspected and recorded as `ignored_non_state` because it is a Build Flow idle screenshot, not Draw Choice/Pending Placement/Invalid Placement evidence. `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` now reports `unlabeled_count=0`, `manual_registration_candidate_count=0`, `triaged_non_state_count=1`, and still missing Draw Choice, Pending Placement, and Invalid Placement. `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` reports the same triage status and recommends Capture Verification Suite or focused retakes. `Tools/Show-PrototypeSessionStatus.ps1` now prints `playmode_triaged_non_state_count=1` and `next_evidence_action=No standalone PNG candidates remain; capture or focused-retake Draw Choice, Pending Placement, and Invalid Placement evidence.`
 - Latest local recheck at 2026-05-08 00:09 KST after focused retake plan work: `Tools/Write-PrototypePlayModeRetakePlan.ps1 -PreviewOnly -JsonOnly` reports `retake_plan_status=ok`, `focused_retake_count=3`, missing Draw Choice/Pending Placement/Invalid Placement, `manual_registration_candidate_count=0`, and `triaged_non_state_count=1`; `Tools/Show-PrototypeSessionStatus.ps1 -JsonOnly` now includes `retake_plan_status=ok`, `retake_plan_focused_retake_count=3`, and a focused retake next action; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=41`, `failed_checks=0`.
+- Latest local recheck at 2026-05-08 00:46 KST after retake plan doc verification work: `Tools/Verify-PrototypePlayModeRetakePlan.ps1 -JsonOnly` reports `retake_plan_doc_status=ok`, `documented_focused_retake_count=3/3`, and `missing_needles=0`; `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` reports `gate_status=ok` and includes `playmode_retake_plan`; `Tools/Show-PrototypeSessionStatus.ps1` prints `retake_plan_doc_status=ok`; `Tools/Verify-PrototypeHudStateContract.ps1 -JsonOnly` reports `check_count=43`, `failed_checks=0`.
 
 ## Changed Files
 - `Tools/Verify-PrototypeAssets.ps1`: asset checker now validates presence, dimensions, alpha, and `.meta`.
@@ -149,6 +151,7 @@ Last updated: 2026-05-08 00:09 KST
 - `Tools/Verify-PrototypePlayModeScreenshots.ps1`: reads screenshot PNG headers and reports file quality, portrait resolution, unlabeled captures, missing state coverage, manual registration candidates, state-specific registration command templates, and triaged non-state screenshots.
 - `Tools/Write-PrototypePlayModeReviewPack.ps1`: writes a visual review pack from suite, screenshot, and record verifier outputs, including suite evidence source, a screenshot contact sheet, Wave Combat action showcase status, visual acceptance checklist, manual evidence registration hints, triaged non-state screenshots, and result command templates; use `-PreviewOnly -JsonOnly` for no-write status checks.
 - `Tools/Write-PrototypePlayModeRetakePlan.ps1`: writes a focused retake plan from suite, screenshot, record, and review pack preview outputs, including the missing states, menu paths, must-see criteria, Wave Combat action-showcase note, and follow-up verification commands.
+- `Tools/Verify-PrototypePlayModeRetakePlan.ps1`: checks the written retake plan against the current writer preview and reports `ok`, `missing_doc`, or `stale_doc`.
 - `Docs/Prototype_PlayMode_RetakePlan.md`: current focused retake checklist for Draw Choice, Pending Placement, and Invalid Placement.
 - `Docs/Prototype_PlayMode_Screenshot_Triage.txt`: records visually inspected screenshots that should not count as required state evidence.
 - `Tools/Register-PrototypePlayModeManualEvidence.ps1`: validates a standalone PNG and registers it as Draw Choice, Pending Placement, Invalid Placement, or Wave Combat evidence in the suite manifest, with temp fallback output if the project Docs folder is locked by the environment.
@@ -157,8 +160,8 @@ Last updated: 2026-05-08 00:09 KST
 - `Tools/Create-PrototypeIngredientPlaceholders.ps1`: generates the 8 placeholder ingredient icons.
 - `Tools/Create-PrototypeCoreArtPlaceholders.ps1`: generates placeholder `FoodTruck.png` and `KitchenModule.png`.
 - `Tools/Ensure-PrototypeAssetMetas.ps1`: creates Unity sprite `.meta` files for missing prototype PNG metas.
-- `Tools/Show-PrototypeSessionStatus.ps1`: prints concise next-session readiness, top issue, next evidence action, next code target, docs, layout status, HUD state contract status, Play Mode suite evidence status, Wave Combat action showcase status, Play Mode screenshot evidence status, manual registration candidate count, review pack readiness, focused retake plan status, Play Mode record status, review pack recommendation, unresolved issues, and recommended actions.
-- `Tools/Gate-Verification.ps1`: non-compact output now includes Wave Combat action showcase readiness and reason beside Play Mode suite status.
+- `Tools/Show-PrototypeSessionStatus.ps1`: prints concise next-session readiness, top issue, next evidence action, next code target, docs, layout status, HUD state contract status, Play Mode suite evidence status, Wave Combat action showcase status, Play Mode screenshot evidence status, manual registration candidate count, review pack readiness, focused retake plan status, retake plan doc status, Play Mode record status, review pack recommendation, unresolved issues, and recommended actions.
+- `Tools/Gate-Verification.ps1`: non-compact output now includes Wave Combat action showcase readiness and retake plan doc status beside Play Mode suite/screenshot status.
 - `Tools/VerificationStatusPath.ps1`: shared default status path resolver; uses project `Temp\verification-status.txt` when writable and falls back to user temp when Unity `Temp` is locked by the environment.
 - `Tools/Run-Verification.ps1`: uses the shared status path resolver and literal status-file reads/writes.
 - `Tools/Ensure-VerificationFresh.ps1`: uses the shared status path resolver and passes `ProjectPath`/`StatusFile` through to child commands.
@@ -202,6 +205,7 @@ Last updated: 2026-05-08 00:09 KST
 - Pending Placement recommendation reasons are code-guarded, but still need Play Mode visual review to confirm the R1/R2 text stays readable in portrait.
 - Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=partial_evidence`; it now also carries Wave Combat action showcase status and the visual acceptance checklist. Session status now surfaces `review_pack_status=ok`, `review_readiness=partial_evidence`, and `review_pack_visual_review_required=True`; gate text also surfaces showcase readiness. Full review pack generation should wait until suite-state captures or intentional review output writing.
 - Focused retake plan assembly is available and reports `retake_plan_status=ok`, `retake_plan_focused_retake_count=3`, and missing Draw Choice/Pending Placement/Invalid Placement; use it before opening Unity when no standalone registration candidates remain.
+- Focused retake plan doc verification is available and reports `retake_plan_doc_status=ok`; if suite/screenshot evidence changes, regenerate `Docs/Prototype_PlayMode_RetakePlan.md` before opening Unity.
 - Session status now translates readiness into immediate work focus: current `top_issue` is manual Play Mode evidence partial, current `next_evidence_action` is to capture or focused-retake Draw Choice, Pending Placement, and Invalid Placement because no standalone PNG candidates remain, and current `next_code_target` is no new gameplay code until fresh suite evidence exists.
 - `Tools/Write-PrototypePlayModeResultFromSuite.ps1` is the intended PASS/FIX/BLOCKED result writer, but status-only handoff passes should not run it because it writes a result draft even with `-JsonOnly`.
 - Unity MCP is currently unavailable from this session (`MCP SSE probe returned 404`).
@@ -210,25 +214,26 @@ Last updated: 2026-05-08 00:09 KST
 ## Recommended Next Session Work
 1. Treat the combat-only HUD compaction as complete unless a fresh screenshot shows a regression.
 2. Run `Tools/Write-PrototypePlayModeRetakePlan.ps1 -PreviewOnly -JsonOnly`, then generate `Docs/Prototype_PlayMode_RetakePlan.md` if the focused retake count is still above zero.
-3. In Play Mode, run `Tools > Food Truck Prototype > Capture Verification Suite` before attempting longer manual play.
-4. If only standalone screenshots are available, run `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` or the review pack preview and copy the generated `Register-PrototypePlayModeManualEvidence.ps1` command template for any visually matching missing state.
-5. Run `Tools/Verify-PrototypePlayModeSuite.ps1` to confirm all four suite screenshots exist or that missing states are explicit.
-6. Run `Tools/Verify-PrototypePlayModeScreenshots.ps1` to confirm captured PNGs are valid portrait evidence and have labeled state coverage.
-7. Run `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` for a no-write readiness check, then run `Tools/Write-PrototypePlayModeReviewPack.ps1` to assemble the evidence into one review sheet before making PASS/FIX/BLOCKED decisions.
-8. Use `Tools > Food Truck Prototype > Prepare and Capture State` only for focused retakes of Draw Choice, Pending Placement, or Invalid Placement.
-9. If all required states pass visually, run `Tools > Food Truck Prototype > Record PASS Manual Result`; otherwise use `Tools/Write-PrototypePlayModeResultFromSuite.ps1` with the failing `FIX_*` or `BLOCKED` status when you are ready to create/apply the result draft.
-10. Run `Tools/Verify-PrototypeHudStateContract.ps1` after any Draw/Pending/Invalid Placement HUD code change.
-11. Run `Tools/Verify-PrototypeLayout.ps1` after any HUD layout code change.
-12. Run `Tools/Verify-PrototypePlayModeRecord.ps1` to confirm the manual record is parsable.
-13. If Draw cards or placement still crowd the play view, adjust `FoodTruckPrototypeHud.CalculateGameplayFocusLayout` and `ApplyGameplayHudContext` before adding new mechanics.
-14. Verify that ingredient icons appear on draw cards, pending block preview, and placed inventory cells.
-15. Verify that `FoodTruck.png` appears on lane truck markers and `KitchenModule.png` appears only on active block cells.
-16. After manual visual confirmation, run `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` and keep the JSON output with the session notes.
-17. During the next Wave Combat capture, verify that the wave payoff cue is readable and does not obscure HP/Heat/lane pressure.
-18. During the next Draw Choice capture, verify that `Fit`, `Heat`, and `Role` can be compared across all three cards within three seconds.
-19. During the next Invalid Placement capture, verify that the reason and `Next` action are visible near the board/cue without requiring the full log.
-20. During the next Pending Placement capture, verify that R1/R2 recommendations explain the useful lane/coverage/center reason without crowding the board.
-21. During the next Wave Combat suite capture, confirm the review pack shows `wave_combat_action_showcase_ready=true`; if not, treat it as `FIX_FEEDBACK` or retake evidence before recording PASS.
+3. Run `Tools/Verify-PrototypePlayModeRetakePlan.ps1` to confirm the written retake checklist is not stale.
+4. In Play Mode, run `Tools > Food Truck Prototype > Capture Verification Suite` before attempting longer manual play.
+5. If only standalone screenshots are available, run `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` or the review pack preview and copy the generated `Register-PrototypePlayModeManualEvidence.ps1` command template for any visually matching missing state.
+6. Run `Tools/Verify-PrototypePlayModeSuite.ps1` to confirm all four suite screenshots exist or that missing states are explicit.
+7. Run `Tools/Verify-PrototypePlayModeScreenshots.ps1` to confirm captured PNGs are valid portrait evidence and have labeled state coverage.
+8. Run `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` for a no-write readiness check, then run `Tools/Write-PrototypePlayModeReviewPack.ps1` to assemble the evidence into one review sheet before making PASS/FIX/BLOCKED decisions.
+9. Use `Tools > Food Truck Prototype > Prepare and Capture State` only for focused retakes of Draw Choice, Pending Placement, or Invalid Placement.
+10. If all required states pass visually, run `Tools > Food Truck Prototype > Record PASS Manual Result`; otherwise use `Tools/Write-PrototypePlayModeResultFromSuite.ps1` with the failing `FIX_*` or `BLOCKED` status when you are ready to create/apply the result draft.
+11. Run `Tools/Verify-PrototypeHudStateContract.ps1` after any Draw/Pending/Invalid Placement HUD code change.
+12. Run `Tools/Verify-PrototypeLayout.ps1` after any HUD layout code change.
+13. Run `Tools/Verify-PrototypePlayModeRecord.ps1` to confirm the manual record is parsable.
+14. If Draw cards or placement still crowd the play view, adjust `FoodTruckPrototypeHud.CalculateGameplayFocusLayout` and `ApplyGameplayHudContext` before adding new mechanics.
+15. Verify that ingredient icons appear on draw cards, pending block preview, and placed inventory cells.
+16. Verify that `FoodTruck.png` appears on lane truck markers and `KitchenModule.png` appears only on active block cells.
+17. After manual visual confirmation, run `Tools/Gate-Verification.ps1 -RunTests -JsonOnly` and keep the JSON output with the session notes.
+18. During the next Wave Combat capture, verify that the wave payoff cue is readable and does not obscure HP/Heat/lane pressure.
+19. During the next Draw Choice capture, verify that `Fit`, `Heat`, and `Role` can be compared across all three cards within three seconds.
+20. During the next Invalid Placement capture, verify that the reason and `Next` action are visible near the board/cue without requiring the full log.
+21. During the next Pending Placement capture, verify that R1/R2 recommendations explain the useful lane/coverage/center reason without crowding the board.
+22. During the next Wave Combat suite capture, confirm the review pack shows `wave_combat_action_showcase_ready=true`; if not, treat it as `FIX_FEEDBACK` or retake evidence before recording PASS.
 
 ## Manual Play Mode Acceptance Checklist
 - Full checklist and result template: `Docs/Prototype_PlayMode_Verification.md`.
@@ -245,6 +250,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1"
 powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
+powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
@@ -275,18 +281,19 @@ Current status:
 - Prototype resource pipeline is complete for placeholders.
 - Asset gate passes: asset_status=ok, runtime_required_missing=0, final_art_missing=0, missing_meta=0, diagnostic_warnings=0.
 - Layout numeric/source-sync guard passes: layout_status=ok, failed_checks=0, source_sync_status=ok, source_sync_failed_checks=0.
-- HUD state contract guard passes: hud_contract_status=ok, check_count=41, failed_checks=0.
+- HUD state contract guard passes: hud_contract_status=ok, check_count=43, failed_checks=0.
 - Play Mode suite evidence is tracked and currently manual partial: playmode_suite_status=manual_partial, suite_capture_source=manual screenshot registration, captured_count=1/4, wave_combat_action_showcase_ready=false, wave_combat_action_showcase_reason=legacy_wave_combat_capture_without_attack_labels. This status is visible from `Tools\Show-PrototypeSessionStatus.ps1` without opening the review pack.
 - Play Mode screenshot evidence is tracked and currently partial: 2 valid portrait PNGs, unlabeled_count=0, manual_registration_candidate_count=0, triaged_non_state_count=1, covered_state_count=1/4, Wave Combat is labeled through the suite manifest, and Draw Choice/Pending Placement/Invalid Placement remain missing.
 - Play Mode review pack writer works in preview mode and currently reports review_pack_status=ok, review_readiness=partial_evidence, review_pack_visual_review_required=True, manual_registration_candidate_count=0, and triaged_non_state_count=1 until suite-state captures or manual registrations cover every required state; it now includes suite evidence source, Wave Combat action showcase status, visual acceptance checklist, and triaged non-state screenshots. Full generation writes the review pack.
 - Focused retake plan writer works in preview mode and currently reports retake_plan_status=ok, focused_retake_count=3, missing Draw Choice/Pending Placement/Invalid Placement, manual_registration_candidate_count=0, triaged_non_state_count=1, and a menu-path checklist for `Prepare and Capture State`.
+- Focused retake plan verifier reports retake_plan_doc_status=ok with documented_focused_retake_count=3/3.
 - Session status top issue is `Manual Play Mode evidence is partial: 1/4 states registered.`; the next evidence action is to run focused retakes for Draw Choice, Pending Placement, and Invalid Placement with `Tools > Food Truck Prototype > Prepare and Capture State`, while the next code target is intentionally blocked until fresh suite evidence exists.
 - Play Mode result writer can draft/apply PASS/FIX/BLOCKED outcomes from suite evidence, but even JsonOnly creates a draft, so reserve it for intentional result recording.
 - Manual Play Mode record is tracked and currently not recorded: playmode_record_status=not_recorded; Draw Choice, Pending Placement, and Invalid Placement are NOT_RECORDED while Wave Combat is PASS in the latest manual result.
 - Static guard passes: static_status=ok.
 - Integrated gate passes: gate_status=ok.
 - Unity compile/tests are inconclusive only because headless Editor verification is unreliable in this environment.
-- Latest local MCP-free recheck at 2026-05-08 00:09 KST confirmed focused retake plan preview, suite/screenshot/review pack status through Show-PrototypeSessionStatus, and Verify-PrototypeHudStateContract after adding retake plan contract checks. Write-PrototypePlayModeResultFromSuite was not re-run in this handoff-only pass because it writes a draft by design.
+- Latest local MCP-free recheck at 2026-05-08 00:46 KST confirmed focused retake plan doc verification, suite/screenshot/review pack status through Show-PrototypeSessionStatus, Gate-Verification integration, and Verify-PrototypeHudStateContract after adding stale-doc contract checks. Write-PrototypePlayModeResultFromSuite was not re-run in this handoff-only pass because it writes a draft by design.
 
 Recent work:
 - Added Verify-PrototypeAssets.ps1 with PNG/meta diagnostics.
@@ -307,6 +314,7 @@ Recent work:
 - Added Tools/Verify-PrototypePlayModeScreenshots.ps1 for checking captured PNG quality and required state coverage before visual review.
 - Added Tools/Write-PrototypePlayModeReviewPack.ps1 for assembling visual review evidence and result command templates.
 - Added Tools/Write-PrototypePlayModeRetakePlan.ps1 for turning partial evidence into a focused Draw/Pending/Invalid retake checklist before opening Unity.
+- Added Tools/Verify-PrototypePlayModeRetakePlan.ps1 for detecting stale focused retake plan docs after evidence changes.
 - Added Tools/Write-PrototypePlayModeResultFromSuite.ps1 for drafting or applying PASS/FIX/BLOCKED manual results from suite evidence.
 - Added Tools/Register-PrototypePlayModeManualEvidence.ps1 for registering standalone PNGs as explicit manual suite evidence when direct Play Mode interaction is unreliable.
 - Fixed Tools/Show-PrototypeSessionStatus.ps1 so unresolved_issues JSON no longer splits the manual Play Mode status into separate fragments.
@@ -320,8 +328,8 @@ Recent work:
   - Record PASS Manual Result updates Docs/Prototype_PlayMode_Verification.md after explicit visual confirmation.
 - Published the checkpoint to GitHub draft PR #1 on branch codex/publish-prototype.
 - Captured Wave Combat screenshots and committed them as verification evidence.
-- Compacted combat-only portrait HUD so the 3x3 build grid is hidden while no block/draw/rest context is active, added layout/action visibility guards for that state, added the HUD state contract verifier, added Play Mode helper state setup/capture menus for Draw/Pending/Invalid/Wave states, added the one-pass Capture Verification Suite, added machine-checkable suite/screenshot evidence verification, added review pack assembly, made PASS recording reuse suite screenshots from disk, added suite-backed PASS/FIX/BLOCKED result drafting, and added Wave Combat action-showcase status to suite/review/session evidence.
+- Compacted combat-only portrait HUD so the 3x3 build grid is hidden while no block/draw/rest context is active, added layout/action visibility guards for that state, added the HUD state contract verifier, added Play Mode helper state setup/capture menus for Draw/Pending/Invalid/Wave states, added the one-pass Capture Verification Suite, added machine-checkable suite/screenshot evidence verification, added review pack assembly, added focused retake plan generation/stale-doc verification, made PASS recording reuse suite screenshots from disk, added suite-backed PASS/FIX/BLOCKED result drafting, and added Wave Combat action-showcase status to suite/review/session evidence.
 
 Next priority:
-Run Tools/Write-PrototypePlayModeRetakePlan.ps1 before opening Unity so the current missing Draw Choice, Pending Placement, and Invalid Placement targets are explicit. Then use `Tools > Food Truck Prototype > Capture Verification Suite` in Play Mode, or focused `Prepare and Capture State` retakes, to capture the missing states with minimal direct input. If only standalone PNGs are available, run Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly or Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly and copy the generated Tools/Register-PrototypePlayModeManualEvidence.ps1 command template for any visually matching missing state. If a PNG is reviewed and does not match a required state, record it in Docs/Prototype_PlayMode_Screenshot_Triage.txt so it stops appearing as a registration candidate. Then run Tools/Verify-PrototypePlayModeSuite.ps1, Tools/Verify-PrototypePlayModeScreenshots.ps1, and Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly to confirm files exist, are valid portrait PNGs, have labeled state coverage, and report `wave_combat_action_showcase_ready=true` before recording PASS. Generate the full review pack and use Tools/Write-PrototypePlayModeResultFromSuite.ps1 or the PASS menu only when ready to record the visual result. Continue code-level next work without blocking on longer Play Mode input from this PC.
+Run Tools/Write-PrototypePlayModeRetakePlan.ps1 and Tools/Verify-PrototypePlayModeRetakePlan.ps1 before opening Unity so the current missing Draw Choice, Pending Placement, and Invalid Placement targets are explicit and not stale. Then use `Tools > Food Truck Prototype > Capture Verification Suite` in Play Mode, or focused `Prepare and Capture State` retakes, to capture the missing states with minimal direct input. If only standalone PNGs are available, run Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly or Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly and copy the generated Tools/Register-PrototypePlayModeManualEvidence.ps1 command template for any visually matching missing state. If a PNG is reviewed and does not match a required state, record it in Docs/Prototype_PlayMode_Screenshot_Triage.txt so it stops appearing as a registration candidate. Then run Tools/Verify-PrototypePlayModeSuite.ps1, Tools/Verify-PrototypePlayModeScreenshots.ps1, and Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly to confirm files exist, are valid portrait PNGs, have labeled state coverage, and report `wave_combat_action_showcase_ready=true` before recording PASS. Generate the full review pack and use Tools/Write-PrototypePlayModeResultFromSuite.ps1 or the PASS menu only when ready to record the visual result. Continue code-level next work without blocking on longer Play Mode input from this PC.
 ```

@@ -1,6 +1,6 @@
 # Prototype Play Mode Retake Plan
 
-Generated: 2026-05-08 00:09 KST
+Generated: 2026-05-08 00:46 KST
 Retake plan status: `ok`
 
 ## Machine Summary
@@ -27,6 +27,12 @@ No standalone PNG candidates remain for the missing required states. Capture fre
 Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.
 
 ## Follow-Up Commands
+Before opening Unity, verify this plan still matches the current evidence state:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+```
+
 After retaking the missing screenshots, run these in order:
 
 ```powershell

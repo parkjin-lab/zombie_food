@@ -15,7 +15,8 @@ param(
     [switch]$SkipLayout,
     [switch]$SkipHudContract,
     [switch]$SkipPlayModeSuite,
-    [switch]$SkipPlayModeScreenshots
+    [switch]$SkipPlayModeScreenshots,
+    [switch]$SkipPlayModeRetakePlan
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,6 +34,7 @@ $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
 $hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
 $playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
+$playModeRetakePlanScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRetakePlan.ps1"
 
 if (-not (Test-Path $ensureScript)) {
     Write-Error "Missing script: $ensureScript"
@@ -299,6 +301,51 @@ function Invoke-PlayModeScreenshotCheck {
     }
 }
 
+function Invoke-PlayModeRetakePlanCheck {
+    param(
+        [string]$PlayModeRetakePlanScriptPath,
+        [string]$RootPath
+    )
+
+    if (-not (Test-Path $PlayModeRetakePlanScriptPath)) {
+        return [pscustomobject]@{
+            exit_code = 90
+            playmode_retake_plan = [pscustomobject]@{
+                retake_plan_doc_status = "missing_playmode_retake_plan_verifier"
+                expected_focused_retake_count = $null
+                documented_focused_retake_count = $null
+            }
+        }
+    }
+
+    $retakePlanJsonRaw = & powershell -ExecutionPolicy Bypass -File $PlayModeRetakePlanScriptPath -ProjectPath $RootPath -JsonOnly
+    $exitCode = $LASTEXITCODE
+    $jsonLine = $retakePlanJsonRaw | Select-Object -Last 1
+    $retakePlanObj = $null
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$jsonLine)) {
+        try {
+            $retakePlanObj = $jsonLine | ConvertFrom-Json
+        }
+        catch {
+            $retakePlanObj = $null
+        }
+    }
+
+    if ($null -eq $retakePlanObj) {
+        $retakePlanObj = [pscustomobject]@{
+            retake_plan_doc_status = "failed_playmode_retake_plan_parse"
+            expected_focused_retake_count = $null
+            documented_focused_retake_count = $null
+        }
+    }
+
+    return [pscustomobject]@{
+        exit_code = $exitCode
+        playmode_retake_plan = $retakePlanObj
+    }
+}
+
 $ensureArgs = @(
     "-ExecutionPolicy", "Bypass",
     "-File", $ensureScript,
@@ -508,6 +555,37 @@ if (-not $SkipPlayModeScreenshots) {
     }
 }
 
+$playModeRetakePlanObj = $null
+if (-not $SkipPlayModeRetakePlan) {
+    $playModeRetakePlanResult = Invoke-PlayModeRetakePlanCheck -PlayModeRetakePlanScriptPath $playModeRetakePlanScript -RootPath $ProjectPath
+    $playModeRetakePlanObj = $playModeRetakePlanResult.playmode_retake_plan
+
+    if (-not $Compact -and $null -ne $playModeRetakePlanObj) {
+        Write-Host ("retake_plan_doc_status=" + $playModeRetakePlanObj.retake_plan_doc_status)
+        Write-Host ("retake_plan_doc_focused_retake_count=" + $playModeRetakePlanObj.documented_focused_retake_count + "/" + $playModeRetakePlanObj.expected_focused_retake_count)
+    }
+
+    if ($playModeRetakePlanResult.exit_code -ne 0) {
+        if ($JsonOnly) {
+            $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
+            [ordered]@{
+                gate_status = "failed_playmode_retake_plan"
+                status = $statusObj
+                assets = $assetObj
+                layout = $layoutObj
+                hud_contract = $hudContractObj
+                playmode_suite = $playModeSuiteObj
+                playmode_screenshots = $playModeScreenshotsObj
+                playmode_retake_plan = $playModeRetakePlanObj
+            } | ConvertTo-Json -Depth 8 -Compress | Write-Host
+            exit 9
+        }
+
+        Write-Host "gate_status=failed_playmode_retake_plan"
+        exit 9
+    }
+}
+
 $statusObj = $null
 if ($Json) {
     $statusObj = Get-StatusObject -ShowScriptPath $showScript -RootPath $ProjectPath -MaxAge $MaxAgeMinutes
@@ -535,6 +613,7 @@ if ($JsonOnly) {
         hud_contract = $hudContractObj
         playmode_suite = $playModeSuiteObj
         playmode_screenshots = $playModeScreenshotsObj
+        playmode_retake_plan = $playModeRetakePlanObj
     } | ConvertTo-Json -Depth 8 -Compress | Write-Host
     exit 0
 }

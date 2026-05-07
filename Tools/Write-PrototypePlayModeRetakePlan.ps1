@@ -196,6 +196,12 @@ function Build-RetakePlanMarkdown {
     [void]$builder.AppendLine()
 
     [void]$builder.AppendLine("## Follow-Up Commands")
+    [void]$builder.AppendLine("Before opening Unity, verify this plan still matches the current evidence state:")
+    [void]$builder.AppendLine()
+    [void]$builder.AppendLine('```powershell')
+    [void]$builder.AppendLine('powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRetakePlan.ps1" -ProjectPath "' + $ProjectPath + '"')
+    [void]$builder.AppendLine('```')
+    [void]$builder.AppendLine()
     [void]$builder.AppendLine("After retaking the missing screenshots, run these in order:")
     [void]$builder.AppendLine()
     [void]$builder.AppendLine('```powershell')
