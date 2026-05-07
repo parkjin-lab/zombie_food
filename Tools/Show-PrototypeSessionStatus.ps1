@@ -59,6 +59,7 @@ $playModeRecordScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRe
 $playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
 $playModeReviewPackScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeReviewPack.ps1"
+$playModeRetakePlanScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeRetakePlan.ps1"
 $playModeManualEvidenceScript = Join-Path $ProjectPath "Tools\Register-PrototypePlayModeManualEvidence.ps1"
 $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
@@ -102,6 +103,12 @@ $playModeReviewPackResult = Invoke-JsonScript -ScriptPath $playModeReviewPackScr
     "-JsonOnly"
 )
 
+$playModeRetakePlanResult = Invoke-JsonScript -ScriptPath $playModeRetakePlanScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-PreviewOnly",
+    "-JsonOnly"
+)
+
 $gateData = $gateResult.data
 $assetData = $assetResult.data
 $verification = if ($null -ne $gateData) { $gateData.status } else { $null }
@@ -115,6 +122,7 @@ $hudContractData = $hudContractResult.data
 $playModeSuiteData = $playModeSuiteResult.data
 $playModeScreenshotsData = $playModeScreenshotsResult.data
 $playModeReviewPackData = $playModeReviewPackResult.data
+$playModeRetakePlanData = $playModeRetakePlanResult.data
 
 $assetStatus = if ($null -ne $assetData) { $assetData.asset_status } elseif ($null -ne $gateAssets) { $gateAssets.asset_status } else { "unknown" }
 $layoutStatus = if ($null -ne $gateLayout) { $gateLayout.layout_status } else { "unknown" }
@@ -139,6 +147,12 @@ $reviewReadiness = if ($null -ne $playModeReviewPackData) { $playModeReviewPackD
 $reviewPackVisualReviewRequired = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.visual_review_required } else { $null }
 $reviewPackNextAction = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.next_action } else { "Run Tools\Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly to inspect review readiness." }
 $reviewPackError = if ($playModeReviewPackResult.ok) { $null } else { $playModeReviewPackResult.error }
+$retakePlanStatus = if ($null -ne $playModeRetakePlanData) { $playModeRetakePlanData.retake_plan_status } elseif (-not $playModeRetakePlanResult.ok) { "failed" } else { "unknown" }
+$retakePlanMissingStates = if ($null -ne $playModeRetakePlanData) { $playModeRetakePlanData.missing_states } else { @() }
+$retakePlanFocusedRetakeCount = if ($null -ne $playModeRetakePlanData) { $playModeRetakePlanData.focused_retake_count } else { $null }
+$retakePlanFocusedRetakeStates = if ($null -ne $playModeRetakePlanData) { $playModeRetakePlanData.focused_retake_states } else { @() }
+$retakePlanNextAction = if ($null -ne $playModeRetakePlanData) { $playModeRetakePlanData.next_action } else { "Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity." }
+$retakePlanError = if ($playModeRetakePlanResult.ok) { $null } else { $playModeRetakePlanResult.error }
 $staticStatus = if ($null -ne $verification) { $verification.static_status } else { "unknown" }
 $compileStatus = if ($null -ne $verification) { $verification.compile_status } else { "unknown" }
 $testsStatus = if ($null -ne $verification) { $verification.tests_status } else { "unknown" }
@@ -158,6 +172,9 @@ elseif ($playModeScreenshotStatus -eq "invalid_screenshots") {
     $readiness = "needs_fix_before_playmode"
 }
 elseif ($reviewPackStatus -ne "ok" -and $reviewPackStatus -ne "unknown") {
+    $readiness = "needs_fix_before_playmode"
+}
+elseif ($retakePlanStatus -ne "ok" -and $retakePlanStatus -ne "unknown") {
     $readiness = "needs_fix_before_playmode"
 }
 elseif ($playModeRecordStatus -eq "needs_fix" -or $playModeRecordStatus -eq "blocked") {
@@ -188,7 +205,7 @@ elseif (-not $suiteEvidenceReady) {
             $nextEvidenceAction = "Review " + $playModeManualRegistrationCandidateCount + " unlabeled PNG candidate(s), then register any matching missing state with Tools\Register-PrototypePlayModeManualEvidence.ps1."
         }
         else {
-            $nextEvidenceAction = "No standalone PNG candidates remain; capture or focused-retake Draw Choice, Pending Placement, and Invalid Placement evidence."
+            $nextEvidenceAction = $retakePlanNextAction
         }
     }
     else {
@@ -229,6 +246,7 @@ $unresolvedIssues.Add("Play Mode verification suite status: " + $playModeSuiteSt
 $unresolvedIssues.Add("Wave Combat action showcase ready: " + [string]$waveCombatActionShowcaseReady + " (" + $waveCombatActionShowcaseReason + ").") | Out-Null
 $unresolvedIssues.Add("Play Mode screenshot evidence status: " + $playModeScreenshotStatus + ".") | Out-Null
 $unresolvedIssues.Add("Play Mode review pack readiness: " + $reviewReadiness + ".") | Out-Null
+$unresolvedIssues.Add("Play Mode retake plan status: " + $retakePlanStatus + ".") | Out-Null
 $unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
 $unresolvedIssues.Add("Top issue: " + $topIssue) | Out-Null
 $unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
@@ -263,6 +281,12 @@ $summary = [ordered]@{
     review_pack_visual_review_required = $reviewPackVisualReviewRequired
     review_pack_error = $reviewPackError
     review_pack_next_action = $reviewPackNextAction
+    retake_plan_status = $retakePlanStatus
+    retake_plan_missing_states = $retakePlanMissingStates
+    retake_plan_focused_retake_count = $retakePlanFocusedRetakeCount
+    retake_plan_focused_retake_states = $retakePlanFocusedRetakeStates
+    retake_plan_error = $retakePlanError
+    retake_plan_next_action = $retakePlanNextAction
     playmode_record_status = $playModeRecordStatus
     static_status = $staticStatus
     compile_status = $compileStatus
@@ -280,6 +304,7 @@ $summary = [ordered]@{
         playmode_suite_verifier = (Test-Path -LiteralPath $playModeSuiteScript)
         playmode_screenshot_verifier = (Test-Path -LiteralPath $playModeScreenshotsScript)
         playmode_review_pack_writer = (Test-Path -LiteralPath $playModeReviewPackScript)
+        playmode_retake_plan_writer = (Test-Path -LiteralPath $playModeRetakePlanScript)
         playmode_manual_evidence_register = (Test-Path -LiteralPath $playModeManualEvidenceScript)
         playmode_record_verifier = (Test-Path -LiteralPath $playModeRecordScript)
     }
@@ -288,6 +313,7 @@ $summary = [ordered]@{
         ($nextEvidenceAction),
         ("Next code target: " + $nextCodeTarget),
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
+        "Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity.",
         "Open the review pack or screenshot verifier output to copy manual registration command templates for unlabeled PNGs.",
         "If only standalone PNGs are available, register them with Tools\Register-PrototypePlayModeManualEvidence.ps1 before generating the review pack.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",
@@ -337,6 +363,9 @@ Write-Host ("playmode_triaged_non_state_count=" + $summary.playmode_triaged_non_
 Write-Host ("review_pack_status=" + $summary.review_pack_status)
 Write-Host ("review_readiness=" + $summary.review_readiness)
 Write-Host ("review_pack_visual_review_required=" + [string]$summary.review_pack_visual_review_required)
+Write-Host ("retake_plan_status=" + $summary.retake_plan_status)
+Write-Host ("retake_plan_focused_retake_count=" + $summary.retake_plan_focused_retake_count)
+Write-Host ("retake_plan_next_action=" + $summary.retake_plan_next_action)
 Write-Host ("playmode_record_status=" + $summary.playmode_record_status)
 Write-Host ("static_status=" + $summary.static_status)
 Write-Host ("compile_status=" + $summary.compile_status)

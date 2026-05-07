@@ -4,7 +4,7 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-06 01:58 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 screenshot triage 경로를 추가한 뒤에도 통과한다.
+- 2026-05-08 00:09 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 focused retake plan 경로를 추가한 뒤에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -27,6 +27,7 @@
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `top_issue`, `next_evidence_action`, `next_code_target`까지 출력해 다음 세션의 첫 행동을 분명히 한다.
 - `Tools\Register-PrototypePlayModeManualEvidence.ps1`은 standalone PNG를 상태별 suite 증거로 등록한다. 직접 Play Mode 조작이 불안정할 때 Capture Verification Suite의 보조 경로로 사용하며, screenshot verifier와 review pack preview가 상태별 command template을 생성한다.
 - `Docs\Prototype_PlayMode_Screenshot_Triage.txt`는 시각 검토 후 필수 상태 증거가 아니라고 판단한 PNG를 기록한다. triage된 PNG는 더 이상 manual registration candidate로 추천되지 않는다.
+- `Tools\Write-PrototypePlayModeRetakePlan.ps1`은 현재 partial evidence를 읽어 Draw Choice, Pending Placement, Invalid Placement의 focused retake 메뉴와 must-see 기준을 한 장짜리 `Docs\Prototype_PlayMode_RetakePlan.md`로 정리한다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
@@ -37,6 +38,7 @@
 ### P0 (즉시: Play Mode 증거와 결과 기록)
 - 첫 상태 확인은 `Tools\Show-PrototypeSessionStatus.ps1`로 시작한다. suite/스크린샷/review pack/record/showcase 상태가 기대와 다르면 먼저 인계 문서를 확인한다.
 - 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다.
+- 현재 `manual_registration_candidate_count=0`이고 missing state가 남아 있으면 Unity를 열기 전에 `Tools\Write-PrototypePlayModeRetakePlan.ps1`을 실행해 retake checklist를 먼저 만든다.
 - Unity Play Mode에서 `Tools > Food Truck Prototype > Capture Verification Suite`를 실행해 Draw Choice, Pending Placement, Invalid Placement, Wave Combat 네 상태를 한 번에 캡처한다.
 - 직접 suite 캡처가 어렵지만 PNG는 확보했다면 `Tools\Register-PrototypePlayModeManualEvidence.ps1`로 해당 PNG를 상태별 suite 증거에 등록한다.
 - 등록할 상태가 애매하면 `Tools\Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` 또는 review pack preview의 `manual_registration_commands`를 먼저 보고, 시각적으로 맞는 상태에만 적용한다. 시각적으로 맞지 않으면 triage manifest에 남긴다.
@@ -73,6 +75,7 @@
 - Review readiness: `ready_for_visual_review` 또는 `partial_evidence`
 - Review pack status: `review_pack_status=ok`, `review_pack_visual_review_required=True/False`
 - Work focus: `top_issue`, `next_evidence_action`, `next_code_target`
+- Retake plan: `retake_plan_status=ok`, `retake_plan_focused_retake_count`, `retake_plan_next_action`
 - Manual registration candidates: `manual_registration_candidate_count`, `manual_registration_commands`
 - Screenshot triage: `triaged_non_state_count`, `triaged_non_state_screenshots`
 - Wave Combat action showcase: `wave_combat_action_showcase_ready=true`와 reason 확인
@@ -119,7 +122,13 @@ powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1"
 powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 ```
 
-### 2. Play Mode suite 캡처
+### 2. Focused retake 계획 생성
+```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+```
+
+### 3. Play Mode suite 캡처
 - Unity Editor에서 Play Mode 진입
 - `Tools > Food Truck Prototype > Capture Verification Suite`
 - 일부 상태만 다시 찍을 때: `Tools > Food Truck Prototype > Prepare and Capture State > Draw Choice/Pending Placement/Invalid Placement/Wave Combat`
@@ -129,7 +138,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1"
 powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -State "Wave Combat" -ScreenshotPath "Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010153.png" -PreviewOnly -JsonOnly
 ```
 
-### 3. suite와 스크린샷 기계 검증
+### 4. suite와 스크린샷 기계 검증
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
@@ -137,13 +146,13 @@ powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreensh
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 ```
 
-### 4. 시각 리뷰 pack 생성
+### 5. 시각 리뷰 pack 생성
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 ```
 
-### 5. 결과 기록
+### 6. 결과 기록
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS -Apply
@@ -151,7 +160,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.p
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 ```
 
-### 6. 코드 변경 후 회귀 가드
+### 7. 코드 변경 후 회귀 가드
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
@@ -165,5 +174,5 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: local scripts/file inspection first; MCP 연결 문제로 completion-critical UX 검증을 멈추지 않는다.
 - Immediate next validation: Play Mode에서 `Capture Verification Suite`를 실행한 뒤 suite verifier, screenshot verifier, review pack, result writer 순서로 닫는다.
-- Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, manual PNG evidence registration, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
+- Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, manual PNG evidence registration, focused retake plan writer, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
 - Manual record remains open until Draw Choice, Pending Placement, Invalid Placement, Wave Combat suite evidence is captured, visually reviewed, and recorded.

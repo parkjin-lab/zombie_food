@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-06 01:58 KST
+Last updated: 2026-05-08 00:09 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -16,7 +16,7 @@ evidence.
 - Play Mode suite: `playmode_suite_status=manual_partial`, `captured_count=1/4`, `suite_capture_source=manual screenshot registration`; Wave Combat has one manually registered PNG, while Draw Choice, Pending Placement, and Invalid Placement remain missing.
 - Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, Wave Combat is labeled through the suite manifest, `manual_registration_candidate_count=0`, `triaged_non_state_count=1`, but full suite coverage is still missing.
 - Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
-- Session status/review pack: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, triaged non-state count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `top_issue`, `next_evidence_action`, and `next_code_target`; review pack also includes suite evidence source, visual acceptance checklist, manual registration command hints, and triaged non-state screenshots.
+- Session status/review pack/retake plan: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, triaged non-state count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `retake_plan_status`, `retake_plan_focused_retake_count`, `top_issue`, `next_evidence_action`, and `next_code_target`; review pack also includes suite evidence source, visual acceptance checklist, manual registration command hints, and triaged non-state screenshots.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
 - Invalid Placement update: blocked placement now surfaces a corrective next action together with the fail reason; Play Mode readability is still pending.
@@ -30,22 +30,26 @@ evidence.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
-2. If the PC can run Unity Play Mode, use `Tools > Food Truck Prototype > Capture Verification Suite`.
+2. Generate the focused retake plan before opening Unity when missing states remain and no manual registration candidates are available.
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+   ```
+3. If the PC can run Unity Play Mode, use `Tools > Food Truck Prototype > Capture Verification Suite`.
    If only standalone PNGs are available, register them as explicit manual evidence.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -State "Wave Combat" -ScreenshotPath "Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010153.png" -PreviewOnly -JsonOnly
    ```
-3. Verify suite and screenshot evidence.
+4. Verify suite and screenshot evidence.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
-4. Build the review pack before manual visual judgment, and check the Wave Combat action showcase status.
+5. Build the review pack before manual visual judgment, and check the Wave Combat action showcase status.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
    ```
-5. Manually judge Draw Choice, Pending Placement, Invalid Placement, and Wave Combat as `PASS/FIX/BLOCKED` when the suite can be captured.
-6. Record the result only after evidence is available.
+6. Manually judge Draw Choice, Pending Placement, Invalid Placement, and Wave Combat as `PASS/FIX/BLOCKED` when the suite can be captured.
+7. Record the result only after evidence is available.
    ```powershell
    powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS -Apply
    powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
@@ -62,6 +66,7 @@ evidence.
 - Treat `wave_combat_action_showcase_ready=false` in session status as an evidence gap, not a Wave Combat visual PASS.
 - Treat `review_readiness=partial_evidence` in session status as a prompt to capture/retake evidence before recording manual results.
 - Treat `top_issue` and `next_evidence_action` as the first action filter before choosing new gameplay code work.
+- Use `Write-PrototypePlayModeRetakePlan.ps1` when `manual_registration_candidate_count=0` and Draw/Pending/Invalid states remain missing.
 - Use `Register-PrototypePlayModeManualEvidence.ps1` when the PC can capture a standalone PNG but cannot complete direct Play Mode input or the full suite menu.
 - Use screenshot verifier or review pack preview `manual_registration_commands` so standalone PNGs are registered only after visual confirmation of the matching state.
 - Record visually reviewed non-required PNGs in the screenshot triage manifest so they stop appearing as manual registration candidates.
@@ -75,6 +80,7 @@ evidence.
 - `playmode_suite_status=captured` / `captured_manual`, or the missing/manual partial capture reason is explicit.
 - `playmode_screenshot_status=suite_ready`, or the partial/missing screenshot reason is explicit.
 - `review_pack_status=ok` and `review_readiness=ready_for_visual_review`, or the partial evidence reason is explicit.
+- `retake_plan_status=ok` reports a concrete focused retake count and next action while evidence is partial.
 - Session status reports a concrete `top_issue`, `next_evidence_action`, and `next_code_target`.
 - Session/review output reports `suite_capture_source` so manual evidence is not confused with a full Unity suite capture.
 - Screenshot/review output reports manual registration candidates and command templates for any unlabeled PNGs that pass machine quality.
@@ -240,7 +246,7 @@ The summary should highlight:
 1. Start session: use show status to check readiness and unresolved issues.
 2. Run the relevant verifier before changing behavior.
 3. Implement: change only one player-facing variable per session when possible.
-4. Capture: use Capture Verification Suite when PC conditions allow.
+4. Capture: generate the retake plan, then use Capture Verification Suite or focused Prepare and Capture State when PC conditions allow.
 5. Verify: run suite verifier, screenshot verifier, and review pack in order.
 6. Judge: record `PASS/FIX/BLOCKED` with the result writer.
 7. Report: carry forward one top failure reason and one next code target.
@@ -256,6 +262,8 @@ powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1"
 powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"

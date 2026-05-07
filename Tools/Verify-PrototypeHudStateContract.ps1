@@ -62,6 +62,7 @@ $relativeFiles = [ordered]@{
     playModeSuiteVerifier = "Tools\Verify-PrototypePlayModeSuite.ps1"
     playModeScreenshotVerifier = "Tools\Verify-PrototypePlayModeScreenshots.ps1"
     playModeReviewPackWriter = "Tools\Write-PrototypePlayModeReviewPack.ps1"
+    playModeRetakePlanWriter = "Tools\Write-PrototypePlayModeRetakePlan.ps1"
     playModeManualEvidenceRegister = "Tools\Register-PrototypePlayModeManualEvidence.ps1"
     playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
@@ -426,6 +427,15 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_status_is_in_session_sta
     'Check review_readiness before generating or recording manual PASS/FIX/BLOCKED evidence.'
 ) "The first session status command should expose review pack readiness before writing review output."
 
+Add-ContractCheck $checks "editor_helpers" "retake_plan_status_is_in_session_status" $sources.sessionStatus @(
+    'Write-PrototypePlayModeRetakePlan.ps1',
+    '"-PreviewOnly"',
+    'retake_plan_status',
+    'retake_plan_focused_retake_count',
+    'retake_plan_next_action',
+    'Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity.'
+) "The first session status command should expose focused retake plan readiness before opening Unity."
+
 Add-ContractCheck $checks "editor_helpers" "session_status_reports_next_work_focus" $sources.sessionStatus @(
     'top_issue',
     'next_evidence_action',
@@ -461,6 +471,19 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     'Write-TextWithFallback',
     'visual_review_required'
 ) "Manual visual review should have a single evidence pack before PASS/FIX/BLOCKED recording."
+
+Add-ContractCheck $checks "editor_helpers" "retake_plan_collects_focused_capture_work" $sources.playModeRetakePlanWriter @(
+    'Prototype_PlayMode_RetakePlan.md',
+    'Verify-PrototypePlayModeSuite.ps1',
+    'Verify-PrototypePlayModeScreenshots.ps1',
+    'Write-PrototypePlayModeReviewPack.ps1',
+    'Prepare and Capture State',
+    'Draw Choice',
+    'Pending Placement',
+    'Invalid Placement',
+    'retake_plan_status',
+    'focused_retake_count'
+) "Focused retake planning should translate partial evidence into state-specific capture work."
 
 Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_evidence" $sources.editorMenu @(
     'CollectManualResultScreenshotEvidence',
