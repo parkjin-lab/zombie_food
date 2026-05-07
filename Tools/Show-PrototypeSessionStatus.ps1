@@ -61,6 +61,7 @@ $playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayM
 $playModeReviewPackScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeReviewPack.ps1"
 $playModeRetakePlanScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeRetakePlan.ps1"
 $playModeRetakePlanVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRetakePlan.ps1"
+$playModeEvidencePreflightScript = Join-Path $ProjectPath "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1"
 $playModeManualEvidenceScript = Join-Path $ProjectPath "Tools\Register-PrototypePlayModeManualEvidence.ps1"
 $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
@@ -334,6 +335,7 @@ $summary = [ordered]@{
         playmode_review_pack_writer = (Test-Path -LiteralPath $playModeReviewPackScript)
         playmode_retake_plan_writer = (Test-Path -LiteralPath $playModeRetakePlanScript)
         playmode_retake_plan_verifier = (Test-Path -LiteralPath $playModeRetakePlanVerifierScript)
+        playmode_evidence_preflight = (Test-Path -LiteralPath $playModeEvidencePreflightScript)
         playmode_manual_evidence_register = (Test-Path -LiteralPath $playModeManualEvidenceScript)
         playmode_record_verifier = (Test-Path -LiteralPath $playModeRecordScript)
     }
@@ -344,6 +346,7 @@ $summary = [ordered]@{
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity.",
         "Run Tools\Verify-PrototypePlayModeRetakePlan.ps1 to confirm the focused retake checklist is not stale.",
+        "Run Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1 before opening Unity to summarize focused retake readiness.",
         "Open the review pack or screenshot verifier output to copy manual registration command templates for unlabeled PNGs.",
         "If only standalone PNGs are available, register them with Tools\Register-PrototypePlayModeManualEvidence.ps1 before generating the review pack.",
         "In Play Mode, use Tools > Food Truck Prototype > Capture Verification Suite for one-pass evidence across all required states.",

@@ -64,6 +64,7 @@ $relativeFiles = [ordered]@{
     playModeReviewPackWriter = "Tools\Write-PrototypePlayModeReviewPack.ps1"
     playModeRetakePlanWriter = "Tools\Write-PrototypePlayModeRetakePlan.ps1"
     playModeRetakePlanVerifier = "Tools\Verify-PrototypePlayModeRetakePlan.ps1"
+    playModeEvidencePreflight = "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1"
     playModeManualEvidenceRegister = "Tools\Register-PrototypePlayModeManualEvidence.ps1"
     playModeResultWriter = "Tools\Write-PrototypePlayModeResultFromSuite.ps1"
     gate = "Tools\Gate-Verification.ps1"
@@ -431,6 +432,7 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_status_is_in_session_sta
 Add-ContractCheck $checks "editor_helpers" "retake_plan_status_is_in_session_status" $sources.sessionStatus @(
     'Write-PrototypePlayModeRetakePlan.ps1',
     'Verify-PrototypePlayModeRetakePlan.ps1',
+    'Invoke-PrototypePlayModeEvidencePreflight.ps1',
     '"-PreviewOnly"',
     'retake_plan_status',
     'retake_plan_focused_retake_count',
@@ -438,6 +440,28 @@ Add-ContractCheck $checks "editor_helpers" "retake_plan_status_is_in_session_sta
     'retake_plan_next_action',
     'Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity.'
 ) "The first session status command should expose focused retake plan readiness before opening Unity."
+
+Add-ContractCheck $checks "editor_helpers" "playmode_evidence_preflight_summarizes_capture_readiness" $sources.playModeEvidencePreflight @(
+    'Invoke-PrototypePlayModeEvidencePreflight.ps1',
+    'Show-PrototypeSessionStatus.ps1',
+    'Verify-PrototypePlayModeRetakePlan.ps1',
+    'Verify-PrototypePlayModeSuite.ps1',
+    'Verify-PrototypePlayModeScreenshots.ps1',
+    'Write-PrototypePlayModeReviewPack.ps1',
+    'playmode_evidence_preflight_status',
+    'ready_for_focused_retake',
+    'ready_for_visual_review',
+    'needs_retake_plan_refresh',
+    'needs_screenshot_fix',
+    'commands_after_capture',
+    'focused_retake_states'
+) "A single preflight should summarize whether the PC-limited session is ready for focused retakes or visual review."
+
+Add-ContractCheck $checks "editor_helpers" "preflight_is_visible_in_session_status" $sources.sessionStatus @(
+    'Invoke-PrototypePlayModeEvidencePreflight.ps1',
+    'playmode_evidence_preflight',
+    'Run Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1 before opening Unity to summarize focused retake readiness.'
+) "Session status should point the user to the one-command preflight without invoking it recursively."
 
 Add-ContractCheck $checks "editor_helpers" "retake_plan_status_is_in_gate" $sources.gate @(
     'Verify-PrototypePlayModeRetakePlan.ps1',

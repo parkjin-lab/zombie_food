@@ -1,6 +1,6 @@
 # Prototype Play Mode Retake Plan
 
-Generated: 2026-05-08 00:46 KST
+Generated: 2026-05-08 01:44 KST
 Retake plan status: `ok`
 
 ## Machine Summary
@@ -31,6 +31,7 @@ Before opening Unity, verify this plan still matches the current evidence state:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 ```
 
 After retaking the missing screenshots, run these in order:
@@ -39,6 +40,7 @@ After retaking the missing screenshots, run these in order:
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
+powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 ```
 
 Generate the full review pack only after `review_readiness` reaches `ready_for_visual_review` or when you intentionally want a partial evidence sheet for discussion.

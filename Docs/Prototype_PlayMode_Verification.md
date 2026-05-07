@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Verification
 
-Last updated: 2026-05-08 00:46 KST
+Last updated: 2026-05-08 01:52 KST
 
 ## Purpose
 Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
@@ -16,6 +16,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeLayout.ps1" -Pro
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypeHudStateContract.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -RunTests -JsonOnly
 ```
 
@@ -30,6 +31,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - Play Mode 입력이 불안정하면 `Tools > Food Truck Prototype > Prepare and Capture State` 아래의 Draw Choice / Pending Placement / Invalid Placement / Wave Combat 메뉴를 사용한다. 각 메뉴는 해당 상태를 자동으로 만든 뒤 스크린샷과 draft에 준비 상태 요약을 남긴다.
 - focused retake 전에 `Tools\Write-PrototypePlayModeRetakePlan.ps1`을 실행하면 현재 missing state, menu path, must-see 기준, 후속 검증 명령을 `Docs\Prototype_PlayMode_RetakePlan.md`로 정리한다. 현재처럼 `manual_registration_candidate_count=0`이면 새 PNG 캡처가 필요한 상태로 간주한다.
 - retake plan 생성 뒤 `Tools\Verify-PrototypePlayModeRetakePlan.ps1`을 실행해 문서가 현재 suite/screenshot/review preview와 맞는지 확인한다. stale이면 먼저 retake plan을 다시 생성한다.
+- Unity를 열기 직전에는 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`을 실행해 focused retake 대상, stale-doc 여부, screenshot 상태, 캡처 후 검증 명령을 한 번에 확인한다.
 - 상태만 먼저 만들고 직접 확인하려면 `Tools > Food Truck Prototype > Prepare State` 아래 메뉴를 사용한 뒤 `Capture Play Mode Snapshot`을 실행한다.
 - 네 상태가 모두 PASS임을 직접 확인한 뒤 `Tools > Food Truck Prototype > Record PASS Manual Result`를 실행하면 `Latest Manual Result`가 자동으로 PASS 기록으로 갱신된다. suite manifest가 있으면 해당 스크린샷 목록을 PASS 기록의 증거로 함께 사용한다.
 - 문제가 보이면 PASS 기록 메뉴를 쓰지 말고 `Tools\Write-PrototypePlayModeResultFromSuite.ps1`로 FIX/BLOCKED 상태가 포함된 결과 draft를 만들거나 `-Apply`로 `Latest Manual Result`를 갱신한다. draft는 기본적으로 `Docs` 아래에 쓰고, 현재 환경에서 쓰기가 막히면 출력 JSON의 `draft_path`에 표시된 temp 경로로 저장된다.

@@ -4,7 +4,7 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
-- 2026-05-08 00:46 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 focused retake plan doc verifier 경로를 추가한 뒤에도 통과한다.
+- 2026-05-08 01:52 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 PlayMode evidence preflight 경로를 추가한 뒤에도 통과한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -29,6 +29,7 @@
 - `Docs\Prototype_PlayMode_Screenshot_Triage.txt`는 시각 검토 후 필수 상태 증거가 아니라고 판단한 PNG를 기록한다. triage된 PNG는 더 이상 manual registration candidate로 추천되지 않는다.
 - `Tools\Write-PrototypePlayModeRetakePlan.ps1`은 현재 partial evidence를 읽어 Draw Choice, Pending Placement, Invalid Placement의 focused retake 메뉴와 must-see 기준을 한 장짜리 `Docs\Prototype_PlayMode_RetakePlan.md`로 정리한다.
 - `Tools\Verify-PrototypePlayModeRetakePlan.ps1`은 `Docs\Prototype_PlayMode_RetakePlan.md`가 현재 suite/screenshot/review preview 상태와 맞는지 확인하고, stale이면 gate/session status에서 바로 드러낸다.
+- `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`은 session status, retake plan doc, suite, screenshot, review pack preview를 한 번에 모아 `ready_for_focused_retake` 또는 `ready_for_visual_review` 같은 다음 행동 상태를 출력한다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
@@ -41,6 +42,7 @@
 - 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다.
 - 현재 `manual_registration_candidate_count=0`이고 missing state가 남아 있으면 Unity를 열기 전에 `Tools\Write-PrototypePlayModeRetakePlan.ps1`을 실행해 retake checklist를 먼저 만든다.
 - retake checklist 생성 뒤 `Tools\Verify-PrototypePlayModeRetakePlan.ps1`로 문서가 현재 증거 상태와 동기화되어 있는지 확인한다.
+- Unity를 열기 전 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`로 focused retake 대상과 캡처 후 실행할 검증 명령을 한 번 더 확인한다.
 - Unity Play Mode에서 `Tools > Food Truck Prototype > Capture Verification Suite`를 실행해 Draw Choice, Pending Placement, Invalid Placement, Wave Combat 네 상태를 한 번에 캡처한다.
 - 직접 suite 캡처가 어렵지만 PNG는 확보했다면 `Tools\Register-PrototypePlayModeManualEvidence.ps1`로 해당 PNG를 상태별 suite 증거에 등록한다.
 - 등록할 상태가 애매하면 `Tools\Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` 또는 review pack preview의 `manual_registration_commands`를 먼저 보고, 시각적으로 맞는 상태에만 적용한다. 시각적으로 맞지 않으면 triage manifest에 남긴다.
@@ -79,6 +81,7 @@
 - Work focus: `top_issue`, `next_evidence_action`, `next_code_target`
 - Retake plan: `retake_plan_status=ok`, `retake_plan_focused_retake_count`, `retake_plan_next_action`
 - Retake plan doc: `retake_plan_doc_status=ok`, `documented_focused_retake_count / expected_focused_retake_count`
+- PlayMode evidence preflight: `playmode_evidence_preflight_status=ready_for_focused_retake` 또는 `ready_for_visual_review`
 - Manual registration candidates: `manual_registration_candidate_count`, `manual_registration_commands`
 - Screenshot triage: `triaged_non_state_count`, `triaged_non_state_screenshots`
 - Wave Combat action showcase: `wave_combat_action_showcase_ready=true`와 reason 확인
@@ -103,6 +106,7 @@
 
 ### 개발
 - 작업 전 `Tools\Show-PrototypeSessionStatus.ps1`로 suite/스크린샷/record 상태를 확인했는가?
+- Unity를 열기 전 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`로 focused retake readiness를 확인했는가?
 - 단계 잠금(event/draw/pending)에서 누락된 입력 경로가 없는가?
 - HUD 텍스트/배너/버튼 상태가 동일한 상태머신을 참조하는가?
 - Draw/Pending/Invalid Placement HUD를 바꿨다면 `Tools\Verify-PrototypeHudStateContract.ps1`를 실행했는가?
@@ -130,6 +134,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRetakePlan.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
+powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 ```
 
 ### 3. Play Mode suite 캡처
@@ -148,6 +153,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
+powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 ```
 
 ### 5. 시각 리뷰 pack 생성
@@ -177,6 +183,6 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - Manual Play Mode verification sheet: `Docs/Prototype_PlayMode_Verification.md`.
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: local scripts/file inspection first; MCP 연결 문제로 completion-critical UX 검증을 멈추지 않는다.
-- Immediate next validation: Play Mode에서 `Capture Verification Suite`를 실행한 뒤 suite verifier, screenshot verifier, review pack, result writer 순서로 닫는다.
+- Immediate next validation: `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`가 `ready_for_focused_retake`를 보고하면 Play Mode에서 focused retake 또는 `Capture Verification Suite`를 실행한 뒤 suite verifier, screenshot verifier, review pack, result writer 순서로 닫는다.
 - Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, manual PNG evidence registration, focused retake plan writer, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
 - Manual record remains open until Draw Choice, Pending Placement, Invalid Placement, Wave Combat suite evidence is captured, visually reviewed, and recorded.

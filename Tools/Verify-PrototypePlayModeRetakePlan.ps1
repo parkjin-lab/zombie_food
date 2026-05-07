@@ -116,6 +116,7 @@ if ($planExists) {
     Add-MissingNeedle $missingNeedles $content ('Manual record status: `' + $previewData.manual_record_status + '`')
     Add-MissingNeedle $missingNeedles $content ('Wave Combat action showcase: `' + [string]$previewData.wave_combat_action_showcase_ready + '` (' + [string]$previewData.wave_combat_action_showcase_reason + ')')
     Add-MissingNeedle $missingNeedles $content 'Tools\Verify-PrototypePlayModeRetakePlan.ps1'
+    Add-MissingNeedle $missingNeedles $content 'Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1'
     Add-MissingNeedle $missingNeedles $content 'Tools\Verify-PrototypePlayModeSuite.ps1'
     Add-MissingNeedle $missingNeedles $content 'Tools\Verify-PrototypePlayModeScreenshots.ps1'
     Add-MissingNeedle $missingNeedles $content 'Tools\Write-PrototypePlayModeReviewPack.ps1'
