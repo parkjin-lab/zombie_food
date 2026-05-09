@@ -4,7 +4,9 @@
 - 최신 상세 인계: `Docs/Prototype_Session_Handoff.md`.
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
+- 리듬 디자인 점검: `Docs/Prototype_RhythmDesign_Audit.md`.
 - 2026-05-08 01:52 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 PlayMode evidence preflight 경로를 추가한 뒤에도 통과한다.
+- 2026-05-10 00:26 KST 기준 디자인 방향성은 rhythm-first로 갱신됐다. 리듬 판정은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release` beat로 기록한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -22,6 +24,7 @@
 - 전투 결과 판독성은 이제 좀비 피격 `-damage`, 처치 `KO`, 트럭 도달 `LEAK`, 트럭 피해 `TRUCK -HP` 플로팅 텍스트로 보강됐다.
 - Wave Combat suite 캡처는 이제 검증용 액션 showcase를 포함해 `-12`, `KO`, `LEAK`, `TRUCK -7` 표식과 lane flash가 찍히도록 보강됐다.
 - Review pack은 이제 Wave Combat action showcase 준비 여부와 사유를 같이 보여주며, 네 상태의 시각 판정 체크리스트를 한 장에 포함한다.
+- 게임 리듬감 기준은 이제 별도 audit로 승격됐다. 현재 판정은 "리듬 재료는 있으나, beat map과 tension/release 검증 기준이 부족하다"이며, 다음 기능은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release` 중 어느 beat를 개선하는지 먼저 밝혀야 한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`도 이제 `wave_combat_action_showcase_ready/reason`을 첫 화면과 JSON에 함께 출력한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`도 첫 화면과 JSON에 함께 출력한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`은 이제 `top_issue`, `next_evidence_action`, `next_code_target`까지 출력해 다음 세션의 첫 행동을 분명히 한다.
@@ -35,6 +38,7 @@
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
 - PC 입력 불안정성 완화: 긴 직접 플레이보다 전체 suite 캡처를 먼저 실행하고, 실패한 상태만 focused retake로 다시 찍는다.
 - UX 다음 작업 게이트 고정: PASS/FIX/BLOCKED 결과가 기록되기 전에는 새 메커니즘보다 레이아웃/피드백 수정에 집중한다.
+- 리듬감 기준 고정: 새 시스템을 추가하기 전 현재 loop가 읽기, 선택, 배치, 압박, 보상, 회복의 박자로 느껴지는지 판정한다.
 
 ## 우선순위
 ### P0 (즉시: Play Mode 증거와 결과 기록)
@@ -56,6 +60,8 @@
 - 기록 후 `Tools\Verify-PrototypePlayModeRecord.ps1`로 문서가 파싱 가능한지 확인하고, 마지막으로 `Tools\Gate-Verification.ps1 -RunTests -JsonOnly`를 실행해 코드 가드가 유지되는지 본다.
 
 ### P1 (다음: 결과 기반 UX 수정)
+- 다음 코드 작업을 고르기 전에 `Docs\Prototype_RhythmDesign_Audit.md`의 beat map을 기준으로 어떤 beat가 약한지 정한다.
+- `FIX_FEEDBACK`이면 먼저 실패한 beat를 분류한다: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
 - `FIX_LAYOUT`이면 `FoodTruckPrototypeHud.CalculateGameplayFocusLayout`, `ApplyGameplayHudContext`, `ApplyPanelLayout` 쪽을 우선 본다. 수정 뒤 layout guard와 HUD state contract를 실행하고 해당 상태만 focused retake한다.
 - `FIX_FEEDBACK`이면 Invalid Placement의 실패 사유가 보드 근처에서 즉시 이해되는지 먼저 고친다. 수정 뒤 HUD state contract와 Invalid Placement retake를 실행한다.
 - `FIX_ASSET`이면 ingredient/truck/kitchen module Sprite import, 크기, 대비를 점검한다. 수정 뒤 asset verifier와 영향을 받은 상태 retake를 실행한다.
@@ -66,6 +72,7 @@
 - Pending Placement retake에서는 R1/R2 추천 이유가 보드 조작을 방해하지 않는 길이로 읽히는지 확인한다.
 - Wave Combat/Draw/Pending retake에서는 푸드트럭과 좀비 전장이 실제 화면의 50% 이상으로 느껴지는지, 트럭이 한 대만 보이는지, 공격 궤적과 피격 플래시만 보고도 어떤 좀비가 맞았는지 이해되는지 확인한다.
 - Wave Combat retake에서는 suite 캡처 직후 액션 showcase 표식(`-12`, `KO`, `LEAK`, `TRUCK -7`)이 겹치지 않고 읽히는지 확인한다.
+- Wave Combat retake에서는 압박이 평평하게 흘러가는지, 아니면 상승-피크-해소가 느껴지는지 같이 판정한다.
 
 ### P2 (중기: 자동화와 제품 확장)
 - review pack 산출물을 세션별로 비교하기 쉽게 보관하고, suite 스크린샷의 의미적 차이는 아직 수동 판정으로 남긴다.
@@ -85,6 +92,8 @@
 - Manual registration candidates: `manual_registration_candidate_count`, `manual_registration_commands`
 - Screenshot triage: `triaged_non_state_count`, `triaged_non_state_screenshots`
 - Wave Combat action showcase: `wave_combat_action_showcase_ready=true`와 reason 확인
+- Rhythm beat: 현재 작업이 개선하는 beat(`Read`, `Commit`, `Pressure`, `Payoff`, `Release`)
+- Tension/release: spike overlap count, payoff visible time, release window 확인
 - Manual record: `passed`, `needs_fix`, `blocked`, `not_recorded`, `invalid_record`
 - 배치 성공률: `placed_success / place_attempt`
 - blocked reason 분포: `out_of_bounds`, `occupied`, `invalid_anchor`, `no_pending`
@@ -103,6 +112,8 @@
 - 오늘 카드 선택에서 "왜 이 카드를 골랐는지"가 3초 내 설명 가능한가?
 - 실패 피드백 문구가 행동 수정에 직접 도움 되는가?
 - review pack contact sheet만 보고도 Draw/Pending/Invalid/Wave의 주요 UI가 가려졌는지 판단 가능한가?
+- 오늘 변경이 어떤 beat를 개선하는가: 읽기, 선택/배치, 압박, 보상, 회복 중 하나로 말할 수 있는가?
+- wave/event/overheat/recipe가 동시에 울릴 때 의도된 spike인지, 우연히 겹친 소음인지 구분했는가?
 
 ### 개발
 - 작업 전 `Tools\Show-PrototypeSessionStatus.ps1`로 suite/스크린샷/record 상태를 확인했는가?
@@ -181,6 +192,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 ## Latest Handoff
 - Current detailed handoff: `Docs/Prototype_Session_Handoff.md`.
 - Manual Play Mode verification sheet: `Docs/Prototype_PlayMode_Verification.md`.
+- Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md`.
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: local scripts/file inspection first; MCP 연결 문제로 completion-critical UX 검증을 멈추지 않는다.
 - Immediate next validation: `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`가 `ready_for_focused_retake`를 보고하면 Play Mode에서 focused retake 또는 `Capture Verification Suite`를 실행한 뒤 suite verifier, screenshot verifier, review pack, result writer 순서로 닫는다.

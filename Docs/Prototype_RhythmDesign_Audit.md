@@ -1,0 +1,111 @@
+# Prototype Rhythm Design Audit
+
+Last updated: 2026-05-10 00:26 KST
+
+## Verdict
+The prototype has rhythm ingredients, but rhythm is not yet a first-class design
+rule. The current loop already has timed waves, rest windows, Heat pressure,
+events, unlock beats, combo timing, recipe durations, and payoff cues. Those are
+good raw materials. The missing piece is an explicit cadence map that says when
+the player should feel tension, variation, release, and renewed commitment.
+
+Design decision: treat rhythm as the central difficulty and fun lens for the next
+loop updates.
+
+## Existing Rhythm Sources
+| Source | Current behavior | Rhythm value |
+| --- | --- | --- |
+| Core loop | Draw 3 -> choose -> rotate/place -> survive wave -> read outcome | Gives a repeatable beat |
+| Wave timer | Combat wave lasts 20 seconds | Creates a clear pressure pulse |
+| Rest timer | Rest phase lasts 10 seconds after boss spikes | Gives release, but only on specific beats |
+| Combo window | Combo window lasts 8 seconds | Creates short-term tempo pressure |
+| Vent cooldown | Vent cooldown lasts 7 seconds | Makes Heat management rhythmic instead of constant |
+| Heat bands | Warning at 70, overheat at 85 | Creates tension ramp and danger peaks |
+| Events | Event every 3 waves | Adds variation/offbeat choices |
+| Weather | Weather rotates every 4 waves | Adds rule variation |
+| Boss/rest | Boss pressure every 5 waves with rest | Adds spike and relief |
+| Unlocks | Wave 4 and 7 unlock targeting/shapes | Adds learning and tempo shifts |
+| Recipes | Durations and payoff summaries | Adds delayed reward rhythm |
+| Payoff cue | Wave result and recipe result summaries | Closes the beat with feedback |
+
+## Weak Points
+- The cadence exists as scattered constants and conditions, not as a visible beat
+  map that guides tuning.
+- Events, weather, boss pressure, and unlocks are periodic, but their collisions
+  are not intentionally composed. A wave can become busy because schedules overlap,
+  not because the rhythm asks for that spike.
+- The player-facing state rhythm is still hard to read until Play Mode evidence
+  confirms Draw Choice, Pending Placement, Invalid Placement, and Wave Combat.
+- The game does not yet define a "breath" standard: how long the player gets to
+  choose, commit, watch consequences, and recover.
+- Music and SFX are mentioned as future resources, but there is no beat contract
+  for combat pulse, Heat warning, overheat, combo, event resolve, or payoff.
+- Metrics track useful events, but there is no explicit rhythm score such as time
+  in each state, spike spacing, recovery spacing, or repeated high-tension overlap.
+
+## Rhythm Pillars
+| Pillar | Design rule |
+| --- | --- |
+| Pulse | The player should feel a steady loop: read, choose, commit, pressure, payoff. |
+| Tension Envelope | Heat, threat, lane leaks, and wave timer should climb toward a readable peak. |
+| Variation | Every few beats, a new rule or forced choice should bend the loop without hiding it. |
+| Release | After a spike, the game should give a visible payoff or relief window. |
+| Syncopation | Events, recipes, combo bursts, and overheat should feel like offbeats, not random noise. |
+| Readability | A rhythm beat only counts if the player can see what changed and why. |
+
+## Target Beat Map
+| Beat | Target feel | Current support | Needed update |
+| --- | --- | --- | --- |
+| 1. Read | Compare three options and current pressure | Draw cards show Fit/Heat/Role | Verify readability and keep one safe/one greedy/one utility choice |
+| 2. Commit | Place or recover from a mistake | Pending and invalid placement have guidance | Verify placement is fast enough and failure does not stall the loop |
+| 3. Pressure | Watch the truck, zombies, Heat, and attacks | 20s wave, attack trails, combat labels | Tune spawn/Heat ramp so pressure rises instead of feeling flat |
+| 4. Payoff | Understand why the last decision mattered | Wave payoff and recipe payoff cues | Keep payoff visible long enough to guide next choice |
+| 5. Release/Variation | Breathe, then get a twist | Rest, events, weather, unlocks | Compose overlaps so spikes and relief are intentional |
+
+## Wave Cadence Target
+| Arc | Intent |
+| --- | --- |
+| Wave 1 | Establish the base tempo: simple lanes, low Heat, clear placement. |
+| Wave 2 | Add pressure: a lane threat or Heat tradeoff becomes visible. |
+| Wave 3 | Offbeat: event choice changes the next decision. |
+| Wave 4 | Tempo shift: targeting/shape unlock adds a new decision layer. |
+| Wave 5 | Spike and release: boss pressure, then rest/payoff. |
+| Wave 6 | Recovery test: player uses the new tool under moderate pressure. |
+| Wave 7 | Second tempo shift: broader targeting/shape/risk variation. |
+
+## Update Backlog
+### P0 Rhythm Criteria
+- Add rhythm acceptance checks to Play Mode review: pressure ramp, variation, payoff,
+  and release must be judged alongside readability.
+- During focused retakes, judge whether Draw/Pending/Wave states feel like connected
+  beats rather than separate screens.
+- Add rhythm language to the next-step playbook so future feature work states which
+  beat it improves.
+
+### P1 System Updates
+- Add a lightweight rhythm state label or meter in the HUD: `Read`, `Commit`,
+  `Pressure`, `Payoff`, `Relief`.
+- Add a wave cadence helper in the model so events/weather/boss/unlocks can avoid
+  accidental overstacking unless a planned spike calls for it.
+- Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
+  spike overlap count, and payoff-visible time.
+- Add a review-pack rhythm section so screenshots and manual notes carry the same
+  beat vocabulary.
+
+### P2 Audio/Feel Updates
+- Define SFX pulse roles: combat tick, Heat warning, overheat spike, combo window,
+  recipe activation, event resolve, and payoff.
+- Use music intensity or percussion layers to match Heat/threat bands.
+- Keep audio variation tied to state changes, not just button presses.
+
+## Acceptance
+- The player can describe the current beat: choosing, committing, surviving,
+  reading payoff, or recovering.
+- At least one tension source rises before a spike, and at least one release follows
+  after the spike.
+- Variation appears every 2-3 waves, but not every variation source fires at once
+  unless the wave is intentionally a spike.
+- Payoff appears before the next choice and helps choose the next card or placement.
+- Heat/Threat/Combo/Recipe signals feel like layered rhythm, not unrelated meters.
+- A `FIX_FEEDBACK` result can identify which beat failed: read, commit, pressure,
+  payoff, or release.

@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-08 01:52 KST
+Last updated: 2026-05-10 00:26 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -24,6 +24,7 @@ evidence.
 - Battlefield readability update: placement/draw states now reserve more than half of the viewport for the truck-and-zombie play area, show one long food truck marker, and use brighter attack trails/impact flashes; Play Mode readability is still pending.
 - Combat result readability update: hits now surface floating `-damage`, `KO`, `LEAK`, and `TRUCK -HP` text in the battlefield; Play Mode readability is still pending.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
+- Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md` now treats rhythm as the central difficulty/fun lens. Verdict: the prototype has strong rhythm ingredients, but needs an explicit beat map and review criteria so tension, variation, payoff, and release are tuned intentionally.
 
 ## Start Here
 1. Print the current session status, including Wave Combat action showcase readiness, review pack readiness, and next-work focus.
@@ -101,6 +102,24 @@ evidence.
 - Make each draw feel like a tradeoff between safety, payoff, and utility.
 - Make placement feedback explain what the player can do next.
 - Make wave results clearly explain why the previous decision helped or hurt.
+- Make the whole loop feel rhythmic: read, commit, pressure, payoff, release, then variation.
+
+### Rhythm Design Direction
+Rhythm is now the primary design lens for the prototype. A fun run should not feel
+like a flat stream of systems. It should feel like a beat:
+`Read -> Commit -> Pressure -> Payoff -> Release/Variation`.
+
+Current assessment: the model already contains rhythm material: 20-second combat
+waves, 10-second rest windows, 8-second combo timing, 7-second vent cooldowns,
+Heat warning/overheat bands, wave 3 events, wave 4/7 unlocks, wave 4 weather
+rotation, wave 5 boss/rest spikes, recipe durations, and payoff summaries. The
+gap is that these are not yet composed as one cadence. They can stack accidentally
+instead of producing a deliberate tension envelope.
+
+Near-term rule: every next feature or tuning change should name which beat it
+improves: `Read`, `Commit`, `Pressure`, `Payoff`, or `Release`.
+
+Design reference: `Docs/Prototype_RhythmDesign_Audit.md`.
 
 ### Short-Term Focus: Wave Outcome / Payoff Summary
 After each wave, show a concise combat result summary before the next draw decision.
@@ -158,6 +177,9 @@ The summary should highlight:
 - Next-decision hint: a short reason the next draw should value safety, greedy payoff, utility, or Heat control.
 
 ### Next Actions
+- Use the rhythm audit when choosing next work; do not add a mechanic unless it improves a named beat.
+- During Play Mode review, judge whether the player can feel a clear pressure ramp and payoff/release before the next choice.
+- Track accidental overlap between event, weather, unlock, boss/rest, overheat, and recipe beats.
 - Verify that the three draw cards keep `Fit`, `Heat`, `Role`, `Value/Risk`, and `Target` readable in compact portrait layout.
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.
 - Verify Pending Placement recommendation reasons: lane pressure, multi-lane coverage, and center/near-center placement should be readable without raw score interpretation.
@@ -173,6 +195,8 @@ The summary should highlight:
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.
 
 ### Acceptance
+- The player can name the current beat: reading, committing, surviving pressure, reading payoff, or recovering.
+- At least one release follows a spike, and at least one variation appears every 2-3 waves without every system firing at once.
 - The player can explain the difference between the three draw cards within three seconds.
 - The player can compare at least one board-fit signal and one Heat/risk signal before choosing a card.
 - Repeated placement failures from the same reason decrease across playtest sessions.
@@ -247,6 +271,10 @@ The summary should highlight:
 - `reward_pick_rate`
 - `wave_outcome_summary_viewed`
 - `wave_payoff_top_contributor`
+- `rhythm_state_duration_sec`
+- `spike_overlap_count`
+- `payoff_visible_sec`
+- `release_window_sec`
 
 ### Operating Loop
 1. Start session: use show status to check readiness and unresolved issues.
@@ -285,4 +313,5 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 ## Do Not Skip
 - Do not edit other docs or code just to tidy the roadmap while other workers may be active.
 - Before adding new gameplay systems, verify Draw Choice, Pending Placement, Invalid Placement, and Wave Combat evidence.
+- Before adding new mechanics, name the rhythm beat being improved: `Read`, `Commit`, `Pressure`, `Payoff`, or `Release`.
 - Even when automated verifiers are `ok`, make the final Play Mode readability call from the review pack and manual visual judgment.
