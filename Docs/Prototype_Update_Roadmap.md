@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-10 00:26 KST
+Last updated: 2026-05-17 01:18 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -25,6 +25,7 @@ evidence.
 - Combat result readability update: hits now surface floating `-damage`, `KO`, `LEAK`, and `TRUCK -HP` text in the battlefield; Play Mode readability is still pending.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
 - Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md` now treats rhythm as the central difficulty/fun lens. Verdict: the prototype has strong rhythm ingredients, but needs an explicit beat map and review criteria so tension, variation, payoff, and release are tuned intentionally.
+- 2026-05-17 sub-agent review: tracked source/docs were clean before this pass, code guards remain stable, Play Mode evidence is still the blocker, and imported Unity/Asset Store folders remain untracked. Do not let untracked asset imports blur the prototype checkpoint.
 
 ## Start Here
 1. Print the current session status, including Wave Combat action showcase readiness, review pack readiness, and next-work focus.
@@ -121,6 +122,30 @@ improves: `Read`, `Commit`, `Pressure`, `Payoff`, or `Release`.
 
 Design reference: `Docs/Prototype_RhythmDesign_Audit.md`.
 
+### Next Rhythm System Candidates
+The next fun work after Play Mode evidence closes should be narrow and testable.
+Recommended order:
+
+1. `Wave Cadence Composer`: move the scattered wave 3 event, wave 4 weather,
+   wave 5 boss/rest, wave 4/7 unlock, overheat, and recipe timing into an
+   inspectable cadence schedule. Avoid accidental event/weather/boss/unlock
+   overstacking unless the wave is intentionally a planned spike.
+2. `Payoff-to-Read Panel`: extend the existing wave payoff cue into a compact
+   next-decision hint. Examples: `Leak x2 -> value lane control`,
+   `PeakHeat +18 -> pick COOL/SAFE`. Keep this short and test the wording with
+   Play Mode review before adding more content.
+3. `Rhythm Beat HUD/Telemetry`: expose `Read`, `Commit`, `Pressure`, `Payoff`,
+   and `Release` as a lightweight label or telemetry state only after the first
+   two items prove the cadence and payoff direction.
+4. `Pressure Ramp Tuning`: make the 20-second wave visibly rise from readably
+   low pressure to a peak without causing Heat/Threat/Combo noise.
+5. `Rest-Phase Reward`: convert release windows into a small 1-of-3 reward only
+   after flow-lock and evidence tooling are stable.
+
+Risk control: each candidate must include an EditMode or verifier check plus a
+manual Play Mode review criterion. Do not implement multiple rhythm candidates in
+one pass.
+
 ### Short-Term Focus: Wave Outcome / Payoff Summary
 After each wave, show a concise combat result summary before the next draw decision.
 This should become a near-term core loop improvement because it closes the feedback
@@ -180,6 +205,8 @@ The summary should highlight:
 - Use the rhythm audit when choosing next work; do not add a mechanic unless it improves a named beat.
 - During Play Mode review, judge whether the player can feel a clear pressure ramp and payoff/release before the next choice.
 - Track accidental overlap between event, weather, unlock, boss/rest, overheat, and recipe beats.
+- If evidence is PASS or a concrete FIX is recorded, implement `Wave Cadence Composer` before wider content. It changes less UI surface than a new reward system and makes later rhythm tuning measurable.
+- If payoff readability is the main FIX, implement `Payoff-to-Read Panel` before cadence tuning.
 - Verify that the three draw cards keep `Fit`, `Heat`, `Role`, `Value/Risk`, and `Target` readable in compact portrait layout.
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.
 - Verify Pending Placement recommendation reasons: lane pressure, multi-lane coverage, and center/near-center placement should be readable without raw score interpretation.
@@ -197,6 +224,8 @@ The summary should highlight:
 ### Acceptance
 - The player can name the current beat: reading, committing, surviving pressure, reading payoff, or recovering.
 - At least one release follows a spike, and at least one variation appears every 2-3 waves without every system firing at once.
+- Intentional spike waves are distinguishable from accidental overlap in logs, tests, or review notes.
+- The next-decision payoff cue is short enough to read during the next Draw/Pending state.
 - The player can explain the difference between the three draw cards within three seconds.
 - The player can compare at least one board-fit signal and one Heat/risk signal before choosing a card.
 - Repeated placement failures from the same reason decrease across playtest sessions.

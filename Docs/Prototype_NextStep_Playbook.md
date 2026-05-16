@@ -6,8 +6,9 @@
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
 - 리듬 디자인 점검: `Docs/Prototype_RhythmDesign_Audit.md`.
 - 2026-05-08 01:52 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 PlayMode evidence preflight 경로를 추가한 뒤에도 통과한다.
-- 2026-05-10 00:26 KST 기준 디자인 방향성은 rhythm-first로 갱신됐다. 리듬 판정은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release` beat로 기록한다.
+- 2026-05-17 01:18 KST 기준 sub-agent review 결과, 디자인 방향성은 rhythm-first로 유지한다. 즉시는 Play Mode evidence closure, 그 다음 구현 후보는 `Wave Cadence Composer`와 `Payoff-to-Read Panel`이다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
+- tracked 코드/문서는 이 업데이트 전 깨끗했지만, Unity/Asset Store import 흔적으로 보이는 대형 untracked 폴더들이 남아 있다. 명시적 에셋 결정 없이 스테이징하지 않는다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
 - PC 제한 상황에서도 코어 루프 개선은 진행 중이다. 최신 코드 단계는 Wave Combat 종료 후 KO/damage, HP/Heat 변화, supplies, peak Heat, combo/leak 정보를 짧은 payoff cue로 남긴다.
@@ -62,6 +63,9 @@
 ### P1 (다음: 결과 기반 UX 수정)
 - 다음 코드 작업을 고르기 전에 `Docs\Prototype_RhythmDesign_Audit.md`의 beat map을 기준으로 어떤 beat가 약한지 정한다.
 - `FIX_FEEDBACK`이면 먼저 실패한 beat를 분류한다: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
+- Play Mode evidence가 PASS 또는 명확한 FIX로 닫힌 뒤 첫 구현 후보는 `Wave Cadence Composer`다. 이벤트/날씨/보스/언락이 우연히 겹치지 않게 planned spike 여부를 코드와 테스트로 드러낸다.
+- payoff 가독성이 주된 문제라면 `Payoff-to-Read Panel`을 먼저 한다. 기존 wave payoff cue에 짧은 next-decision hint를 붙이고, 다음 Draw/Pending 중 읽히는지 검증한다.
+- Rhythm label/telemetry, pressure ramp, rest-phase reward는 위 두 후보 이후로 둔다.
 - `FIX_LAYOUT`이면 `FoodTruckPrototypeHud.CalculateGameplayFocusLayout`, `ApplyGameplayHudContext`, `ApplyPanelLayout` 쪽을 우선 본다. 수정 뒤 layout guard와 HUD state contract를 실행하고 해당 상태만 focused retake한다.
 - `FIX_FEEDBACK`이면 Invalid Placement의 실패 사유가 보드 근처에서 즉시 이해되는지 먼저 고친다. 수정 뒤 HUD state contract와 Invalid Placement retake를 실행한다.
 - `FIX_ASSET`이면 ingredient/truck/kitchen module Sprite import, 크기, 대비를 점검한다. 수정 뒤 asset verifier와 영향을 받은 상태 retake를 실행한다.
@@ -94,6 +98,7 @@
 - Wave Combat action showcase: `wave_combat_action_showcase_ready=true`와 reason 확인
 - Rhythm beat: 현재 작업이 개선하는 beat(`Read`, `Commit`, `Pressure`, `Payoff`, `Release`)
 - Tension/release: spike overlap count, payoff visible time, release window 확인
+- Planned spike: event/weather/boss/unlock/overheat/recipe overlap이 의도된 것인지 기록
 - Manual record: `passed`, `needs_fix`, `blocked`, `not_recorded`, `invalid_record`
 - 배치 성공률: `placed_success / place_attempt`
 - blocked reason 분포: `out_of_bounds`, `occupied`, `invalid_anchor`, `no_pending`
@@ -196,5 +201,6 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: local scripts/file inspection first; MCP 연결 문제로 completion-critical UX 검증을 멈추지 않는다.
 - Immediate next validation: `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`가 `ready_for_focused_retake`를 보고하면 Play Mode에서 focused retake 또는 `Capture Verification Suite`를 실행한 뒤 suite verifier, screenshot verifier, review pack, result writer 순서로 닫는다.
+- Immediate next implementation after evidence closure: `Wave Cadence Composer`, unless review says payoff readability is the main blocker, in which case start with `Payoff-to-Read Panel`.
 - Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, manual PNG evidence registration, focused retake plan writer, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
 - Manual record remains open until Draw Choice, Pending Placement, Invalid Placement, Wave Combat suite evidence is captured, visually reviewed, and recorded.

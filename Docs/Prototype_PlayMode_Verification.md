@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Verification
 
-Last updated: 2026-05-10 00:26 KST
+Last updated: 2026-05-17 01:18 KST
 
 ## Purpose
 Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
@@ -90,6 +90,8 @@ Screenshots captured: 2
 Top issue: Current PC cannot reliably continue direct Play Mode interaction. Captured Wave Combat was readable, but the bottom build panel occupied too much portrait space when no block was pending.
 Next code target: Completed 2026-05-04 20:24 KST; visual review can now be assembled into a single review pack before PASS/FIX/BLOCKED recording.
 Verification command result: Partial Play Mode record remains `not_recorded` until Draw Choice, Pending Placement, and Invalid Placement can be captured; suite evidence now reports `manual_partial` with Wave Combat registered from an existing PNG and 3 states missing; screenshot evidence reports `partial` with 2 valid portrait PNGs, 1 labeled Wave Combat state, `manual_registration_candidate_count=0`, `triaged_non_state_count=1`, and missing Draw Choice/Pending Placement/Invalid Placement coverage; `Tools\Verify-PrototypeHudStateContract.ps1`, `Tools\Verify-PrototypePlayModeSuite.ps1`, `Tools\Verify-PrototypePlayModeScreenshots.ps1`, `Tools\Write-PrototypePlayModeReviewPack.ps1`, `Tools\Verify-PrototypeLayout.ps1`, `Tools\Verify-PrototypeStatic.ps1`, and `Tools\Gate-Verification.ps1 -RunTests -JsonOnly` pass.
+
+2026-05-17 status note: no additional Play Mode capture has been recorded since the latest manual result above. Current session status still reports `needs_manual_playmode`, `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `review_readiness=partial_evidence`, and missing Draw Choice/Pending Placement/Invalid Placement coverage. Use the focused retake flow before recording any new PASS/FIX/BLOCKED result.
 
 ## Result Template
 ```text

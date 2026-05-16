@@ -1,6 +1,6 @@
 # Prototype Rhythm Design Audit
 
-Last updated: 2026-05-10 00:26 KST
+Last updated: 2026-05-17 01:18 KST
 
 ## Verdict
 The prototype has rhythm ingredients, but rhythm is not yet a first-class design
@@ -43,6 +43,23 @@ loop updates.
 - Metrics track useful events, but there is no explicit rhythm score such as time
   in each state, spike spacing, recovery spacing, or repeated high-tension overlap.
 
+## 2026-05-17 Review Update
+Sub-agent review confirms the original verdict. The current code has enough rhythm
+material to build on, but Play Mode evidence is still too partial to validate the
+felt rhythm. Do not add broad content until Draw Choice, Pending Placement, and
+Invalid Placement are captured and judged.
+
+Implementation priority after evidence closure:
+1. `Wave Cadence Composer`
+2. `Payoff-to-Read Panel`
+3. `Rhythm Beat HUD/Telemetry`
+4. `Pressure Ramp Tuning`
+5. `Rest-Phase Reward`
+
+The first two are preferred because they use existing systems instead of adding
+new surface area. They make the current loop easier to read and tune before
+larger reward/content systems are introduced.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
@@ -83,10 +100,12 @@ loop updates.
   beat it improves.
 
 ### P1 System Updates
-- Add a lightweight rhythm state label or meter in the HUD: `Read`, `Commit`,
-  `Pressure`, `Payoff`, `Relief`.
 - Add a wave cadence helper in the model so events/weather/boss/unlocks can avoid
   accidental overstacking unless a planned spike calls for it.
+- Add a Payoff-to-Read panel or compact chip that turns the latest wave outcome
+  into a next-decision hint.
+- Add a lightweight rhythm state label or meter in the HUD: `Read`, `Commit`,
+  `Pressure`, `Payoff`, `Relief`.
 - Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
   spike overlap count, and payoff-visible time.
 - Add a review-pack rhythm section so screenshots and manual notes carry the same

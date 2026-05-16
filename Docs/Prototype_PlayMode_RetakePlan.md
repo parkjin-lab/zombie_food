@@ -3,6 +3,9 @@
 Generated: 2026-05-08 01:44 KST
 Retake plan status: `ok`
 
+Reviewed: 2026-05-17 01:18 KST
+Current status remains unchanged: Draw Choice, Pending Placement, and Invalid Placement still need focused retake evidence; no standalone registration candidates are available.
+
 ## Machine Summary
 - Suite status: `manual_partial` (1/4)
 - Suite evidence source: `manual screenshot registration`
