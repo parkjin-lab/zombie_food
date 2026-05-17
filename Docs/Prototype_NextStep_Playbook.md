@@ -66,9 +66,10 @@
 - `Wave Cadence Composer` 1차 소스 가드는 완료됐다. 모델은 이벤트/날씨/보스/휴식/언락 beat와 `planned spike` 여부를 `LastWaveCadencePlan`으로 노출하고, HUD state contract와 EditMode 테스트가 이를 고정한다.
 - `Payoff-to-Read Panel` 1차 소스 가드도 완료됐다. 기존 wave payoff cue 옆에 `Next` hint chip을 붙여 누수, Heat spike, damage payoff, combo, recovery를 다음 선택 성향으로 번역한다.
 - `Rhythm Beat HUD/Telemetry` 1차 소스 가드도 완료됐다. 모델은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release`를 계산하고, HUD/UX telemetry가 같은 beat label, current duration, transition count를 표시/CSV export한다.
-- Play Mode evidence가 PASS 또는 명확한 FIX로 닫히면, Composer/Payoff-to-Read/Rhythm Beat label과 duration이 실제 화면에서 리듬감 있게 느껴지는지 먼저 확인한다. 다음 자율 구현 후보는 pressure ramp tuning이다.
+- `Pressure Ramp Profile` 1차 소스 가드가 완료됐다. 20초 wave 압박을 `Build`, `Climb`, `Peak`와 intensity로 읽을 수 있고 HUD/UX telemetry/CSV에 노출된다.
+- Play Mode evidence가 PASS 또는 명확한 FIX로 닫히면, Composer/Payoff-to-Read/Rhythm Beat/Pressure Ramp profile이 실제 화면에서 리듬감 있게 느껴지는지 먼저 확인한다. 다음 자율 구현 후보는 pressure ramp 수치 튜닝 또는 rest-phase reward다.
 - payoff 가독성이 주된 문제라면 새 시스템을 늘리기보다 `Next` hint 문구/표시 조건을 먼저 조정한다. 다음 Draw/Pending 중 읽히는지 검증한다.
-- Rhythm label/telemetry, pressure ramp, rest-phase reward는 위 두 후보 이후로 둔다.
+- Rhythm label/telemetry와 pressure ramp profile은 소스 가드가 있으므로, rest-phase reward는 visual review 이후로 둔다.
 - `FIX_LAYOUT`이면 `FoodTruckPrototypeHud.CalculateGameplayFocusLayout`, `ApplyGameplayHudContext`, `ApplyPanelLayout` 쪽을 우선 본다. 수정 뒤 layout guard와 HUD state contract를 실행하고 해당 상태만 focused retake한다.
 - `FIX_FEEDBACK`이면 Invalid Placement의 실패 사유가 보드 근처에서 즉시 이해되는지 먼저 고친다. 수정 뒤 HUD state contract와 Invalid Placement retake를 실행한다.
 - `FIX_ASSET`이면 ingredient/truck/kitchen module Sprite import, 크기, 대비를 점검한다. 수정 뒤 asset verifier와 영향을 받은 상태 retake를 실행한다.

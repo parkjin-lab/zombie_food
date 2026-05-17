@@ -74,6 +74,13 @@ namespace ZombieFoodcenter.Prototype
         Release
     }
 
+    public enum PressureRampPhase
+    {
+        Build,
+        Climb,
+        Peak
+    }
+
 
     public sealed class RunEventOption
     {
@@ -469,6 +476,9 @@ namespace ZombieFoodcenter.Prototype
             !string.IsNullOrEmpty(lastWaveOutcomeNextHint),
             GetWaveProgress01());
         public string CurrentRhythmBeatLabel => BuildRhythmBeatLabel(CurrentRhythmBeat);
+        public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
+        public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);
+        public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
         public string LastRecipeActivationName => lastRecipeActivationName;
         public string LastRecipeActivationSummary => lastRecipeActivationSummary;
         public string LastRecipeActivationCue => lastRecipeActivationCue;
@@ -1769,6 +1779,46 @@ namespace ZombieFoodcenter.Prototype
                 default:
                     return "Pressure";
             }
+        }
+
+        public static PressureRampPhase ResolvePressureRampPhase(float waveProgress01, bool isRestPhase, bool eventPending, bool hasDrawChoice)
+        {
+            if (isRestPhase || eventPending || hasDrawChoice)
+            {
+                return PressureRampPhase.Build;
+            }
+
+            float clampedProgress = Mathf.Clamp01(waveProgress01);
+            if (clampedProgress < 0.35f)
+            {
+                return PressureRampPhase.Build;
+            }
+
+            return clampedProgress < 0.72f ? PressureRampPhase.Climb : PressureRampPhase.Peak;
+        }
+
+        public static string BuildPressureRampLabel(PressureRampPhase phase)
+        {
+            switch (phase)
+            {
+                case PressureRampPhase.Climb:
+                    return "Climb";
+                case PressureRampPhase.Peak:
+                    return "Peak";
+                default:
+                    return "Build";
+            }
+        }
+
+        public static float BuildPressureRampIntensity01(float waveProgress01, bool isRestPhase, bool eventPending, bool hasDrawChoice)
+        {
+            if (isRestPhase || eventPending || hasDrawChoice)
+            {
+                return 0f;
+            }
+
+            float clampedProgress = Mathf.Clamp01(waveProgress01);
+            return clampedProgress * clampedProgress * (3f - 2f * clampedProgress);
         }
 
         private static string FormatSignedRounded(float value)

@@ -408,6 +408,43 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void ResolvePressureRampPhase_MapsWaveProgressToBuildClimbPeak()
+        {
+            Assert.AreEqual(
+                PressureRampPhase.Build,
+                FoodTruckRunModel.ResolvePressureRampPhase(0.20f, false, false, false));
+            Assert.AreEqual(
+                PressureRampPhase.Climb,
+                FoodTruckRunModel.ResolvePressureRampPhase(0.50f, false, false, false));
+            Assert.AreEqual(
+                PressureRampPhase.Peak,
+                FoodTruckRunModel.ResolvePressureRampPhase(0.90f, false, false, false));
+        }
+
+        [Test]
+        public void ResolvePressureRampPhase_WhenFlowLocked_ReturnsBuild()
+        {
+            Assert.AreEqual(
+                PressureRampPhase.Build,
+                FoodTruckRunModel.ResolvePressureRampPhase(0.95f, true, false, false));
+            Assert.AreEqual(
+                PressureRampPhase.Build,
+                FoodTruckRunModel.ResolvePressureRampPhase(0.95f, false, true, false));
+            Assert.AreEqual(
+                PressureRampPhase.Build,
+                FoodTruckRunModel.ResolvePressureRampPhase(0.95f, false, false, true));
+        }
+
+        [Test]
+        public void BuildPressureRampIntensity_UsesSmoothProgressAndFlowLocks()
+        {
+            Assert.AreEqual(0f, FoodTruckRunModel.BuildPressureRampIntensity01(0.8f, true, false, false), 0.0001f);
+            Assert.AreEqual(0f, FoodTruckRunModel.BuildPressureRampIntensity01(0f, false, false, false), 0.0001f);
+            Assert.AreEqual(0.5f, FoodTruckRunModel.BuildPressureRampIntensity01(0.5f, false, false, false), 0.0001f);
+            Assert.AreEqual(1f, FoodTruckRunModel.BuildPressureRampIntensity01(1f, false, false, false), 0.0001f);
+        }
+
+        [Test]
         public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
         {
             var model = new FoodTruckRunModel(seed: 163);

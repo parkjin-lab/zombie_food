@@ -1418,10 +1418,12 @@ namespace ZombieFoodcenter.Prototype
                 : (model.IsHeatWarning ? "warning" : "stable");
             string ventState = BuildVentStatusText(false);
             string rhythmBeat = model.CurrentRhythmBeatLabel;
+            string pressureRamp = model.CurrentPressureRampLabel;
             if (gameplayFocusHud)
             {
                 secondLineText.text =
                     "Beat " + rhythmBeat +
+                    "  |  Ramp " + pressureRamp +
                     "  |  " + phase +
                     "  |  Threat " + model.Threat.ToString("0.0") +
                     "  |  Heat " + model.Heat.ToString("0.0") + " (" + heatState + ")" +
@@ -1438,7 +1440,8 @@ namespace ZombieFoodcenter.Prototype
                     "  |  Combo " + model.ComboStreak + " (x" + model.ComboMultiplier.ToString("0.00") + ")" +
                     "  |  Heat A/L/R " + model.HeatAttackMultiplier.ToString("0.00") + "/" + model.HeatLootMultiplier.ToString("0.00") + "/" + model.HeatRiskMultiplier.ToString("0.00") +
                     "  |  " + phase +
-                    "  |  Beat " + rhythmBeat;
+                    "  |  Beat " + rhythmBeat +
+                    "  |  Ramp " + pressureRamp;
             }
 
             string pendingStatus = model.HasDrawChoice

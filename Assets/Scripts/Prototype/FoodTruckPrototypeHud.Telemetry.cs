@@ -343,6 +343,8 @@ namespace ZombieFoodcenter.Prototype
 
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                 string rhythmBeat = model.CurrentRhythmBeatLabel;
+                string pressureRamp = model.CurrentPressureRampLabel;
+                string pressureRampIntensity = model.CurrentPressureRampIntensity01.ToString("0.###", CultureInfo.InvariantCulture);
                 string waveCadence = model.LastWaveCadenceSummary;
                 int scopedRhythmBeatTransitions = ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount);
 
@@ -350,7 +352,7 @@ namespace ZombieFoodcenter.Prototype
                 {
                     if (writeHeader)
                     {
-                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,wave_cadence");
+                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,pressure_ramp_phase,pressure_ramp_intensity,wave_cadence");
                     }
 
                     string[] row =
@@ -390,6 +392,8 @@ namespace ZombieFoodcenter.Prototype
                         CsvEscape(rhythmBeat),
                         telemetryCurrentRhythmBeatSeconds.ToString("0.###", CultureInfo.InvariantCulture),
                         scopedRhythmBeatTransitions.ToString(CultureInfo.InvariantCulture),
+                        CsvEscape(pressureRamp),
+                        CsvEscape(pressureRampIntensity),
                         CsvEscape(waveCadence)
                     };
 
@@ -413,6 +417,7 @@ namespace ZombieFoodcenter.Prototype
                         ", pickValue[L/M/H]=" + pickValueLow + "/" + pickValueMid + "/" + pickValueHigh +
                         ", pickRisk[L/M/H]=" + pickRiskLow + "/" + pickRiskMid + "/" + pickRiskHigh +
                         ", rhythmBeat=" + rhythmBeat +
+                        ", pressureRamp=" + pressureRamp + "/" + pressureRampIntensity +
                         ", rhythmBeatDuration=" + telemetryCurrentRhythmBeatSeconds.ToString("0.0", CultureInfo.InvariantCulture) + "s" +
                         ", rhythmTransitions=" + scopedRhythmBeatTransitions +
                         ", drawToPlaceAvg=" + (drawToPlaceAvg >= 0f ? drawToPlaceAvg.ToString("0.00", CultureInfo.InvariantCulture) + "s" : "n/a") +
@@ -727,6 +732,7 @@ namespace ZombieFoodcenter.Prototype
                     telemetryCurrentRhythmBeatSeconds,
                     ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount),
                     model.LastWaveCadenceSummary) + "\n" +
+                "Pressure Ramp: " + model.CurrentPressureRampLabel + " " + (model.CurrentPressureRampIntensity01 * 100f).ToString("0") + "%\n" +
                 "Draw Assist: " + model.DrawAssistTag + "\n" +
                 "Placement: " + success + "/" + attempts + " (" + (successRate * 100f).ToString("0") + "%)\n" +
                 "Placement Type: Direct " + directPlacementSuccess + " (" + (directRate * 100f).ToString("0") + "%) | AutoMerge " + autoMergeSuccess + " (" + (autoShare * 100f).ToString("0") + "%)\n" +

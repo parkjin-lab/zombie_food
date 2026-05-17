@@ -76,6 +76,11 @@ source guard. The model resolves `Read`, `Commit`, `Pressure`, `Payoff`, and
 `Release`; the HUD status line and UX telemetry reuse the same label. Telemetry
 also tracks current beat duration and transition count.
 
+2026-05-17 pressure ramp update: `Pressure Ramp Profile` now has a first source
+guard. The model labels combat wave pressure as `Build`, `Climb`, or `Peak` and
+exports an intensity value for HUD/telemetry review. It does not yet change spawn
+or Heat balance.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
@@ -124,6 +129,8 @@ also tracks current beat duration and transition count.
 - Use the rhythm beat duration/transition telemetry after visual review to tune
   whether `Read`, `Commit`, `Pressure`, `Payoff`, and `Release` are lingering or
   cutting off too quickly.
+- Use the pressure ramp profile after visual review to decide whether spawn/Heat
+  should follow the observed `Build -> Climb -> Peak` curve.
 - Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
   spike overlap count, and payoff-visible time.
 - Add a review-pack rhythm section so screenshots and manual notes carry the same

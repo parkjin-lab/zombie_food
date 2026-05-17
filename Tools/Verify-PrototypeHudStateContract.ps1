@@ -314,7 +314,8 @@ Add-ContractCheck $checks "rhythm_beat" "hud_and_telemetry_surface_current_beat"
     '"Beat " + rhythmBeat',
     'BuildRhythmBeatTelemetryLine(',
     'BuildRhythmBeatMiniText(model.CurrentRhythmBeatLabel, telemetryCurrentRhythmBeatSeconds)',
-    'rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,wave_cadence',
+    'rhythm_beat_duration_s',
+    'rhythm_beat_transition_count',
     'CsvEscape(rhythmBeat)',
     'telemetryCurrentRhythmBeatSeconds.ToString("0.###", CultureInfo.InvariantCulture)',
     'telemetryWaveBaseRhythmBeatTransitionCount = telemetryRhythmBeatTransitionCount;',
@@ -332,6 +333,33 @@ Add-ContractCheck $checks "rhythm_beat" "editmode_covers_rhythm_beat_mapping" $s
     'BuildRhythmBeatTelemetryLine_IncludesDurationTransitionsAndCadence',
     'BuildRhythmBeatMiniText_ClampsNegativeDuration'
 ) "EditMode coverage should lock Read, Commit, Pressure, Payoff, and Release mapping semantics."
+
+Add-ContractCheck $checks "pressure_ramp" "model_exposes_pressure_ramp_profile" $sources.model @(
+    'public enum PressureRampPhase',
+    'Build,',
+    'Climb,',
+    'Peak',
+    'public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(',
+    'public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);',
+    'public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(',
+    'public static PressureRampPhase ResolvePressureRampPhase(',
+    'public static float BuildPressureRampIntensity01('
+) "The model should expose an inspectable pressure ramp before balance values are tuned."
+
+Add-ContractCheck $checks "pressure_ramp" "hud_and_telemetry_surface_pressure_ramp" ($sources.hud + $sources.telemetry) @(
+    'string pressureRamp = model.CurrentPressureRampLabel;',
+    '"  |  Ramp " + pressureRamp',
+    'pressure_ramp_phase,pressure_ramp_intensity',
+    'CsvEscape(pressureRamp)',
+    'CsvEscape(pressureRampIntensity)',
+    '"Pressure Ramp: " + model.CurrentPressureRampLabel'
+) "HUD and UX telemetry should show the current pressure ramp phase without changing combat balance."
+
+Add-ContractCheck $checks "pressure_ramp" "editmode_covers_pressure_ramp_profile" $sources.tests @(
+    'ResolvePressureRampPhase_MapsWaveProgressToBuildClimbPeak',
+    'ResolvePressureRampPhase_WhenFlowLocked_ReturnsBuild',
+    'BuildPressureRampIntensity_UsesSmoothProgressAndFlowLocks'
+) "EditMode coverage should lock pressure ramp phase thresholds and flow-lock behavior."
 
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
     'private sealed class CombatFloatingTextWidget',
@@ -671,7 +699,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "pressure_ramp", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

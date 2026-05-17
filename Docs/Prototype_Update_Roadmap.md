@@ -151,6 +151,10 @@ Recommended order:
    included in telemetry panel/mini text and CSV export.
 4. `Pressure Ramp Tuning`: make the 20-second wave visibly rise from readably
    low pressure to a peak without causing Heat/Threat/Combo noise.
+   Source status: first pass complete as an inspectable profile. The model now
+   labels pressure as `Build`, `Climb`, or `Peak`, exposes a smooth intensity
+   value, and exports both through HUD/UX telemetry. Remaining work is deciding
+   whether spawn/Heat should actually follow this curve after Play Mode review.
 5. `Rest-Phase Reward`: convert release windows into a small 1-of-3 reward only
    after flow-lock and evidence tooling are stable.
 
@@ -341,6 +345,8 @@ The summary should highlight:
 - `rhythm_beat_label`
 - `rhythm_beat_duration_s`
 - `rhythm_beat_transition_count`
+- `pressure_ramp_phase`
+- `pressure_ramp_intensity`
 - `spike_overlap_count`
 - `payoff_visible_sec`
 - `release_window_sec`
