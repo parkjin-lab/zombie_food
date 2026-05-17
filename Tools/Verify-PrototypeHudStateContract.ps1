@@ -249,6 +249,27 @@ Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources
     '"Wave " + model.Wave + " started. Keep your lanes stable."'
 ) "Wave change feedback should prioritize the last wave payoff when one is available."
 
+Add-ContractCheck $checks "wave_cadence" "model_composes_wave_schedule_without_random_rolls" $sources.model @(
+    'public sealed class WaveCadencePlan',
+    'public WaveCadencePlan LastWaveCadencePlan => lastWaveCadencePlan;',
+    'public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;',
+    'public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;',
+    'private static WaveCadencePlan BuildWaveCadencePlan(int wave)',
+    'bool progressionUnlock = wave == 4 || wave == 7;',
+    'bool weatherRotation = wave % 4 == 0;',
+    'bool bossPressureSpike = wave % 5 == 0;',
+    'bool runEvent = wave % 3 == 0;',
+    'bool plannedSpike = bossPressureSpike || scheduledBeatCount >= 2;'
+) "Wave rhythm scheduling must be inspectable without consuming weather or event random rolls."
+
+Add-ContractCheck $checks "wave_cadence" "editmode_covers_core_cadence_beats" $sources.tests @(
+    'Tick_WhenWaveThreeStarts_ReportsEventCadence',
+    'Tick_WhenWaveFourStarts_ReportsUnlockWeatherPlannedSpike',
+    'Tick_WhenWaveFiveStarts_ReportsBossRestPlannedSpike',
+    'Tick_WhenWaveSevenStarts_ReportsUnlockCadenceWithoutSpike',
+    'AdvanceToWave(FoodTruckRunModel model, int targetWave)'
+) "EditMode coverage should lock the first event, unlock/weather overlap, boss/rest spike, and non-spike unlock beat."
+
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
     'private sealed class CombatFloatingTextWidget',
     'private readonly List<CombatFloatingTextWidget> combatFloatingTexts',
@@ -587,7 +608,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

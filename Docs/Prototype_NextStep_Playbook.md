@@ -63,7 +63,8 @@
 ### P1 (다음: 결과 기반 UX 수정)
 - 다음 코드 작업을 고르기 전에 `Docs\Prototype_RhythmDesign_Audit.md`의 beat map을 기준으로 어떤 beat가 약한지 정한다.
 - `FIX_FEEDBACK`이면 먼저 실패한 beat를 분류한다: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
-- Play Mode evidence가 PASS 또는 명확한 FIX로 닫힌 뒤 첫 구현 후보는 `Wave Cadence Composer`다. 이벤트/날씨/보스/언락이 우연히 겹치지 않게 planned spike 여부를 코드와 테스트로 드러낸다.
+- `Wave Cadence Composer` 1차 소스 가드는 완료됐다. 모델은 이벤트/날씨/보스/휴식/언락 beat와 `planned spike` 여부를 `LastWaveCadencePlan`으로 노출하고, HUD state contract와 EditMode 테스트가 이를 고정한다.
+- Play Mode evidence가 PASS 또는 명확한 FIX로 닫히면, Composer가 실제 화면에서 리듬감 있게 느껴지는지 먼저 확인한다. 다음 자율 구현 후보는 payoff 가독성을 강화하는 `Payoff-to-Read Panel`이다.
 - payoff 가독성이 주된 문제라면 `Payoff-to-Read Panel`을 먼저 한다. 기존 wave payoff cue에 짧은 next-decision hint를 붙이고, 다음 Draw/Pending 중 읽히는지 검증한다.
 - Rhythm label/telemetry, pressure ramp, rest-phase reward는 위 두 후보 이후로 둔다.
 - `FIX_LAYOUT`이면 `FoodTruckPrototypeHud.CalculateGameplayFocusLayout`, `ApplyGameplayHudContext`, `ApplyPanelLayout` 쪽을 우선 본다. 수정 뒤 layout guard와 HUD state contract를 실행하고 해당 상태만 focused retake한다.

@@ -130,6 +130,11 @@ Recommended order:
    wave 5 boss/rest, wave 4/7 unlock, overheat, and recipe timing into an
    inspectable cadence schedule. Avoid accidental event/weather/boss/unlock
    overstacking unless the wave is intentionally a planned spike.
+   Source status: first pass complete for wave event/weather/boss/rest/unlock
+   beats. `FoodTruckRunModel` now exposes `LastWaveCadencePlan`,
+   `LastWaveCadenceSummary`, scheduled beat count, and planned-spike state
+   without consuming weather/event random rolls. Remaining work is visual
+   review and later inclusion of overheat/recipe rhythm if needed.
 2. `Payoff-to-Read Panel`: extend the existing wave payoff cue into a compact
    next-decision hint. Examples: `Leak x2 -> value lane control`,
    `PeakHeat +18 -> pick COOL/SAFE`. Keep this short and test the wording with
@@ -145,6 +150,10 @@ Recommended order:
 Risk control: each candidate must include an EditMode or verifier check plus a
 manual Play Mode review criterion. Do not implement multiple rhythm candidates in
 one pass.
+
+Composer acceptance now includes: Wave 3 event cadence, Wave 4 unlock/weather
+planned spike, Wave 5 boss/rest planned spike, and Wave 7 non-spike unlock must
+be covered by EditMode tests and the HUD state contract.
 
 ### Short-Term Focus: Wave Outcome / Payoff Summary
 After each wave, show a concise combat result summary before the next draw decision.
@@ -205,7 +214,9 @@ The summary should highlight:
 - Use the rhythm audit when choosing next work; do not add a mechanic unless it improves a named beat.
 - During Play Mode review, judge whether the player can feel a clear pressure ramp and payoff/release before the next choice.
 - Track accidental overlap between event, weather, unlock, boss/rest, overheat, and recipe beats.
-- If evidence is PASS or a concrete FIX is recorded, implement `Wave Cadence Composer` before wider content. It changes less UI surface than a new reward system and makes later rhythm tuning measurable.
+- If evidence is PASS or a concrete FIX is recorded, review the source-level
+  `Wave Cadence Composer` in Play Mode before wider content. If rhythm
+  readability is still weak, implement `Payoff-to-Read Panel` next.
 - If payoff readability is the main FIX, implement `Payoff-to-Read Panel` before cadence tuning.
 - Verify that the three draw cards keep `Fit`, `Heat`, `Role`, `Value/Risk`, and `Target` readable in compact portrait layout.
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.

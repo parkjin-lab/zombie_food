@@ -249,6 +249,61 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
+        {
+            var model = new FoodTruckRunModel(seed: 163);
+
+            AdvanceToWave(model, 3);
+
+            Assert.AreEqual(3, model.LastWaveCadencePlan.Wave);
+            Assert.IsTrue(model.LastWaveCadencePlan.RunEvent);
+            Assert.IsFalse(model.LastWaveCadencePlannedSpike);
+            Assert.AreEqual(1, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual("Wave 3: Event", model.LastWaveCadenceSummary);
+        }
+
+        [Test]
+        public void Tick_WhenWaveFourStarts_ReportsUnlockWeatherPlannedSpike()
+        {
+            var model = new FoodTruckRunModel(seed: 164);
+
+            AdvanceToWave(model, 4);
+
+            Assert.IsTrue(model.LastWaveCadencePlan.ProgressionUnlock);
+            Assert.IsTrue(model.LastWaveCadencePlan.WeatherRotation);
+            Assert.IsTrue(model.LastWaveCadencePlannedSpike);
+            Assert.AreEqual(2, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual("Wave 4: Unlock, Weather (planned spike)", model.LastWaveCadenceSummary);
+        }
+
+        [Test]
+        public void Tick_WhenWaveFiveStarts_ReportsBossRestPlannedSpike()
+        {
+            var model = new FoodTruckRunModel(seed: 165);
+
+            AdvanceToWave(model, 5);
+
+            Assert.IsTrue(model.LastWaveCadencePlan.BossPressureSpike);
+            Assert.IsTrue(model.LastWaveCadencePlan.RestGranted);
+            Assert.IsTrue(model.LastWaveCadencePlannedSpike);
+            Assert.AreEqual(2, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual("Wave 5: Boss, Rest (planned spike)", model.LastWaveCadenceSummary);
+        }
+
+        [Test]
+        public void Tick_WhenWaveSevenStarts_ReportsUnlockCadenceWithoutSpike()
+        {
+            var model = new FoodTruckRunModel(seed: 167);
+
+            AdvanceToWave(model, 7);
+
+            Assert.IsTrue(model.LastWaveCadencePlan.ProgressionUnlock);
+            Assert.IsFalse(model.LastWaveCadencePlannedSpike);
+            Assert.AreEqual(1, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual("Wave 7: Unlock", model.LastWaveCadenceSummary);
+        }
+
+        [Test]
         public void VentHeat_WhenPrerequisitesMet_SucceedsAndConsumesResources()
         {
             var model = new FoodTruckRunModel(seed: 17);
@@ -1009,6 +1064,20 @@ namespace ZombieFoodcenter.Tests.EditMode
             {
                 blockByCell[block.OccupiedCellIndices[i]] = block.Id;
             }
+        }
+
+        private static void AdvanceToWave(FoodTruckRunModel model, int targetWave)
+        {
+            Assert.Greater(targetWave, 1);
+            SetAutoProperty(model, "Wave", targetWave - 1);
+            SetPrivateField(model, "waveTimer", 19f);
+            SetAutoProperty(model, "Threat", 0f);
+            SetAutoProperty(model, "MaxTruckHp", 100000f);
+            SetAutoProperty(model, "TruckHp", 100000f);
+
+            model.Tick(1f);
+
+            Assert.AreEqual(targetWave, model.Wave);
         }
 
         private static void SetAutoProperty<TModel, TValue>(TModel instance, string propertyName, TValue value)

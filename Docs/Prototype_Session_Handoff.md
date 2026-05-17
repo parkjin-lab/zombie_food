@@ -217,7 +217,8 @@ Last updated: 2026-05-17 01:18 KST
 - Focused retake plan doc verification is available and reports `retake_plan_doc_status=ok`; if suite/screenshot evidence changes, regenerate `Docs/Prototype_PlayMode_RetakePlan.md` before opening Unity.
 - PlayMode evidence preflight is available and currently reports `playmode_evidence_preflight_status=ready_for_focused_retake`; use it immediately before Unity and again after capture so stale-doc or screenshot problems do not hide inside separate command outputs.
 - Rhythm design audit is available and currently reports that the prototype has strong rhythm ingredients but lacks an explicit beat map and tension/release review criteria.
-- Sub-agent review agrees the next fun work should not be a broad new mechanic. The best candidates after evidence closes are `Wave Cadence Composer` and `Payoff-to-Read panel`; `Rhythm Beat HUD/telemetry`, pressure ramp tuning, and rest-phase reward follow after that.
+- `Wave Cadence Composer` first source pass is complete: `FoodTruckRunModel` exposes `LastWaveCadencePlan`, `LastWaveCadenceSummary`, scheduled beat count, and planned-spike state for event/weather/boss/rest/unlock overlaps without pre-consuming random rolls.
+- Sub-agent review agrees the next fun work should not be a broad new mechanic. After Composer source guard, the next autonomous candidate is `Payoff-to-Read panel`; `Rhythm Beat HUD/telemetry`, pressure ramp tuning, and rest-phase reward follow after that.
 - Large imported Unity/Asset Store folders remain untracked: `Assets/Feel`, `Assets/Plugins`, `Assets/Undead Survivor`, `Assets/Resources/Undead Survivor`, `Assets/StreamingAssets`, `Assets/_Recovery`, and `Assets/Resources/DOTweenSettings.asset`. Do not stage them unless the asset import decision is explicit.
 - Session status now translates readiness into immediate work focus: current `top_issue` is manual Play Mode evidence partial, current `next_evidence_action` is to capture or focused-retake Draw Choice, Pending Placement, and Invalid Placement because no standalone PNG candidates remain, and current `next_code_target` is no new gameplay code until fresh suite evidence exists.
 - `Tools/Write-PrototypePlayModeResultFromSuite.ps1` is the intended PASS/FIX/BLOCKED result writer, but status-only handoff passes should not run it because it writes a result draft even with `-JsonOnly`.
@@ -251,7 +252,7 @@ Last updated: 2026-05-17 01:18 KST
 24. During the next Pending Placement capture, verify that R1/R2 recommendations explain the useful lane/coverage/center reason without crowding the board.
 25. During the next Wave Combat suite capture, confirm the review pack shows `wave_combat_action_showcase_ready=true`; if not, treat it as `FIX_FEEDBACK` or retake evidence before recording PASS.
 26. During the next rhythm review, confirm the wave has a readable pressure ramp, a payoff beat, and a release or intentional variation beat.
-27. After Play Mode evidence is PASS or has a concrete FIX record, choose the next implementation from this order: `Wave Cadence Composer`, `Payoff-to-Read panel`, `Rhythm Beat HUD/telemetry`, pressure ramp tuning, rest-phase reward.
+27. After Play Mode evidence is PASS or has a concrete FIX record, verify whether the source-level `Wave Cadence Composer` makes wave 3/4/5/7 beats readable enough, then continue with `Payoff-to-Read panel`, `Rhythm Beat HUD/telemetry`, pressure ramp tuning, and rest-phase reward in that order.
 
 ## Manual Play Mode Acceptance Checklist
 - Full checklist and result template: `Docs/Prototype_PlayMode_Verification.md`.

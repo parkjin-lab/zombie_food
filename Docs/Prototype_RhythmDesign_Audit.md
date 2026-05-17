@@ -50,7 +50,7 @@ felt rhythm. Do not add broad content until Draw Choice, Pending Placement, and
 Invalid Placement are captured and judged.
 
 Implementation priority after evidence closure:
-1. `Wave Cadence Composer`
+1. `Wave Cadence Composer` source guard
 2. `Payoff-to-Read Panel`
 3. `Rhythm Beat HUD/Telemetry`
 4. `Pressure Ramp Tuning`
@@ -59,6 +59,12 @@ Implementation priority after evidence closure:
 The first two are preferred because they use existing systems instead of adding
 new surface area. They make the current loop easier to read and tune before
 larger reward/content systems are introduced.
+
+2026-05-17 source update: `Wave Cadence Composer` now exists in
+`FoodTruckRunModel` as an inspectable `WaveCadencePlan`. It does not pre-roll
+weather or event randomness; it only labels scheduled beats and planned spikes
+for wave transitions. Play Mode still needs to confirm whether those planned
+spikes are felt clearly.
 
 ## Rhythm Pillars
 | Pillar | Design rule |
@@ -80,15 +86,15 @@ larger reward/content systems are introduced.
 | 5. Release/Variation | Breathe, then get a twist | Rest, events, weather, unlocks | Compose overlaps so spikes and relief are intentional |
 
 ## Wave Cadence Target
-| Arc | Intent |
-| --- | --- |
-| Wave 1 | Establish the base tempo: simple lanes, low Heat, clear placement. |
-| Wave 2 | Add pressure: a lane threat or Heat tradeoff becomes visible. |
-| Wave 3 | Offbeat: event choice changes the next decision. |
-| Wave 4 | Tempo shift: targeting/shape unlock adds a new decision layer. |
-| Wave 5 | Spike and release: boss pressure, then rest/payoff. |
-| Wave 6 | Recovery test: player uses the new tool under moderate pressure. |
-| Wave 7 | Second tempo shift: broader targeting/shape/risk variation. |
+| Arc | Intent | Composer label |
+| --- | --- | --- |
+| Wave 1 | Establish the base tempo: simple lanes, low Heat, clear placement. | Steady combat |
+| Wave 2 | Add pressure: a lane threat or Heat tradeoff becomes visible. | Steady combat |
+| Wave 3 | Offbeat: event choice changes the next decision. | Event |
+| Wave 4 | Tempo shift: targeting/shape unlock adds a new decision layer. | Unlock, Weather planned spike |
+| Wave 5 | Spike and release: boss pressure, then rest/payoff. | Boss, Rest planned spike |
+| Wave 6 | Recovery test: player uses the new tool under moderate pressure. | Event |
+| Wave 7 | Second tempo shift: broader targeting/shape/risk variation. | Unlock |
 
 ## Update Backlog
 ### P0 Rhythm Criteria
@@ -100,8 +106,9 @@ larger reward/content systems are introduced.
   beat it improves.
 
 ### P1 System Updates
-- Add a wave cadence helper in the model so events/weather/boss/unlocks can avoid
-  accidental overstacking unless a planned spike calls for it.
+- Extend the wave cadence helper from source guard to tuning tool: use the
+  planned-spike flag to decide whether an overlap should be emphasized, softened,
+  or moved.
 - Add a Payoff-to-Read panel or compact chip that turns the latest wave outcome
   into a next-decision hint.
 - Add a lightweight rhythm state label or meter in the HUD: `Read`, `Commit`,

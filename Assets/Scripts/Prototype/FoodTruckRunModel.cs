@@ -94,6 +94,41 @@ namespace ZombieFoodcenter.Prototype
         public RunEventOption[] Options { get; }
     }
 
+    public sealed class WaveCadencePlan
+    {
+        public WaveCadencePlan(
+            int wave,
+            bool progressionUnlock,
+            bool weatherRotation,
+            bool bossPressureSpike,
+            bool runEvent,
+            bool restGranted,
+            int scheduledBeatCount,
+            bool plannedSpike,
+            string summary)
+        {
+            Wave = wave;
+            ProgressionUnlock = progressionUnlock;
+            WeatherRotation = weatherRotation;
+            BossPressureSpike = bossPressureSpike;
+            RunEvent = runEvent;
+            RestGranted = restGranted;
+            ScheduledBeatCount = scheduledBeatCount;
+            PlannedSpike = plannedSpike;
+            Summary = summary;
+        }
+
+        public int Wave { get; }
+        public bool ProgressionUnlock { get; }
+        public bool WeatherRotation { get; }
+        public bool BossPressureSpike { get; }
+        public bool RunEvent { get; }
+        public bool RestGranted { get; }
+        public int ScheduledBeatCount { get; }
+        public bool PlannedSpike { get; }
+        public string Summary { get; }
+    }
+
     public sealed class RecipeState
     {
         public RecipeState(string name, RecipeTier tier, bool isPassive, float potency, float durationSeconds)
@@ -341,6 +376,7 @@ namespace ZombieFoodcenter.Prototype
         private float wavePeakHeat;
         private string lastWaveOutcomeSummary = string.Empty;
         private string lastWaveOutcomeCue = string.Empty;
+        private WaveCadencePlan lastWaveCadencePlan;
         private string lastRecipeActivationName = string.Empty;
         private string lastRecipeActivationSummary = string.Empty;
         private string lastRecipeActivationCue = string.Empty;
@@ -410,6 +446,10 @@ namespace ZombieFoodcenter.Prototype
         public float PlacementSuccessRate => placementAttemptCount > 0 ? (float)placementSuccessCount / placementAttemptCount : 0f;
         public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;
         public string LastWaveOutcomeCue => lastWaveOutcomeCue;
+        public WaveCadencePlan LastWaveCadencePlan => lastWaveCadencePlan;
+        public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;
+        public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;
+        public int LastWaveCadenceScheduledBeatCount => lastWaveCadencePlan != null ? lastWaveCadencePlan.ScheduledBeatCount : 0;
         public string LastRecipeActivationName => lastRecipeActivationName;
         public string LastRecipeActivationSummary => lastRecipeActivationSummary;
         public string LastRecipeActivationCue => lastRecipeActivationCue;
@@ -463,6 +503,7 @@ namespace ZombieFoodcenter.Prototype
             placedBlocks.Clear();
             lastWaveOutcomeSummary = string.Empty;
             lastWaveOutcomeCue = string.Empty;
+            lastWaveCadencePlan = BuildWaveCadencePlan(Wave);
             lastRecipeActivationName = string.Empty;
             lastRecipeActivationSummary = string.Empty;
             lastRecipeActivationCue = string.Empty;
@@ -1483,19 +1524,20 @@ namespace ZombieFoodcenter.Prototype
             CaptureWaveOutcomeSummary();
             waveTimer = 0f;
             Wave += 1;
+            lastWaveCadencePlan = BuildWaveCadencePlan(Wave);
             Threat += 2.2f + Wave * 0.33f;
             Supplies += 4 + Mathf.FloorToInt(Wave * 0.32f);
             AppendLog(lastWaveOutcomeSummary);
             AppendLog("Wave " + Wave + " started.");
 
-            if (Wave == 4)
+            if (lastWaveCadencePlan.ProgressionUnlock && Wave == 4)
             {
                 AppendLog("Progression unlock: advanced targeting (FAR/HP) + T shape enabled.");
                 EmitPresentationTrigger(
                     PresentationTriggerType.ProgressionUnlock,
                     "Wave 4: FAR/HP targeting + T shape unlocked.");
             }
-            else if (Wave == 7)
+            else if (lastWaveCadencePlan.ProgressionUnlock && Wave == 7)
             {
                 AppendLog("Progression unlock: RANDOM targeting + Square shape + harsher heat risk.");
                 EmitPresentationTrigger(
@@ -1503,12 +1545,12 @@ namespace ZombieFoodcenter.Prototype
                     "Wave 7: RANDOM targeting + Square shape unlocked.");
             }
 
-            if (Wave % 4 == 0)
+            if (lastWaveCadencePlan.WeatherRotation)
             {
                 RotateWeather();
             }
 
-            if (Wave % 5 == 0)
+            if (lastWaveCadencePlan.BossPressureSpike)
             {
                 Threat += 3.2f;
                 restTimer = RestDurationSeconds;
@@ -1516,11 +1558,62 @@ namespace ZombieFoodcenter.Prototype
                 AppendLog("Boss pressure spike. Rest phase granted.");
             }
 
-            if (Wave % 3 == 0)
+            if (lastWaveCadencePlan.RunEvent)
             {
                 pendingEvent = BuildEvent();
                 AppendLog("Run event triggered. Choose one option.");
             }
+        }
+
+        private static WaveCadencePlan BuildWaveCadencePlan(int wave)
+        {
+            bool progressionUnlock = wave == 4 || wave == 7;
+            bool weatherRotation = wave % 4 == 0;
+            bool bossPressureSpike = wave % 5 == 0;
+            bool runEvent = wave % 3 == 0;
+            bool restGranted = bossPressureSpike;
+
+            var beats = new List<string>();
+            if (progressionUnlock)
+            {
+                beats.Add("Unlock");
+            }
+
+            if (weatherRotation)
+            {
+                beats.Add("Weather");
+            }
+
+            if (bossPressureSpike)
+            {
+                beats.Add("Boss");
+                beats.Add("Rest");
+            }
+
+            if (runEvent)
+            {
+                beats.Add("Event");
+            }
+
+            int scheduledBeatCount = beats.Count;
+            bool plannedSpike = bossPressureSpike || scheduledBeatCount >= 2;
+            string beatSummary = scheduledBeatCount > 0 ? string.Join(", ", beats.ToArray()) : "Steady combat";
+            string summary = "Wave " + wave + ": " + beatSummary;
+            if (plannedSpike)
+            {
+                summary += " (planned spike)";
+            }
+
+            return new WaveCadencePlan(
+                wave,
+                progressionUnlock,
+                weatherRotation,
+                bossPressureSpike,
+                runEvent,
+                restGranted,
+                scheduledBeatCount,
+                plannedSpike,
+                summary);
         }
 
         private void CaptureWaveOutcomeBaseline()
