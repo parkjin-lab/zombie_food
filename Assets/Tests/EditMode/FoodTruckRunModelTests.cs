@@ -304,6 +304,88 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void ResolveRhythmBeat_ReadStates_PrioritizeChoices()
+        {
+            Assert.AreEqual(
+                RhythmBeatType.Read,
+                FoodTruckRunModel.ResolveRhythmBeat(
+                    isRestPhase: false,
+                    eventPending: true,
+                    hasDrawChoice: false,
+                    hasPendingBlock: false,
+                    hasPayoffHint: false,
+                    waveProgress01: 0.5f));
+
+            Assert.AreEqual(
+                RhythmBeatType.Read,
+                FoodTruckRunModel.ResolveRhythmBeat(
+                    isRestPhase: false,
+                    eventPending: false,
+                    hasDrawChoice: true,
+                    hasPendingBlock: false,
+                    hasPayoffHint: true,
+                    waveProgress01: 0.02f));
+        }
+
+        [Test]
+        public void ResolveRhythmBeat_CommitAndReleaseStates_AreExplicit()
+        {
+            Assert.AreEqual(
+                RhythmBeatType.Commit,
+                FoodTruckRunModel.ResolveRhythmBeat(
+                    isRestPhase: false,
+                    eventPending: false,
+                    hasDrawChoice: false,
+                    hasPendingBlock: true,
+                    hasPayoffHint: false,
+                    waveProgress01: 0.3f));
+
+            Assert.AreEqual(
+                RhythmBeatType.Release,
+                FoodTruckRunModel.ResolveRhythmBeat(
+                    isRestPhase: true,
+                    eventPending: false,
+                    hasDrawChoice: false,
+                    hasPendingBlock: true,
+                    hasPayoffHint: true,
+                    waveProgress01: 0f));
+        }
+
+        [Test]
+        public void ResolveRhythmBeat_PayoffOnlyCoversEarlyWaveWindow()
+        {
+            Assert.AreEqual(
+                RhythmBeatType.Payoff,
+                FoodTruckRunModel.ResolveRhythmBeat(
+                    isRestPhase: false,
+                    eventPending: false,
+                    hasDrawChoice: false,
+                    hasPendingBlock: false,
+                    hasPayoffHint: true,
+                    waveProgress01: 0.08f));
+
+            Assert.AreEqual(
+                RhythmBeatType.Pressure,
+                FoodTruckRunModel.ResolveRhythmBeat(
+                    isRestPhase: false,
+                    eventPending: false,
+                    hasDrawChoice: false,
+                    hasPendingBlock: false,
+                    hasPayoffHint: true,
+                    waveProgress01: 0.45f));
+        }
+
+        [Test]
+        public void BuildRhythmBeatLabel_ReturnsPlayerFacingNames()
+        {
+            Assert.AreEqual("Read", FoodTruckRunModel.BuildRhythmBeatLabel(RhythmBeatType.Read));
+            Assert.AreEqual("Commit", FoodTruckRunModel.BuildRhythmBeatLabel(RhythmBeatType.Commit));
+            Assert.AreEqual("Pressure", FoodTruckRunModel.BuildRhythmBeatLabel(RhythmBeatType.Pressure));
+            Assert.AreEqual("Payoff", FoodTruckRunModel.BuildRhythmBeatLabel(RhythmBeatType.Payoff));
+            Assert.AreEqual("Release", FoodTruckRunModel.BuildRhythmBeatLabel(RhythmBeatType.Release));
+        }
+
+        [Test]
         public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
         {
             var model = new FoodTruckRunModel(seed: 163);

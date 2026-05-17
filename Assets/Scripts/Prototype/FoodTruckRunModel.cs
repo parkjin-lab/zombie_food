@@ -65,6 +65,15 @@ namespace ZombieFoodcenter.Prototype
         RecipeRush
     }
 
+    public enum RhythmBeatType
+    {
+        Read,
+        Commit,
+        Pressure,
+        Payoff,
+        Release
+    }
+
 
     public sealed class RunEventOption
     {
@@ -452,6 +461,14 @@ namespace ZombieFoodcenter.Prototype
         public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;
         public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;
         public int LastWaveCadenceScheduledBeatCount => lastWaveCadencePlan != null ? lastWaveCadencePlan.ScheduledBeatCount : 0;
+        public RhythmBeatType CurrentRhythmBeat => ResolveRhythmBeat(
+            IsRestPhase,
+            EventPending,
+            HasDrawChoice,
+            HasPendingBlock,
+            !string.IsNullOrEmpty(lastWaveOutcomeNextHint),
+            GetWaveProgress01());
+        public string CurrentRhythmBeatLabel => BuildRhythmBeatLabel(CurrentRhythmBeat);
         public string LastRecipeActivationName => lastRecipeActivationName;
         public string LastRecipeActivationSummary => lastRecipeActivationSummary;
         public string LastRecipeActivationCue => lastRecipeActivationCue;
@@ -1704,6 +1721,54 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return "Keep balanced draw";
+        }
+
+        public static RhythmBeatType ResolveRhythmBeat(
+            bool isRestPhase,
+            bool eventPending,
+            bool hasDrawChoice,
+            bool hasPendingBlock,
+            bool hasPayoffHint,
+            float waveProgress01)
+        {
+            if (isRestPhase)
+            {
+                return RhythmBeatType.Release;
+            }
+
+            if (eventPending || hasDrawChoice)
+            {
+                return RhythmBeatType.Read;
+            }
+
+            if (hasPendingBlock)
+            {
+                return RhythmBeatType.Commit;
+            }
+
+            if (hasPayoffHint && waveProgress01 <= 0.12f)
+            {
+                return RhythmBeatType.Payoff;
+            }
+
+            return RhythmBeatType.Pressure;
+        }
+
+        public static string BuildRhythmBeatLabel(RhythmBeatType beat)
+        {
+            switch (beat)
+            {
+                case RhythmBeatType.Read:
+                    return "Read";
+                case RhythmBeatType.Commit:
+                    return "Commit";
+                case RhythmBeatType.Payoff:
+                    return "Payoff";
+                case RhythmBeatType.Release:
+                    return "Release";
+                default:
+                    return "Pressure";
+            }
         }
 
         private static string FormatSignedRounded(float value)

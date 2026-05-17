@@ -296,6 +296,37 @@ Add-ContractCheck $checks "payoff_to_read" "editmode_covers_next_hint_cases" $so
     'BuildPayoffToReadHintChipText_TrimsLongHints'
 ) "EditMode coverage should lock leak, Heat, damage payoff, and copy-trimming hint behavior."
 
+Add-ContractCheck $checks "rhythm_beat" "model_resolves_named_loop_beats" $sources.model @(
+    'public enum RhythmBeatType',
+    'Read,',
+    'Commit,',
+    'Pressure,',
+    'Payoff,',
+    'Release',
+    'public RhythmBeatType CurrentRhythmBeat => ResolveRhythmBeat(',
+    'public string CurrentRhythmBeatLabel => BuildRhythmBeatLabel(CurrentRhythmBeat);',
+    'public static RhythmBeatType ResolveRhythmBeat(',
+    'public static string BuildRhythmBeatLabel(RhythmBeatType beat)'
+) "The run model should expose the current rhythm beat as a stable design-language enum and label."
+
+Add-ContractCheck $checks "rhythm_beat" "hud_and_telemetry_surface_current_beat" ($sources.hud + $sources.telemetry) @(
+    'string rhythmBeat = model.CurrentRhythmBeatLabel;',
+    '"Beat " + rhythmBeat',
+    '"Rhythm Beat: " + model.CurrentRhythmBeatLabel',
+    '" R:" + model.CurrentRhythmBeatLabel',
+    'rhythm_beat,wave_cadence',
+    'CsvEscape(rhythmBeat)',
+    'CsvEscape(waveCadence)',
+    'model.LastWaveCadenceSummary'
+) "HUD and UX telemetry should reuse the same current beat label without adding a large new panel."
+
+Add-ContractCheck $checks "rhythm_beat" "editmode_covers_rhythm_beat_mapping" $sources.tests @(
+    'ResolveRhythmBeat_ReadStates_PrioritizeChoices',
+    'ResolveRhythmBeat_CommitAndReleaseStates_AreExplicit',
+    'ResolveRhythmBeat_PayoffOnlyCoversEarlyWaveWindow',
+    'BuildRhythmBeatLabel_ReturnsPlayerFacingNames'
+) "EditMode coverage should lock Read, Commit, Pressure, Payoff, and Release mapping semantics."
+
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
     'private sealed class CombatFloatingTextWidget',
     'private readonly List<CombatFloatingTextWidget> combatFloatingTexts',
@@ -634,7 +665,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

@@ -145,6 +145,10 @@ Recommended order:
 3. `Rhythm Beat HUD/Telemetry`: expose `Read`, `Commit`, `Pressure`, `Payoff`,
    and `Release` as a lightweight label or telemetry state only after the first
    two items prove the cadence and payoff direction.
+   Source status: first pass complete. `FoodTruckRunModel` resolves the current
+   beat, the HUD status line shows `Beat <label>`, and the UX telemetry panel/mini
+   line reuse the same label. Remaining work is state duration and transition
+   telemetry after Play Mode readability review.
 4. `Pressure Ramp Tuning`: make the 20-second wave visibly rise from readably
    low pressure to a peak without causing Heat/Threat/Combo noise.
 5. `Rest-Phase Reward`: convert release windows into a small 1-of-3 reward only
@@ -161,6 +165,10 @@ be covered by EditMode tests and the HUD state contract.
 Payoff-to-Read acceptance now includes: leak, Heat spike, damage payoff, and
 copy-trimming cases must be covered by EditMode tests; the HUD state contract
 must guard the `Next` chip and bounded hint text.
+
+Rhythm Beat acceptance now includes: `Read`, `Commit`, `Pressure`, `Payoff`, and
+`Release` mapping must be covered by EditMode tests; the HUD state contract must
+guard the beat label in both the HUD status line and UX telemetry text.
 
 ### Short-Term Focus: Wave Outcome / Payoff Summary
 After each wave, show a concise combat result summary before the next draw decision.
@@ -331,6 +339,8 @@ The summary should highlight:
 - `wave_outcome_summary_viewed`
 - `wave_payoff_top_contributor`
 - `rhythm_state_duration_sec`
+- `rhythm_beat_label`
+- `beat_transition_count`
 - `spike_overlap_count`
 - `payoff_visible_sec`
 - `release_window_sec`

@@ -320,12 +320,14 @@ namespace ZombieFoodcenter.Prototype
                 }
 
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                string rhythmBeat = model.CurrentRhythmBeatLabel;
+                string waveCadence = model.LastWaveCadenceSummary;
 
                 using (var writer = new StreamWriter(csvPath, true, Encoding.UTF8))
                 {
                     if (writeHeader)
                     {
-                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave");
+                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,wave_cadence");
                     }
 
                     string[] row =
@@ -361,7 +363,9 @@ namespace ZombieFoodcenter.Prototype
                         drawToPlaceAvg >= 0f ? drawToPlaceAvg.ToString("0.###", CultureInfo.InvariantCulture) : string.Empty,
                         drawToPlaceSamples.ToString(CultureInfo.InvariantCulture),
                         overheatEntries.ToString(CultureInfo.InvariantCulture),
-                        CsvEscape(overheatByWave)
+                        CsvEscape(overheatByWave),
+                        CsvEscape(rhythmBeat),
+                        CsvEscape(waveCadence)
                     };
 
                     writer.WriteLine(string.Join(",", row));
@@ -383,6 +387,7 @@ namespace ZombieFoodcenter.Prototype
                         ", manualMerge=" + manualMergeSuccess +
                         ", pickValue[L/M/H]=" + pickValueLow + "/" + pickValueMid + "/" + pickValueHigh +
                         ", pickRisk[L/M/H]=" + pickRiskLow + "/" + pickRiskMid + "/" + pickRiskHigh +
+                        ", rhythmBeat=" + rhythmBeat +
                         ", drawToPlaceAvg=" + (drawToPlaceAvg >= 0f ? drawToPlaceAvg.ToString("0.00", CultureInfo.InvariantCulture) + "s" : "n/a") +
                         ", overheatEntries=" + overheatEntries +
                         ", file=" + csvPath);
@@ -688,6 +693,7 @@ namespace ZombieFoodcenter.Prototype
 
             telemetryPanelText.text =
                 "UX Telemetry (" + scopeLabel + ")\n" +
+                "Rhythm Beat: " + model.CurrentRhythmBeatLabel + " | Cadence: " + model.LastWaveCadenceSummary + "\n" +
                 "Draw Assist: " + model.DrawAssistTag + "\n" +
                 "Placement: " + success + "/" + attempts + " (" + (successRate * 100f).ToString("0") + "%)\n" +
                 "Placement Type: Direct " + directPlacementSuccess + " (" + (directRate * 100f).ToString("0") + "%) | AutoMerge " + autoMergeSuccess + " (" + (autoShare * 100f).ToString("0") + "%)\n" +
@@ -764,6 +770,7 @@ namespace ZombieFoodcenter.Prototype
             return
                 "   UX[" + scopeTag + "] P " + success + "/" + attempts +
                 "(" + (successRate * 100f).ToString("0") + "%)" +
+                " R:" + model.CurrentRhythmBeatLabel +
                 " M[d" + directPlacementSuccess + " a" + autoMergeSuccess + " m" + manualMergeSuccess + "]" +
                 " B[o" + blockedOutOfBounds +
                 " c" + blockedOccupied +

@@ -1413,10 +1413,12 @@ namespace ZombieFoodcenter.Prototype
                 ? "OVERHEAT " + Mathf.CeilToInt(model.OverheatSeverity01 * 100f) + "%"
                 : (model.IsHeatWarning ? "warning" : "stable");
             string ventState = BuildVentStatusText(false);
+            string rhythmBeat = model.CurrentRhythmBeatLabel;
             if (gameplayFocusHud)
             {
                 secondLineText.text =
-                    phase +
+                    "Beat " + rhythmBeat +
+                    "  |  " + phase +
                     "  |  Threat " + model.Threat.ToString("0.0") +
                     "  |  Heat " + model.Heat.ToString("0.0") + " (" + heatState + ")" +
                     "  |  Combo x" + model.ComboMultiplier.ToString("0.00") +
@@ -1431,7 +1433,8 @@ namespace ZombieFoodcenter.Prototype
                     "  |  Momentum " + model.Momentum.ToString("0.0") +
                     "  |  Combo " + model.ComboStreak + " (x" + model.ComboMultiplier.ToString("0.00") + ")" +
                     "  |  Heat A/L/R " + model.HeatAttackMultiplier.ToString("0.00") + "/" + model.HeatLootMultiplier.ToString("0.00") + "/" + model.HeatRiskMultiplier.ToString("0.00") +
-                    "  |  " + phase;
+                    "  |  " + phase +
+                    "  |  Beat " + rhythmBeat;
             }
 
             string pendingStatus = model.HasDrawChoice

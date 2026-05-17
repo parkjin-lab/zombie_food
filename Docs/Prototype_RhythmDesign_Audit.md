@@ -71,6 +71,11 @@ chip beside the persistent wave payoff chip. It is not a second result banner;
 it translates leaks, HP loss, Heat spikes, damage payoff, combo, or recovery into
 a short next-decision hint for the following Read beat.
 
+2026-05-17 rhythm beat update: `Rhythm Beat HUD/Telemetry` now has a first
+source guard. The model resolves `Read`, `Commit`, `Pressure`, `Payoff`, and
+`Release`; the HUD status line and UX telemetry reuse the same label. Duration
+tracking remains a later tuning pass.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
@@ -116,8 +121,8 @@ a short next-decision hint for the following Read beat.
   or moved.
 - Extend the Payoff-to-Read compact chip after Play Mode review if the current
   `Next` hint is too small, too crowded, or not visible during Draw/Pending.
-- Add a lightweight rhythm state label or meter in the HUD: `Read`, `Commit`,
-  `Pressure`, `Payoff`, `Relief`.
+- Extend the lightweight rhythm beat label into duration telemetry after visual
+  review: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
 - Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
   spike overlap count, and payoff-visible time.
 - Add a review-pack rhythm section so screenshots and manual notes carry the same
