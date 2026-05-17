@@ -345,6 +345,8 @@ namespace ZombieFoodcenter.Prototype
                 string rhythmBeat = model.CurrentRhythmBeatLabel;
                 string pressureRamp = model.CurrentPressureRampLabel;
                 string pressureRampIntensity = model.CurrentPressureRampIntensity01.ToString("0.###", CultureInfo.InvariantCulture);
+                string restReward = model.LastRestRewardLabel;
+                string restRewardSummary = model.LastRestRewardSummary;
                 string waveCadence = model.LastWaveCadenceSummary;
                 int scopedRhythmBeatTransitions = ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount);
 
@@ -352,7 +354,7 @@ namespace ZombieFoodcenter.Prototype
                 {
                     if (writeHeader)
                     {
-                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,pressure_ramp_phase,pressure_ramp_intensity,wave_cadence");
+                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,pressure_ramp_phase,pressure_ramp_intensity,rest_reward,rest_reward_summary,wave_cadence");
                     }
 
                     string[] row =
@@ -394,6 +396,8 @@ namespace ZombieFoodcenter.Prototype
                         scopedRhythmBeatTransitions.ToString(CultureInfo.InvariantCulture),
                         CsvEscape(pressureRamp),
                         CsvEscape(pressureRampIntensity),
+                        CsvEscape(restReward),
+                        CsvEscape(restRewardSummary),
                         CsvEscape(waveCadence)
                     };
 
@@ -418,6 +422,7 @@ namespace ZombieFoodcenter.Prototype
                         ", pickRisk[L/M/H]=" + pickRiskLow + "/" + pickRiskMid + "/" + pickRiskHigh +
                         ", rhythmBeat=" + rhythmBeat +
                         ", pressureRamp=" + pressureRamp + "/" + pressureRampIntensity +
+                        ", restReward=" + restReward +
                         ", rhythmBeatDuration=" + telemetryCurrentRhythmBeatSeconds.ToString("0.0", CultureInfo.InvariantCulture) + "s" +
                         ", rhythmTransitions=" + scopedRhythmBeatTransitions +
                         ", drawToPlaceAvg=" + (drawToPlaceAvg >= 0f ? drawToPlaceAvg.ToString("0.00", CultureInfo.InvariantCulture) + "s" : "n/a") +
@@ -677,8 +682,8 @@ namespace ZombieFoodcenter.Prototype
             if (telemetryPanelLayoutElement != null)
             {
                 bool tallPortrait = IsTallPortraitLayout();
-                telemetryPanelLayoutElement.preferredHeight = telemetryPanelExpanded ? (tallPortrait ? 156f : 134f) : 0f;
-                telemetryPanelLayoutElement.minHeight = telemetryPanelExpanded ? (tallPortrait ? 132f : 112f) : 0f;
+                telemetryPanelLayoutElement.preferredHeight = telemetryPanelExpanded ? (tallPortrait ? 172f : 150f) : 0f;
+                telemetryPanelLayoutElement.minHeight = telemetryPanelExpanded ? (tallPortrait ? 148f : 128f) : 0f;
             }
 
             if (telemetryPanelRect != null)
@@ -733,6 +738,7 @@ namespace ZombieFoodcenter.Prototype
                     ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount),
                     model.LastWaveCadenceSummary) + "\n" +
                 "Pressure Ramp: " + model.CurrentPressureRampLabel + " " + (model.CurrentPressureRampIntensity01 * 100f).ToString("0") + "%\n" +
+                "Rest Reward: " + model.LastRestRewardLabel + (string.IsNullOrEmpty(model.LastRestRewardSummary) ? string.Empty : " | " + model.LastRestRewardSummary) + "\n" +
                 "Draw Assist: " + model.DrawAssistTag + "\n" +
                 "Placement: " + success + "/" + attempts + " (" + (successRate * 100f).ToString("0") + "%)\n" +
                 "Placement Type: Direct " + directPlacementSuccess + " (" + (directRate * 100f).ToString("0") + "%) | AutoMerge " + autoMergeSuccess + " (" + (autoShare * 100f).ToString("0") + "%)\n" +

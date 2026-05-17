@@ -157,6 +157,10 @@ Recommended order:
    whether spawn/Heat should actually follow this curve after Play Mode review.
 5. `Rest-Phase Reward`: convert release windows into a small 1-of-3 reward only
    after flow-lock and evidence tooling are stable.
+   Source status: first pass complete as a small automatic release reward. Boss
+   rest windows now select `Repair`, `Cooling`, or `Stock` from the completed
+   wave's leaks/HP/Heat/KOs/combo signal, apply the small reward, and export
+   `rest_reward` plus `rest_reward_summary` through HUD/UX telemetry.
 
 Risk control: each candidate must include an EditMode or verifier check plus a
 manual Play Mode review criterion. Do not implement multiple rhythm candidates in

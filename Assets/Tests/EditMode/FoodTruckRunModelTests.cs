@@ -445,6 +445,51 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void ResolveRestRewardProfile_PrioritizesRepairCoolingThenStock()
+        {
+            Assert.AreEqual(
+                RestRewardProfile.Repair,
+                FoodTruckRunModel.ResolveRestRewardProfile(
+                    truckHits: 2,
+                    truckHp01: 0.9f,
+                    heatDelta: 0f,
+                    peakHeatDelta: 0f,
+                    enemiesDefeated: 5,
+                    comboActions: 5));
+
+            Assert.AreEqual(
+                RestRewardProfile.Cooling,
+                FoodTruckRunModel.ResolveRestRewardProfile(
+                    truckHits: 0,
+                    truckHp01: 0.8f,
+                    heatDelta: 11f,
+                    peakHeatDelta: 13f,
+                    enemiesDefeated: 1,
+                    comboActions: 0));
+
+            Assert.AreEqual(
+                RestRewardProfile.StockUp,
+                FoodTruckRunModel.ResolveRestRewardProfile(
+                    truckHits: 0,
+                    truckHp01: 0.8f,
+                    heatDelta: 2f,
+                    peakHeatDelta: 4f,
+                    enemiesDefeated: 4,
+                    comboActions: 0));
+        }
+
+        [Test]
+        public void BuildRestRewardSummary_ReturnsReadablePayoff()
+        {
+            Assert.AreEqual("Repair", FoodTruckRunModel.BuildRestRewardLabel(RestRewardProfile.Repair));
+            Assert.AreEqual("Cooling", FoodTruckRunModel.BuildRestRewardLabel(RestRewardProfile.Cooling));
+            Assert.AreEqual("Stock", FoodTruckRunModel.BuildRestRewardLabel(RestRewardProfile.StockUp));
+            Assert.AreEqual("Rest Reward: Repair +8 HP.", FoodTruckRunModel.BuildRestRewardSummary(RestRewardProfile.Repair));
+            Assert.AreEqual("Rest Reward: Cooling -16 Heat.", FoodTruckRunModel.BuildRestRewardSummary(RestRewardProfile.Cooling));
+            Assert.AreEqual("Rest Reward: Stock +6 Supplies, +4 Momentum.", FoodTruckRunModel.BuildRestRewardSummary(RestRewardProfile.StockUp));
+        }
+
+        [Test]
         public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
         {
             var model = new FoodTruckRunModel(seed: 163);

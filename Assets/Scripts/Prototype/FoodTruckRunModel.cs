@@ -81,6 +81,14 @@ namespace ZombieFoodcenter.Prototype
         Peak
     }
 
+    public enum RestRewardProfile
+    {
+        None,
+        Repair,
+        Cooling,
+        StockUp
+    }
+
 
     public sealed class RunEventOption
     {
@@ -394,6 +402,8 @@ namespace ZombieFoodcenter.Prototype
         private string lastWaveOutcomeCue = string.Empty;
         private string lastWaveOutcomeNextHint = string.Empty;
         private WaveCadencePlan lastWaveCadencePlan;
+        private RestRewardProfile lastRestRewardProfile = RestRewardProfile.None;
+        private string lastRestRewardSummary = string.Empty;
         private string lastRecipeActivationName = string.Empty;
         private string lastRecipeActivationSummary = string.Empty;
         private string lastRecipeActivationCue = string.Empty;
@@ -479,6 +489,9 @@ namespace ZombieFoodcenter.Prototype
         public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
         public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);
         public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
+        public RestRewardProfile LastRestRewardProfile => lastRestRewardProfile;
+        public string LastRestRewardLabel => BuildRestRewardLabel(lastRestRewardProfile);
+        public string LastRestRewardSummary => lastRestRewardSummary;
         public string LastRecipeActivationName => lastRecipeActivationName;
         public string LastRecipeActivationSummary => lastRecipeActivationSummary;
         public string LastRecipeActivationCue => lastRecipeActivationCue;
@@ -534,6 +547,8 @@ namespace ZombieFoodcenter.Prototype
             lastWaveOutcomeCue = string.Empty;
             lastWaveOutcomeNextHint = string.Empty;
             lastWaveCadencePlan = BuildWaveCadencePlan(Wave);
+            lastRestRewardProfile = RestRewardProfile.None;
+            lastRestRewardSummary = string.Empty;
             lastRecipeActivationName = string.Empty;
             lastRecipeActivationSummary = string.Empty;
             lastRecipeActivationCue = string.Empty;
@@ -1585,6 +1600,7 @@ namespace ZombieFoodcenter.Prototype
                 Threat += 3.2f;
                 restTimer = RestDurationSeconds;
                 TruckHp = Mathf.Min(MaxTruckHp, TruckHp + 12f);
+                ApplyRestPhaseReward();
                 AppendLog("Boss pressure spike. Rest phase granted.");
             }
 
@@ -1819,6 +1835,93 @@ namespace ZombieFoodcenter.Prototype
 
             float clampedProgress = Mathf.Clamp01(waveProgress01);
             return clampedProgress * clampedProgress * (3f - 2f * clampedProgress);
+        }
+
+        public static RestRewardProfile ResolveRestRewardProfile(
+            int truckHits,
+            float truckHp01,
+            float heatDelta,
+            float peakHeatDelta,
+            int enemiesDefeated,
+            int comboActions)
+        {
+            if (truckHits >= 2 || truckHp01 <= 0.55f)
+            {
+                return RestRewardProfile.Repair;
+            }
+
+            if (peakHeatDelta >= 12f || heatDelta >= 10f)
+            {
+                return RestRewardProfile.Cooling;
+            }
+
+            if (enemiesDefeated >= 4 || comboActions >= 3)
+            {
+                return RestRewardProfile.StockUp;
+            }
+
+            return RestRewardProfile.StockUp;
+        }
+
+        public static string BuildRestRewardLabel(RestRewardProfile profile)
+        {
+            switch (profile)
+            {
+                case RestRewardProfile.Repair:
+                    return "Repair";
+                case RestRewardProfile.Cooling:
+                    return "Cooling";
+                case RestRewardProfile.StockUp:
+                    return "Stock";
+                default:
+                    return "None";
+            }
+        }
+
+        public static string BuildRestRewardSummary(RestRewardProfile profile)
+        {
+            switch (profile)
+            {
+                case RestRewardProfile.Repair:
+                    return "Rest Reward: Repair +8 HP.";
+                case RestRewardProfile.Cooling:
+                    return "Rest Reward: Cooling -16 Heat.";
+                case RestRewardProfile.StockUp:
+                    return "Rest Reward: Stock +6 Supplies, +4 Momentum.";
+                default:
+                    return "Rest Reward: None.";
+            }
+        }
+
+        private void ApplyRestPhaseReward()
+        {
+            RestRewardProfile profile = ResolveRestRewardProfile(
+                waveTruckHits,
+                MaxTruckHp > 0f ? TruckHp / MaxTruckHp : 0f,
+                Heat - waveStartHeat,
+                wavePeakHeat - waveStartHeat,
+                waveEnemiesDefeated,
+                waveComboActions);
+
+            lastRestRewardProfile = profile;
+            lastRestRewardSummary = BuildRestRewardSummary(profile);
+
+            switch (profile)
+            {
+                case RestRewardProfile.Repair:
+                    TruckHp = Mathf.Min(MaxTruckHp, TruckHp + 8f);
+                    break;
+                case RestRewardProfile.Cooling:
+                    Heat = Mathf.Max(0f, Heat - 16f);
+                    ventCooldownRemaining = Mathf.Max(0f, ventCooldownRemaining - 3f);
+                    break;
+                case RestRewardProfile.StockUp:
+                    Supplies += 6;
+                    Momentum += 4f;
+                    break;
+            }
+
+            AppendLog(lastRestRewardSummary);
         }
 
         private static string FormatSignedRounded(float value)

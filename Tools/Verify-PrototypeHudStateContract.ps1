@@ -361,6 +361,30 @@ Add-ContractCheck $checks "pressure_ramp" "editmode_covers_pressure_ramp_profile
     'BuildPressureRampIntensity_UsesSmoothProgressAndFlowLocks'
 ) "EditMode coverage should lock pressure ramp phase thresholds and flow-lock behavior."
 
+Add-ContractCheck $checks "rest_reward" "model_applies_named_rest_reward" $sources.model @(
+    'public enum RestRewardProfile',
+    'public RestRewardProfile LastRestRewardProfile => lastRestRewardProfile;',
+    'public string LastRestRewardLabel => BuildRestRewardLabel(lastRestRewardProfile);',
+    'public string LastRestRewardSummary => lastRestRewardSummary;',
+    'ApplyRestPhaseReward();',
+    'public static RestRewardProfile ResolveRestRewardProfile(',
+    'public static string BuildRestRewardSummary(RestRewardProfile profile)'
+) "Rest should become a visible release reward beat instead of only a timer."
+
+Add-ContractCheck $checks "rest_reward" "hud_and_telemetry_surface_rest_reward" ($sources.hud + $sources.telemetry) @(
+    'string restReward = model.IsRestPhase && !string.IsNullOrEmpty(model.LastRestRewardSummary)',
+    '"  |  Rest " + model.LastRestRewardLabel',
+    'rest_reward,rest_reward_summary',
+    'CsvEscape(restReward)',
+    'CsvEscape(restRewardSummary)',
+    '"Rest Reward: " + model.LastRestRewardLabel'
+) "HUD and UX telemetry should expose which release reward the rest phase granted."
+
+Add-ContractCheck $checks "rest_reward" "editmode_covers_rest_reward_profile" $sources.tests @(
+    'ResolveRestRewardProfile_PrioritizesRepairCoolingThenStock',
+    'BuildRestRewardSummary_ReturnsReadablePayoff'
+) "EditMode coverage should lock rest reward priority and copy."
+
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
     'private sealed class CombatFloatingTextWidget',
     'private readonly List<CombatFloatingTextWidget> combatFloatingTexts',
@@ -699,7 +723,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "pressure_ramp", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "pressure_ramp", "rest_reward", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

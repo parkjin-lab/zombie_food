@@ -81,6 +81,13 @@ guard. The model labels combat wave pressure as `Build`, `Climb`, or `Peak` and
 exports an intensity value for HUD/telemetry review. It does not yet change spawn
 or Heat balance.
 
+2026-05-18 rest reward update: `Rest-Phase Reward` now has a first source guard.
+Boss/rest release windows grant one small automatic reward from `Repair`,
+`Cooling`, or `Stock` based on the completed wave's leaks, HP, Heat spike, KOs,
+and combo actions. HUD and telemetry expose the reward so the Release beat can be
+reviewed without asking the player for another choice while evidence capture is
+still partial.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
@@ -131,6 +138,9 @@ or Heat balance.
   cutting off too quickly.
 - Use the pressure ramp profile after visual review to decide whether spawn/Heat
   should follow the observed `Build -> Climb -> Peak` curve.
+- Use the rest reward profile after visual review to decide whether `Repair`,
+  `Cooling`, or `Stock` makes the Release beat feel earned without over-rewarding
+  boss waves.
 - Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
   spike overlap count, and payoff-visible time.
 - Add a review-pack rhythm section so screenshots and manual notes carry the same
