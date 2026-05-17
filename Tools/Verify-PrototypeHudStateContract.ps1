@@ -312,10 +312,14 @@ Add-ContractCheck $checks "rhythm_beat" "model_resolves_named_loop_beats" $sourc
 Add-ContractCheck $checks "rhythm_beat" "hud_and_telemetry_surface_current_beat" ($sources.hud + $sources.telemetry) @(
     'string rhythmBeat = model.CurrentRhythmBeatLabel;',
     '"Beat " + rhythmBeat',
-    '"Rhythm Beat: " + model.CurrentRhythmBeatLabel',
-    '" R:" + model.CurrentRhythmBeatLabel',
-    'rhythm_beat,wave_cadence',
+    'BuildRhythmBeatTelemetryLine(',
+    'BuildRhythmBeatMiniText(model.CurrentRhythmBeatLabel, telemetryCurrentRhythmBeatSeconds)',
+    'rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,wave_cadence',
     'CsvEscape(rhythmBeat)',
+    'telemetryCurrentRhythmBeatSeconds.ToString("0.###", CultureInfo.InvariantCulture)',
+    'telemetryWaveBaseRhythmBeatTransitionCount = telemetryRhythmBeatTransitionCount;',
+    'ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount)',
+    'scopedRhythmBeatTransitions.ToString(CultureInfo.InvariantCulture)',
     'CsvEscape(waveCadence)',
     'model.LastWaveCadenceSummary'
 ) "HUD and UX telemetry should reuse the same current beat label without adding a large new panel."
@@ -324,7 +328,9 @@ Add-ContractCheck $checks "rhythm_beat" "editmode_covers_rhythm_beat_mapping" $s
     'ResolveRhythmBeat_ReadStates_PrioritizeChoices',
     'ResolveRhythmBeat_CommitAndReleaseStates_AreExplicit',
     'ResolveRhythmBeat_PayoffOnlyCoversEarlyWaveWindow',
-    'BuildRhythmBeatLabel_ReturnsPlayerFacingNames'
+    'BuildRhythmBeatLabel_ReturnsPlayerFacingNames',
+    'BuildRhythmBeatTelemetryLine_IncludesDurationTransitionsAndCadence',
+    'BuildRhythmBeatMiniText_ClampsNegativeDuration'
 ) "EditMode coverage should lock Read, Commit, Pressure, Payoff, and Release mapping semantics."
 
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(

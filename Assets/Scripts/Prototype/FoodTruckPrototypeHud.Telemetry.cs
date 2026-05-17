@@ -21,6 +21,8 @@ namespace ZombieFoodcenter.Prototype
             telemetryPrevIsOverheated = model.IsOverheated;
             telemetryPrevPlacementSuccessCount = model.PlacementSuccessCount;
             telemetryPrevWave = model.Wave;
+            telemetryCurrentRhythmBeat = model.CurrentRhythmBeatLabel;
+            telemetryCurrentRhythmBeatSeconds = 0f;
 
             if (!clearRunMetrics)
             {
@@ -37,6 +39,7 @@ namespace ZombieFoodcenter.Prototype
             Array.Clear(telemetryWaveBaseDrawPickValueBucketCounts, 0, telemetryWaveBaseDrawPickValueBucketCounts.Length);
             Array.Clear(telemetryWaveBaseDrawPickRiskTagCounts, 0, telemetryWaveBaseDrawPickRiskTagCounts.Length);
             telemetryManualMergeSuccessCount = 0;
+            telemetryRhythmBeatTransitionCount = 0;
             telemetryRunHasMeaningfulData = false;
         }
 
@@ -109,6 +112,25 @@ namespace ZombieFoodcenter.Prototype
             if (telemetryDrawToPlaceTimer >= 0f)
             {
                 telemetryDrawToPlaceTimer += Mathf.Max(0f, dt);
+            }
+
+            string rhythmBeat = model.CurrentRhythmBeatLabel;
+            float clampedDeltaTime = Mathf.Max(0f, dt);
+            if (string.IsNullOrEmpty(telemetryCurrentRhythmBeat))
+            {
+                telemetryCurrentRhythmBeat = rhythmBeat;
+                telemetryCurrentRhythmBeatSeconds = 0f;
+            }
+            else if (!string.Equals(telemetryCurrentRhythmBeat, rhythmBeat, StringComparison.Ordinal))
+            {
+                telemetryCurrentRhythmBeat = rhythmBeat;
+                telemetryCurrentRhythmBeatSeconds = 0f;
+                telemetryRhythmBeatTransitionCount += 1;
+                telemetryRunHasMeaningfulData = true;
+            }
+            else
+            {
+                telemetryCurrentRhythmBeatSeconds += clampedDeltaTime;
             }
 
             int currentSuccess = model.PlacementSuccessCount;
@@ -322,12 +344,13 @@ namespace ZombieFoodcenter.Prototype
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                 string rhythmBeat = model.CurrentRhythmBeatLabel;
                 string waveCadence = model.LastWaveCadenceSummary;
+                int scopedRhythmBeatTransitions = ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount);
 
                 using (var writer = new StreamWriter(csvPath, true, Encoding.UTF8))
                 {
                     if (writeHeader)
                     {
-                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,wave_cadence");
+                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,wave_cadence");
                     }
 
                     string[] row =
@@ -365,6 +388,8 @@ namespace ZombieFoodcenter.Prototype
                         overheatEntries.ToString(CultureInfo.InvariantCulture),
                         CsvEscape(overheatByWave),
                         CsvEscape(rhythmBeat),
+                        telemetryCurrentRhythmBeatSeconds.ToString("0.###", CultureInfo.InvariantCulture),
+                        scopedRhythmBeatTransitions.ToString(CultureInfo.InvariantCulture),
                         CsvEscape(waveCadence)
                     };
 
@@ -388,6 +413,8 @@ namespace ZombieFoodcenter.Prototype
                         ", pickValue[L/M/H]=" + pickValueLow + "/" + pickValueMid + "/" + pickValueHigh +
                         ", pickRisk[L/M/H]=" + pickRiskLow + "/" + pickRiskMid + "/" + pickRiskHigh +
                         ", rhythmBeat=" + rhythmBeat +
+                        ", rhythmBeatDuration=" + telemetryCurrentRhythmBeatSeconds.ToString("0.0", CultureInfo.InvariantCulture) + "s" +
+                        ", rhythmTransitions=" + scopedRhythmBeatTransitions +
                         ", drawToPlaceAvg=" + (drawToPlaceAvg >= 0f ? drawToPlaceAvg.ToString("0.00", CultureInfo.InvariantCulture) + "s" : "n/a") +
                         ", overheatEntries=" + overheatEntries +
                         ", file=" + csvPath);
@@ -465,6 +492,7 @@ namespace ZombieFoodcenter.Prototype
             telemetryWaveBasePick2 = model.GetDrawChoicePickCount(1);
             telemetryWaveBasePick3 = model.GetDrawChoicePickCount(2);
             telemetryWaveBaseManualMergeSuccess = telemetryManualMergeSuccessCount;
+            telemetryWaveBaseRhythmBeatTransitionCount = telemetryRhythmBeatTransitionCount;
             Array.Copy(telemetryDrawPickValueBucketCounts, telemetryWaveBaseDrawPickValueBucketCounts, telemetryDrawPickValueBucketCounts.Length);
             Array.Copy(telemetryDrawPickRiskTagCounts, telemetryWaveBaseDrawPickRiskTagCounts, telemetryDrawPickRiskTagCounts.Length);
         }
@@ -481,6 +509,7 @@ namespace ZombieFoodcenter.Prototype
                 model.PlacementSuccessCount < telemetryWaveBaseSuccess ||
                 model.AutoMergeSuccessCount < telemetryWaveBaseAutoMergeSuccess ||
                 telemetryManualMergeSuccessCount < telemetryWaveBaseManualMergeSuccess ||
+                telemetryRhythmBeatTransitionCount < telemetryWaveBaseRhythmBeatTransitionCount ||
                 model.GetDrawChoicePickCount(0) < telemetryWaveBasePick1 ||
                 model.GetDrawChoicePickCount(1) < telemetryWaveBasePick2 ||
                 model.GetDrawChoicePickCount(2) < telemetryWaveBasePick3;
@@ -693,7 +722,11 @@ namespace ZombieFoodcenter.Prototype
 
             telemetryPanelText.text =
                 "UX Telemetry (" + scopeLabel + ")\n" +
-                "Rhythm Beat: " + model.CurrentRhythmBeatLabel + " | Cadence: " + model.LastWaveCadenceSummary + "\n" +
+                BuildRhythmBeatTelemetryLine(
+                    model.CurrentRhythmBeatLabel,
+                    telemetryCurrentRhythmBeatSeconds,
+                    ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount),
+                    model.LastWaveCadenceSummary) + "\n" +
                 "Draw Assist: " + model.DrawAssistTag + "\n" +
                 "Placement: " + success + "/" + attempts + " (" + (successRate * 100f).ToString("0") + "%)\n" +
                 "Placement Type: Direct " + directPlacementSuccess + " (" + (directRate * 100f).ToString("0") + "%) | AutoMerge " + autoMergeSuccess + " (" + (autoShare * 100f).ToString("0") + "%)\n" +
@@ -770,13 +803,29 @@ namespace ZombieFoodcenter.Prototype
             return
                 "   UX[" + scopeTag + "] P " + success + "/" + attempts +
                 "(" + (successRate * 100f).ToString("0") + "%)" +
-                " R:" + model.CurrentRhythmBeatLabel +
+                " " + BuildRhythmBeatMiniText(model.CurrentRhythmBeatLabel, telemetryCurrentRhythmBeatSeconds) +
                 " M[d" + directPlacementSuccess + " a" + autoMergeSuccess + " m" + manualMergeSuccess + "]" +
                 " B[o" + blockedOutOfBounds +
                 " c" + blockedOccupied +
                 " a" + blockedInvalidAnchor +
                 " n" + blockedNoPending + "]" +
                 " Pick[" + pick1 + "/" + pick2 + "/" + pick3 + "]";
+        }
+
+        public static string BuildRhythmBeatTelemetryLine(string beatLabel, float beatSeconds, int transitionCount, string cadenceSummary)
+        {
+            string safeBeat = string.IsNullOrEmpty(beatLabel) ? "Unknown" : beatLabel;
+            string cadence = string.IsNullOrEmpty(cadenceSummary) ? "No cadence" : cadenceSummary;
+            return "Rhythm Beat: " + safeBeat +
+                " " + Mathf.Max(0f, beatSeconds).ToString("0.0", CultureInfo.InvariantCulture) + "s" +
+                " | Transitions " + Mathf.Max(0, transitionCount) +
+                " | Cadence: " + cadence;
+        }
+
+        public static string BuildRhythmBeatMiniText(string beatLabel, float beatSeconds)
+        {
+            string safeBeat = string.IsNullOrEmpty(beatLabel) ? "Unknown" : beatLabel;
+            return "R:" + safeBeat + " " + Mathf.Max(0f, beatSeconds).ToString("0", CultureInfo.InvariantCulture) + "s";
         }
     }
 }

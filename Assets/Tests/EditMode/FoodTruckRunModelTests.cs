@@ -386,6 +386,28 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildRhythmBeatTelemetryLine_IncludesDurationTransitionsAndCadence()
+        {
+            string line = FoodTruckPrototypeHud.BuildRhythmBeatTelemetryLine(
+                "Pressure",
+                12.34f,
+                3,
+                "Wave 4: Unlock, Weather (planned spike)");
+
+            StringAssert.Contains("Rhythm Beat: Pressure 12.3s", line);
+            StringAssert.Contains("Transitions 3", line);
+            StringAssert.Contains("Wave 4: Unlock, Weather", line);
+        }
+
+        [Test]
+        public void BuildRhythmBeatMiniText_ClampsNegativeDuration()
+        {
+            string text = FoodTruckPrototypeHud.BuildRhythmBeatMiniText("Payoff", -4f);
+
+            Assert.AreEqual("R:Payoff 0s", text);
+        }
+
+        [Test]
         public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
         {
             var model = new FoodTruckRunModel(seed: 163);

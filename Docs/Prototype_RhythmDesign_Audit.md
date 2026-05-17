@@ -73,8 +73,8 @@ a short next-decision hint for the following Read beat.
 
 2026-05-17 rhythm beat update: `Rhythm Beat HUD/Telemetry` now has a first
 source guard. The model resolves `Read`, `Commit`, `Pressure`, `Payoff`, and
-`Release`; the HUD status line and UX telemetry reuse the same label. Duration
-tracking remains a later tuning pass.
+`Release`; the HUD status line and UX telemetry reuse the same label. Telemetry
+also tracks current beat duration and transition count.
 
 ## Rhythm Pillars
 | Pillar | Design rule |
@@ -121,8 +121,9 @@ tracking remains a later tuning pass.
   or moved.
 - Extend the Payoff-to-Read compact chip after Play Mode review if the current
   `Next` hint is too small, too crowded, or not visible during Draw/Pending.
-- Extend the lightweight rhythm beat label into duration telemetry after visual
-  review: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
+- Use the rhythm beat duration/transition telemetry after visual review to tune
+  whether `Read`, `Commit`, `Pressure`, `Payoff`, and `Release` are lingering or
+  cutting off too quickly.
 - Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
   spike overlap count, and payoff-visible time.
 - Add a review-pack rhythm section so screenshots and manual notes carry the same

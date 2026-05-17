@@ -332,6 +332,9 @@ namespace ZombieFoodcenter.Prototype
         private bool telemetryPrevIsOverheated;
         private int telemetryPrevPlacementSuccessCount;
         private int telemetryPrevWave;
+        private string telemetryCurrentRhythmBeat = string.Empty;
+        private float telemetryCurrentRhythmBeatSeconds;
+        private int telemetryRhythmBeatTransitionCount;
         private int telemetryRunSessionId = 1;
         private int telemetryExportSequence = 1;
         private int telemetryManualMergeSuccessCount;
@@ -848,6 +851,7 @@ namespace ZombieFoodcenter.Prototype
         private int telemetryWaveBasePick2;
         private int telemetryWaveBasePick3;
         private int telemetryWaveBaseManualMergeSuccess;
+        private int telemetryWaveBaseRhythmBeatTransitionCount;
 
         private static readonly Color PanelDark = new Color(0.08f, 0.10f, 0.13f, 0.95f);
         private static readonly Color PanelMid = new Color(0.11f, 0.15f, 0.19f, 0.95f);
