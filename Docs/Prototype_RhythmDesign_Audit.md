@@ -66,6 +66,11 @@ weather or event randomness; it only labels scheduled beats and planned spikes
 for wave transitions. Play Mode still needs to confirm whether those planned
 spikes are felt clearly.
 
+2026-05-17 payoff update: `Payoff-to-Read Panel` now exists as a compact `Next`
+chip beside the persistent wave payoff chip. It is not a second result banner;
+it translates leaks, HP loss, Heat spikes, damage payoff, combo, or recovery into
+a short next-decision hint for the following Read beat.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
@@ -82,7 +87,7 @@ spikes are felt clearly.
 | 1. Read | Compare three options and current pressure | Draw cards show Fit/Heat/Role | Verify readability and keep one safe/one greedy/one utility choice |
 | 2. Commit | Place or recover from a mistake | Pending and invalid placement have guidance | Verify placement is fast enough and failure does not stall the loop |
 | 3. Pressure | Watch the truck, zombies, Heat, and attacks | 20s wave, attack trails, combat labels | Tune spawn/Heat ramp so pressure rises instead of feeling flat |
-| 4. Payoff | Understand why the last decision mattered | Wave payoff and recipe payoff cues | Keep payoff visible long enough to guide next choice |
+| 4. Payoff | Understand why the last decision mattered | Wave payoff, recipe payoff, and Next hint cues | Keep payoff visible long enough to guide next choice |
 | 5. Release/Variation | Breathe, then get a twist | Rest, events, weather, unlocks | Compose overlaps so spikes and relief are intentional |
 
 ## Wave Cadence Target
@@ -109,8 +114,8 @@ spikes are felt clearly.
 - Extend the wave cadence helper from source guard to tuning tool: use the
   planned-spike flag to decide whether an overlap should be emphasized, softened,
   or moved.
-- Add a Payoff-to-Read panel or compact chip that turns the latest wave outcome
-  into a next-decision hint.
+- Extend the Payoff-to-Read compact chip after Play Mode review if the current
+  `Next` hint is too small, too crowded, or not visible during Draw/Pending.
 - Add a lightweight rhythm state label or meter in the HUD: `Read`, `Commit`,
   `Pressure`, `Payoff`, `Relief`.
 - Add rhythm telemetry: state duration, draw-to-place time, peak Heat timing,
@@ -132,6 +137,8 @@ spikes are felt clearly.
 - Variation appears every 2-3 waves, but not every variation source fires at once
   unless the wave is intentionally a spike.
 - Payoff appears before the next choice and helps choose the next card or placement.
+- The player can connect the `Next` hint to a concrete cause: leak, Heat spike,
+  damage payoff, combo, or recovery.
 - Heat/Threat/Combo/Recipe signals feel like layered rhythm, not unrelated meters.
 - A `FIX_FEEDBACK` result can identify which beat failed: read, commit, pressure,
   payoff, or release.

@@ -270,6 +270,32 @@ Add-ContractCheck $checks "wave_cadence" "editmode_covers_core_cadence_beats" $s
     'AdvanceToWave(FoodTruckRunModel model, int targetWave)'
 ) "EditMode coverage should lock the first event, unlock/weather overlap, boss/rest spike, and non-spike unlock beat."
 
+Add-ContractCheck $checks "payoff_to_read" "model_builds_next_decision_hint_from_wave_payoff" $sources.model @(
+    'private string lastWaveOutcomeNextHint = string.Empty;',
+    'public string LastWaveOutcomeNextHint => lastWaveOutcomeNextHint;',
+    'lastWaveOutcomeNextHint = BuildWaveOutcomeNextHint(',
+    'public static string BuildWaveOutcomeNextHint(',
+    'return "Stabilize lanes";',
+    'return "Pick COOL/SAFE";',
+    'return "Push damage";',
+    'return "Keep combo window";',
+    'return "Keep balanced draw";'
+) "Wave payoff should become a compact next-decision hint, not only a result label."
+
+Add-ContractCheck $checks "payoff_to_read" "hud_keeps_next_hint_visible_near_wave_chip" $sources.hud @(
+    'model.LastWaveOutcomeNextHint',
+    'CreateChip("Next: " + BuildPayoffToReadHintChipText(nextDecisionHint)',
+    'public static string BuildPayoffToReadHintChipText(string hint)',
+    'const int maxLength = 28;'
+) "The next-decision hint should persist in the same compact read area as wave payoff, with bounded copy length."
+
+Add-ContractCheck $checks "payoff_to_read" "editmode_covers_next_hint_cases" $sources.tests @(
+    'BuildWaveOutcomeNextHint_WhenTruckLeaks_PrioritizesLaneStability',
+    'BuildWaveOutcomeNextHint_WhenHeatSpikes_RecommendsSafeCoolingDraw',
+    'BuildWaveOutcomeNextHint_WhenDamagePaysOff_RecommendsPushingDamage',
+    'BuildPayoffToReadHintChipText_TrimsLongHints'
+) "EditMode coverage should lock leak, Heat, damage payoff, and copy-trimming hint behavior."
+
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
     'private sealed class CombatFloatingTextWidget',
     'private readonly List<CombatFloatingTextWidget> combatFloatingTexts',
@@ -608,7 +634,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

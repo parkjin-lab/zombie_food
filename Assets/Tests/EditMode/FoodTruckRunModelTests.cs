@@ -246,6 +246,61 @@ namespace ZombieFoodcenter.Tests.EditMode
             StringAssert.Contains("PeakHeat +13", model.LastWaveOutcomeSummary);
             StringAssert.Contains("Combo x3", model.LastWaveOutcomeSummary);
             StringAssert.Contains("Leak x1", model.LastWaveOutcomeSummary);
+            Assert.AreEqual("Pick COOL/SAFE", model.LastWaveOutcomeNextHint);
+        }
+
+        [Test]
+        public void BuildWaveOutcomeNextHint_WhenTruckLeaks_PrioritizesLaneStability()
+        {
+            string hint = FoodTruckRunModel.BuildWaveOutcomeNextHint(
+                truckHits: 2,
+                hpDelta: -12f,
+                heatDelta: 2f,
+                peakHeatDelta: 3f,
+                enemiesDefeated: 1,
+                damageDealt: 20f,
+                bestComboStreak: 1);
+
+            Assert.AreEqual("Stabilize lanes", hint);
+        }
+
+        [Test]
+        public void BuildWaveOutcomeNextHint_WhenHeatSpikes_RecommendsSafeCoolingDraw()
+        {
+            string hint = FoodTruckRunModel.BuildWaveOutcomeNextHint(
+                truckHits: 0,
+                hpDelta: -2f,
+                heatDelta: 15f,
+                peakHeatDelta: 19f,
+                enemiesDefeated: 2,
+                damageDealt: 30f,
+                bestComboStreak: 2);
+
+            Assert.AreEqual("Pick COOL/SAFE", hint);
+        }
+
+        [Test]
+        public void BuildWaveOutcomeNextHint_WhenDamagePaysOff_RecommendsPushingDamage()
+        {
+            string hint = FoodTruckRunModel.BuildWaveOutcomeNextHint(
+                truckHits: 0,
+                hpDelta: 0f,
+                heatDelta: 4f,
+                peakHeatDelta: 6f,
+                enemiesDefeated: 3,
+                damageDealt: 48f,
+                bestComboStreak: 1);
+
+            Assert.AreEqual("Push damage", hint);
+        }
+
+        [Test]
+        public void BuildPayoffToReadHintChipText_TrimsLongHints()
+        {
+            string chipText = FoodTruckPrototypeHud.BuildPayoffToReadHintChipText("Keep combo window with a very long explanation");
+
+            Assert.LessOrEqual(chipText.Length, 28);
+            StringAssert.EndsWith("...", chipText);
         }
 
         [Test]

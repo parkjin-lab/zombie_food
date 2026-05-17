@@ -376,6 +376,7 @@ namespace ZombieFoodcenter.Prototype
         private float wavePeakHeat;
         private string lastWaveOutcomeSummary = string.Empty;
         private string lastWaveOutcomeCue = string.Empty;
+        private string lastWaveOutcomeNextHint = string.Empty;
         private WaveCadencePlan lastWaveCadencePlan;
         private string lastRecipeActivationName = string.Empty;
         private string lastRecipeActivationSummary = string.Empty;
@@ -446,6 +447,7 @@ namespace ZombieFoodcenter.Prototype
         public float PlacementSuccessRate => placementAttemptCount > 0 ? (float)placementSuccessCount / placementAttemptCount : 0f;
         public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;
         public string LastWaveOutcomeCue => lastWaveOutcomeCue;
+        public string LastWaveOutcomeNextHint => lastWaveOutcomeNextHint;
         public WaveCadencePlan LastWaveCadencePlan => lastWaveCadencePlan;
         public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;
         public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;
@@ -503,6 +505,7 @@ namespace ZombieFoodcenter.Prototype
             placedBlocks.Clear();
             lastWaveOutcomeSummary = string.Empty;
             lastWaveOutcomeCue = string.Empty;
+            lastWaveOutcomeNextHint = string.Empty;
             lastWaveCadencePlan = BuildWaveCadencePlan(Wave);
             lastRecipeActivationName = string.Empty;
             lastRecipeActivationSummary = string.Empty;
@@ -1656,6 +1659,51 @@ namespace ZombieFoodcenter.Prototype
                 comboPart +
                 leakPart +
                 ".";
+            lastWaveOutcomeNextHint = BuildWaveOutcomeNextHint(
+                waveTruckHits,
+                hpDelta,
+                heatDelta,
+                peakHeatDelta,
+                waveEnemiesDefeated,
+                waveDamageDealt,
+                waveBestComboStreak);
+        }
+
+        public static string BuildWaveOutcomeNextHint(
+            int truckHits,
+            float hpDelta,
+            float heatDelta,
+            float peakHeatDelta,
+            int enemiesDefeated,
+            float damageDealt,
+            int bestComboStreak)
+        {
+            if (truckHits >= 2 || hpDelta <= -18f)
+            {
+                return "Stabilize lanes";
+            }
+
+            if (peakHeatDelta >= 12f || heatDelta >= 12f)
+            {
+                return "Pick COOL/SAFE";
+            }
+
+            if (enemiesDefeated >= 3 || damageDealt >= 45f)
+            {
+                return "Push damage";
+            }
+
+            if (bestComboStreak >= 3)
+            {
+                return "Keep combo window";
+            }
+
+            if (hpDelta >= 8f)
+            {
+                return "Spend recovery";
+            }
+
+            return "Keep balanced draw";
         }
 
         private static string FormatSignedRounded(float value)

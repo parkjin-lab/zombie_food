@@ -139,6 +139,9 @@ Recommended order:
    next-decision hint. Examples: `Leak x2 -> value lane control`,
    `PeakHeat +18 -> pick COOL/SAFE`. Keep this short and test the wording with
    Play Mode review before adding more content.
+   Source status: first pass complete as a persistent `Next` chip beside the
+   wave payoff chip. It derives from leak count, HP delta, Heat/peak Heat,
+   damage/KOs, combo, and recovery without changing combat balance.
 3. `Rhythm Beat HUD/Telemetry`: expose `Read`, `Commit`, `Pressure`, `Payoff`,
    and `Release` as a lightweight label or telemetry state only after the first
    two items prove the cadence and payoff direction.
@@ -155,6 +158,10 @@ Composer acceptance now includes: Wave 3 event cadence, Wave 4 unlock/weather
 planned spike, Wave 5 boss/rest planned spike, and Wave 7 non-spike unlock must
 be covered by EditMode tests and the HUD state contract.
 
+Payoff-to-Read acceptance now includes: leak, Heat spike, damage payoff, and
+copy-trimming cases must be covered by EditMode tests; the HUD state contract
+must guard the `Next` chip and bounded hint text.
+
 ### Short-Term Focus: Wave Outcome / Payoff Summary
 After each wave, show a concise combat result summary before the next draw decision.
 This should become a near-term core loop improvement because it closes the feedback
@@ -166,6 +173,15 @@ in portrait Play Mode and decide whether the cue should become a persistent pane
 
 The payoff is now also suitable for a compact persistent chip so the player can
 re-read the last wave result while making the next placement or draw decision.
+
+### Short-Term Focus: Payoff-to-Read Panel
+The payoff-to-read pass turns wave result into a short next decision prompt:
+`Stabilize lanes`, `Pick COOL/SAFE`, `Push damage`, `Keep combo window`,
+`Spend recovery`, or `Keep balanced draw`.
+
+This should stay compact. If Play Mode shows the hint competing with urgent
+combat warnings or recipe chips, shorten the copy or reserve it for Draw/Pending
+states instead of expanding the panel.
 
 ### Short-Term Focus: Battlefield Readability
 The play area should look like the main game, even while the player is choosing or
@@ -217,7 +233,8 @@ The summary should highlight:
 - If evidence is PASS or a concrete FIX is recorded, review the source-level
   `Wave Cadence Composer` in Play Mode before wider content. If rhythm
   readability is still weak, implement `Payoff-to-Read Panel` next.
-- If payoff readability is the main FIX, implement `Payoff-to-Read Panel` before cadence tuning.
+- If payoff readability is the main FIX, tune the source-level `Payoff-to-Read`
+  hint copy/visibility before cadence tuning.
 - Verify that the three draw cards keep `Fit`, `Heat`, `Role`, `Value/Risk`, and `Target` readable in compact portrait layout.
 - Keep card choices visibly different: safe, greedy, and utility picks should not blur together.
 - Verify Pending Placement recommendation reasons: lane pressure, multi-lane coverage, and center/near-center placement should be readable without raw score interpretation.
@@ -229,6 +246,8 @@ The summary should highlight:
 - Verify live recipe progress chips stay readable as payoff starts at zero and ramps up.
 - Verify the wave outcome/payoff cue at the end of Wave Combat before the next draw.
 - Verify the persistent wave payoff chip stays readable beside recipe cues.
+- Verify the `Next` hint remains readable during Draw/Pending and does not tell
+  the player to optimize the wrong thing after leaks, Heat spikes, or damage payoff.
 - If the cue is too fleeting or crowded, promote it into a compact persistent payoff panel.
 - In the wave summary, keep at least one visible cause-and-effect item from the last placement or wave decision.
 

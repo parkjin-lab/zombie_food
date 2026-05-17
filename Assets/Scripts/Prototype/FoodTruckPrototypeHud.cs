@@ -2302,6 +2302,12 @@ namespace ZombieFoodcenter.Prototype
                 CreateChip("Wave: " + BuildWaveOutcomeChipText(lastWaveCue), new Color(0.22f, 0.50f, 0.68f, 1f), 320f, 360f, 13);
             }
 
+            string nextDecisionHint = model != null ? model.LastWaveOutcomeNextHint : string.Empty;
+            if (!string.IsNullOrEmpty(nextDecisionHint))
+            {
+                CreateChip("Next: " + BuildPayoffToReadHintChipText(nextDecisionHint), new Color(0.28f, 0.58f, 0.44f, 1f), 260f, 320f, 13);
+            }
+
             if (model.ActiveRecipes.Count == 0)
             {
                 string lastRecipeResultCue = model != null ? model.LastRecipeResultCue : string.Empty;
@@ -2399,6 +2405,18 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return cue.TrimEnd('.');
+        }
+
+        public static string BuildPayoffToReadHintChipText(string hint)
+        {
+            if (string.IsNullOrEmpty(hint))
+            {
+                return "Keep balanced draw";
+            }
+
+            string trimmed = hint.Trim();
+            const int maxLength = 28;
+            return trimmed.Length <= maxLength ? trimmed : trimmed.Substring(0, maxLength - 1) + "...";
         }
 
     }
