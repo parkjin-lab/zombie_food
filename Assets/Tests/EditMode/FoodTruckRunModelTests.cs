@@ -445,6 +445,15 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildPressureRampSpawnMultiplier_EasesFromLowToPeakPressure()
+        {
+            Assert.AreEqual(1f, FoodTruckRunModel.BuildPressureRampSpawnMultiplier(0.9f, true, false, false), 0.0001f);
+            Assert.AreEqual(0.72f, FoodTruckRunModel.BuildPressureRampSpawnMultiplier(0f, false, false, false), 0.0001f);
+            Assert.AreEqual(1.0f, FoodTruckRunModel.BuildPressureRampSpawnMultiplier(0.5f, false, false, false), 0.0001f);
+            Assert.AreEqual(1.28f, FoodTruckRunModel.BuildPressureRampSpawnMultiplier(1f, false, false, false), 0.0001f);
+        }
+
+        [Test]
         public void ResolveRestRewardProfile_PrioritizesRepairCoolingThenStock()
         {
             Assert.AreEqual(

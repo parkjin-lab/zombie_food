@@ -88,6 +88,12 @@ and combo actions. HUD and telemetry expose the reward so the Release beat can b
 reviewed without asking the player for another choice while evidence capture is
 still partial.
 
+2026-05-20 pressure ramp tuning update: the ramp now affects combat spawn
+intensity in a bounded range from `x0.72` at Build to `x1.28` at Peak. This is
+the first actual Pressure beat tuning pass: early wave seconds should breathe
+more, while late wave seconds should visibly thicken. HUD and telemetry export
+the spawn multiplier for review.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
@@ -136,8 +142,8 @@ still partial.
 - Use the rhythm beat duration/transition telemetry after visual review to tune
   whether `Read`, `Commit`, `Pressure`, `Payoff`, and `Release` are lingering or
   cutting off too quickly.
-- Use the pressure ramp profile after visual review to decide whether spawn/Heat
-  should follow the observed `Build -> Climb -> Peak` curve.
+- Use the pressure ramp spawn multiplier after visual review to decide whether
+  the `Build x0.72 -> Peak x1.28` curve is readable or needs softer values.
 - Use the rest reward profile after visual review to decide whether `Repair`,
   `Cooling`, or `Stock` makes the Release beat feel earned without over-rewarding
   boss waves.

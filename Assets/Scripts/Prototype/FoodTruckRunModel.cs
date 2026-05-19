@@ -489,6 +489,7 @@ namespace ZombieFoodcenter.Prototype
         public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
         public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);
         public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
+        public float CurrentPressureRampSpawnMultiplier => BuildPressureRampSpawnMultiplier(CurrentPressureRampIntensity01, IsRestPhase, EventPending, HasDrawChoice);
         public RestRewardProfile LastRestRewardProfile => lastRestRewardProfile;
         public string LastRestRewardLabel => BuildRestRewardLabel(lastRestRewardProfile);
         public string LastRestRewardSummary => lastRestRewardSummary;
@@ -1401,6 +1402,7 @@ namespace ZombieFoodcenter.Prototype
         private void SpawnLaneEnemies()
         {
             float spawnIntensity = 0.25f + Threat * 0.06f + Wave * 0.045f;
+            spawnIntensity *= CurrentPressureRampSpawnMultiplier;
             int spawnCount = Mathf.FloorToInt(spawnIntensity);
             if (random.NextDouble() < spawnIntensity - spawnCount)
             {
@@ -1835,6 +1837,17 @@ namespace ZombieFoodcenter.Prototype
 
             float clampedProgress = Mathf.Clamp01(waveProgress01);
             return clampedProgress * clampedProgress * (3f - 2f * clampedProgress);
+        }
+
+        public static float BuildPressureRampSpawnMultiplier(float pressureRampIntensity01, bool isRestPhase, bool eventPending, bool hasDrawChoice)
+        {
+            if (isRestPhase || eventPending || hasDrawChoice)
+            {
+                return 1f;
+            }
+
+            float clampedIntensity = Mathf.Clamp01(pressureRampIntensity01);
+            return Mathf.Lerp(0.72f, 1.28f, clampedIntensity);
         }
 
         public static RestRewardProfile ResolveRestRewardProfile(

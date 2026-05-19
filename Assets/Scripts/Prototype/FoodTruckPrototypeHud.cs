@@ -1419,6 +1419,7 @@ namespace ZombieFoodcenter.Prototype
             string ventState = BuildVentStatusText(false);
             string rhythmBeat = model.CurrentRhythmBeatLabel;
             string pressureRamp = model.CurrentPressureRampLabel;
+            string pressureRampTuning = pressureRamp + " x" + model.CurrentPressureRampSpawnMultiplier.ToString("0.00");
             string restReward = model.IsRestPhase && !string.IsNullOrEmpty(model.LastRestRewardSummary)
                 ? "  |  Rest " + model.LastRestRewardLabel
                 : string.Empty;
@@ -1426,7 +1427,7 @@ namespace ZombieFoodcenter.Prototype
             {
                 secondLineText.text =
                     "Beat " + rhythmBeat +
-                    "  |  Ramp " + pressureRamp +
+                    "  |  Ramp " + pressureRampTuning +
                     "  |  " + phase +
                     restReward +
                     "  |  Threat " + model.Threat.ToString("0.0") +
@@ -1446,7 +1447,7 @@ namespace ZombieFoodcenter.Prototype
                     "  |  " + phase +
                     restReward +
                     "  |  Beat " + rhythmBeat +
-                    "  |  Ramp " + pressureRamp;
+                    "  |  Ramp " + pressureRampTuning;
             }
 
             string pendingStatus = model.HasDrawChoice

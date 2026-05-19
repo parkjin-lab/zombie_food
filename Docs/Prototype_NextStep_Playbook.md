@@ -66,9 +66,9 @@
 - `Wave Cadence Composer` 1차 소스 가드는 완료됐다. 모델은 이벤트/날씨/보스/휴식/언락 beat와 `planned spike` 여부를 `LastWaveCadencePlan`으로 노출하고, HUD state contract와 EditMode 테스트가 이를 고정한다.
 - `Payoff-to-Read Panel` 1차 소스 가드도 완료됐다. 기존 wave payoff cue 옆에 `Next` hint chip을 붙여 누수, Heat spike, damage payoff, combo, recovery를 다음 선택 성향으로 번역한다.
 - `Rhythm Beat HUD/Telemetry` 1차 소스 가드도 완료됐다. 모델은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release`를 계산하고, HUD/UX telemetry가 같은 beat label, current duration, transition count를 표시/CSV export한다.
-- `Pressure Ramp Profile` 1차 소스 가드가 완료됐다. 20초 wave 압박을 `Build`, `Climb`, `Peak`와 intensity로 읽을 수 있고 HUD/UX telemetry/CSV에 노출된다.
+- `Pressure Ramp Profile/Tuning` 소스 가드가 완료됐다. 20초 wave 압박을 `Build`, `Climb`, `Peak`와 intensity로 읽을 수 있고, spawn 압박은 `x0.72 -> x1.28` 범위로 실제 전투에 적용되며 HUD/UX telemetry/CSV에 노출된다.
 - `Rest-Phase Reward` 1차 소스 가드가 완료됐다. 보스/휴식 진입 시 직전 wave 결과에 따라 `Repair`, `Cooling`, `Stock` 중 하나의 작은 release reward를 지급하고 HUD/UX telemetry/CSV가 이를 노출한다.
-- Play Mode evidence가 PASS 또는 명확한 FIX로 닫히면, Composer/Payoff-to-Read/Rhythm Beat/Pressure Ramp/Rest Reward가 실제 화면에서 리듬감 있게 느껴지는지 먼저 확인한다. 다음 자율 구현 후보는 pressure ramp 수치 튜닝 또는 rest reward 표시/수치 조정이다.
+- Play Mode evidence가 PASS 또는 명확한 FIX로 닫히면, Composer/Payoff-to-Read/Rhythm Beat/Pressure Ramp/Rest Reward가 실제 화면에서 리듬감 있게 느껴지는지 먼저 확인한다. 다음 자율 구현 후보는 rest reward 표시/수치 조정 또는 Heat ramp tuning이다.
 - payoff 가독성이 주된 문제라면 새 시스템을 늘리기보다 `Next` hint 문구/표시 조건을 먼저 조정한다. 다음 Draw/Pending 중 읽히는지 검증한다.
 - Rhythm label/telemetry, pressure ramp profile, rest-phase reward는 소스 가드가 있으므로 다음 구현은 visual review가 가리키는 가장 약한 beat만 좁게 조정한다.
 - `FIX_LAYOUT`이면 `FoodTruckPrototypeHud.CalculateGameplayFocusLayout`, `ApplyGameplayHudContext`, `ApplyPanelLayout` 쪽을 우선 본다. 수정 뒤 layout guard와 HUD state contract를 실행하고 해당 상태만 focused retake한다.

@@ -342,23 +342,29 @@ Add-ContractCheck $checks "pressure_ramp" "model_exposes_pressure_ramp_profile" 
     'public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(',
     'public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);',
     'public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(',
+    'public float CurrentPressureRampSpawnMultiplier => BuildPressureRampSpawnMultiplier(',
     'public static PressureRampPhase ResolvePressureRampPhase(',
-    'public static float BuildPressureRampIntensity01('
-) "The model should expose an inspectable pressure ramp before balance values are tuned."
+    'public static float BuildPressureRampIntensity01(',
+    'public static float BuildPressureRampSpawnMultiplier(',
+    'spawnIntensity *= CurrentPressureRampSpawnMultiplier;'
+) "The model should expose and apply a bounded pressure ramp tuning value."
 
 Add-ContractCheck $checks "pressure_ramp" "hud_and_telemetry_surface_pressure_ramp" ($sources.hud + $sources.telemetry) @(
     'string pressureRamp = model.CurrentPressureRampLabel;',
-    '"  |  Ramp " + pressureRamp',
-    'pressure_ramp_phase,pressure_ramp_intensity',
+    'string pressureRampTuning = pressureRamp + " x" + model.CurrentPressureRampSpawnMultiplier.ToString("0.00");',
+    '"  |  Ramp " + pressureRampTuning',
+    'pressure_ramp_phase,pressure_ramp_intensity,pressure_ramp_spawn_mult',
     'CsvEscape(pressureRamp)',
     'CsvEscape(pressureRampIntensity)',
+    'CsvEscape(pressureRampSpawnMultiplier)',
     '"Pressure Ramp: " + model.CurrentPressureRampLabel'
-) "HUD and UX telemetry should show the current pressure ramp phase without changing combat balance."
+) "HUD and UX telemetry should show the current pressure ramp phase and spawn multiplier."
 
 Add-ContractCheck $checks "pressure_ramp" "editmode_covers_pressure_ramp_profile" $sources.tests @(
     'ResolvePressureRampPhase_MapsWaveProgressToBuildClimbPeak',
     'ResolvePressureRampPhase_WhenFlowLocked_ReturnsBuild',
-    'BuildPressureRampIntensity_UsesSmoothProgressAndFlowLocks'
+    'BuildPressureRampIntensity_UsesSmoothProgressAndFlowLocks',
+    'BuildPressureRampSpawnMultiplier_EasesFromLowToPeakPressure'
 ) "EditMode coverage should lock pressure ramp phase thresholds and flow-lock behavior."
 
 Add-ContractCheck $checks "rest_reward" "model_applies_named_rest_reward" $sources.model @(
