@@ -256,6 +256,7 @@ namespace ZombieFoodcenter.Prototype
 
         private readonly List<Image> inventoryCells = new List<Image>();
         private readonly List<Text> inventoryCellLabels = new List<Text>();
+        private readonly List<Text> inventoryCellBlockedLabels = new List<Text>();
         private readonly List<RectTransform> inventoryCellRects = new List<RectTransform>();
         private readonly List<Image> inventoryGhostCells = new List<Image>();
         private readonly List<Image> inventoryRecommendationRings = new List<Image>();

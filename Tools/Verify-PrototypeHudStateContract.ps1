@@ -46,6 +46,7 @@ function Add-ContractCheck {
 $relativeFiles = [ordered]@{
     hud = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.cs"
     uiBootstrap = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.UiBootstrap.cs"
+    inventoryCells = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.InventoryCells.cs"
     drawFlow = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceFlow.cs"
     drawVisuals = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceVisuals.cs"
     drawRisk = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceRiskUI.cs"
@@ -189,6 +190,7 @@ Add-ContractCheck $checks "invalid_placement" "fail_reason_text_is_actionable" $
 Add-ContractCheck $checks "invalid_placement" "hud_maps_fail_reasons_to_near_target_feedback" $sources.pendingAssist @(
     'private static string BuildPlacementFailReasonHint(PlacementFailReason failReason)',
     'private static PlacementFailReason ResolvePlacementFailReasonFromText(string reason)',
+    'public static string BuildBoardLocalPlacementFailLabel(',
     'private string BuildPlacementBlockedActionHint(string reason, PlacementFailReason failReason)',
     'private string BuildRecommendedRetryHint(string prefix)',
     'case PlacementFailReason.OutOfBounds:',
@@ -198,6 +200,17 @@ Add-ContractCheck $checks "invalid_placement" "hud_maps_fail_reasons_to_near_tar
     'ShowPlacementBlockedCue("Drop onto a valid inventory slot.");',
     'TriggerPendingPlacementFeedback(false, Array.Empty<int>())'
 ) "Failure feedback must be readable near the grid, not only in logs."
+
+Add-ContractCheck $checks "invalid_placement" "board_local_fail_labels_render_on_cells" ($sources.hud + $sources.uiBootstrap + $sources.inventoryCells + $sources.pendingAssist + $sources.tests) @(
+    'private readonly List<Text> inventoryCellBlockedLabels',
+    'CreateText(cellRect, "CellBlockedLabel"',
+    'inventoryCellBlockedLabels.Add(blockedLabel);',
+    'bool isBlockedAnchorCell = hasPending && hoverAnchorCell == i && !hoverValid',
+    'bool isFailedFeedbackCell = pendingPlacementFeedbackTimer > 0f',
+    'BuildBoardLocalPlacementFailLabel(',
+    'blockedLabel.gameObject.SetActive(true)',
+    'BuildBoardLocalPlacementFailLabel_UsesShortCellLocalCopy'
+) "Invalid placement should show compact reason copy directly on the blocked board cell."
 
 Add-ContractCheck $checks "invalid_placement" "blocked_cues_include_next_action" ($sources.pendingAssist + $sources.presentation) @(
     'string recoveryHint = BuildPlacementBlockedActionHint(blockedReason, lastPlacementBlockedFailReason);',

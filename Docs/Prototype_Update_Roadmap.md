@@ -30,6 +30,7 @@ sequencing.
 - Combat result readability update: hits now surface floating `-damage`, `KO`, `LEAK`, and `TRUCK -HP` text in the battlefield; Play Mode readability is still pending.
 - Combat cause readability update: truck HP loss floaters now distinguish `BITE`, `PRESSURE`, and `OVERHEAT` causes so the player can better read why the truck is dying; Play Mode readability is still pending.
 - Combat flow-label readability update: battlefield floaters now use compact source-to-target result labels such as `HIT>Z -5`, `HIT>Z KO`, and `BITE>TRK -7`; Play Mode readability is still pending.
+- Board-local invalid placement update: blocked grid cells now show short local labels such as `S2 OCCUPIED`, `S4 BOUNDS`, or `S1 ANCHOR` while the pending row keeps the longer recovery hint; Play Mode readability is still pending.
 - Draw choice readability update: card tactical text now adds a live-context `Intent` label (`SAFE`, `GREEDY`, `SYNERGY`, `UTILITY`, or `HOLD`) from fit, Heat pressure, assist tag, value, risk, shape, and target data; Play Mode readability is still pending.
 - Recipe preview readability update: Draw cards now show whether the card is a recipe `Seed`, `Near ... 2/3`, `Bingo`, or `Bingo x2` candidate from current ingredient/shape counts; Play Mode readability is still pending.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.

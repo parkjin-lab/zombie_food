@@ -43,6 +43,11 @@ namespace ZombieFoodcenter.Prototype
             {
                 int blockId = model.GetCellBlockId(i);
                 bool isHoverCell = hoverCells != null && Contains(hoverCells, i);
+                bool isBlockedAnchorCell = hasPending && hoverAnchorCell == i && !hoverValid;
+                bool isFailedFeedbackCell = pendingPlacementFeedbackTimer > 0f
+                    && !pendingPlacementFeedbackSuccess
+                    && pendingPlacementFeedbackCells != null
+                    && Contains(pendingPlacementFeedbackCells, i);
                 bool isRecommendedPrimary = false;
                 bool isRecommendedAnchor = hasPending && IsRecommendedAnchorCell(i, out isRecommendedPrimary);
                 bool isLockedRecommendation = isRecommendedPrimary
@@ -103,6 +108,31 @@ namespace ZombieFoodcenter.Prototype
                 else
                 {
                     inventoryCellLabels[i].text = label;
+                }
+
+                if (i < inventoryCellBlockedLabels.Count && inventoryCellBlockedLabels[i] != null)
+                {
+                    Text blockedLabel = inventoryCellBlockedLabels[i];
+                    bool showBlockedLabel = isBlockedAnchorCell || isFailedFeedbackCell || (isHoverCell && !hoverValid);
+                    if (showBlockedLabel)
+                    {
+                        blockedLabel.text = BuildBoardLocalPlacementFailLabel(
+                            lastPlacementBlockedFailReason,
+                            lastPlacementBlockedHint,
+                            i);
+                        blockedLabel.color = isFailedFeedbackCell
+                            ? new Color(1f, 0.72f, 0.58f, 1f)
+                            : new Color(1f, 0.88f, 0.78f, 0.98f);
+                        if (!blockedLabel.gameObject.activeSelf)
+                        {
+                            blockedLabel.gameObject.SetActive(true);
+                        }
+                    }
+                    else if (blockedLabel.gameObject.activeSelf)
+                    {
+                        blockedLabel.text = string.Empty;
+                        blockedLabel.gameObject.SetActive(false);
+                    }
                 }
 
                 if (i < inventoryRecommendationRings.Count && inventoryRecommendationRings[i] != null)

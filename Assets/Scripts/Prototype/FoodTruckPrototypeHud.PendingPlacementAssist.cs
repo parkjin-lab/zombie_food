@@ -211,6 +211,31 @@ namespace ZombieFoodcenter.Prototype
             return "Rotate once, sell, or free a cell.";
         }
 
+        public static string BuildBoardLocalPlacementFailLabel(
+            PlacementFailReason failReason,
+            string reason,
+            int cellIndex)
+        {
+            PlacementFailReason resolvedFailReason = failReason != PlacementFailReason.None
+                ? failReason
+                : ResolvePlacementFailReasonFromText(reason);
+            string slot = cellIndex >= 0 ? "S" + (cellIndex + 1) + " " : string.Empty;
+
+            switch (resolvedFailReason)
+            {
+                case PlacementFailReason.OutOfBounds:
+                    return slot + "BOUNDS";
+                case PlacementFailReason.Occupied:
+                    return slot + "OCCUPIED";
+                case PlacementFailReason.InvalidAnchor:
+                    return slot + "ANCHOR";
+                case PlacementFailReason.NoPendingBlock:
+                    return slot + "DRAW FIRST";
+                default:
+                    return string.IsNullOrEmpty(reason) ? slot + "BLOCKED" : slot + reason.Trim();
+            }
+        }
+
         private void ShowPlacementBlockedCue(string reason)
         {
             string blockedReason = BuildPlacementBlockedHint(reason);

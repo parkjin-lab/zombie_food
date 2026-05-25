@@ -228,6 +228,11 @@ complete. Battlefield floaters now use compact source-to-target result copy
 such as `HIT>Z -5`, `HIT>Z KO`, and `BITE>TRK -7` so damage and survival beats
 read as a cause chain instead of isolated numbers.
 
+2026-05-25 board-local invalid placement update: the first board-local fail
+label pass is complete. Blocked inventory cells now show compact local labels
+such as `S2 OCCUPIED`, `S4 BOUNDS`, or `S1 ANCHOR` during invalid hover/fail
+feedback, while the longer recovery hint remains in the pending help row.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
@@ -240,7 +245,9 @@ read as a cause chain instead of isolated numbers.
    should confirm whether the added `Intent` line is readable in the card row.
 
 ### Medium Priority
-6. Board-local invalid placement labels near the failed cell.
+6. Board-local invalid placement labels near the failed cell: first source pass
+   complete; next visual review should confirm whether the short cell labels
+   remain readable without covering block identity.
 7. Recipe progress/near-bingo signal during Draw: first source pass complete;
    next visual review should confirm whether the `Recipe` line is readable in
    all Draw card layouts.

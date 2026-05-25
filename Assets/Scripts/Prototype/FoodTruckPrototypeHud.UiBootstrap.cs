@@ -329,6 +329,7 @@ namespace ZombieFoodcenter.Prototype
             inventoryGhostCells.Clear();
             inventoryRecommendationRings.Clear();
             inventoryCellLabels.Clear();
+            inventoryCellBlockedLabels.Clear();
             inventoryCellRects.Clear();
             Array.Clear(inventoryCellBaseScales, 0, inventoryCellBaseScales.Length);
 
@@ -392,10 +393,18 @@ namespace ZombieFoodcenter.Prototype
                 label.text = (i + 1).ToString();
                 Stretch(label.rectTransform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
 
+                Text blockedLabel = CreateText(cellRect, "CellBlockedLabel", 11, FontStyle.Bold,
+                    TextAnchor.LowerCenter, new Color(1f, 0.88f, 0.78f, 0.98f));
+                blockedLabel.text = string.Empty;
+                blockedLabel.raycastTarget = false;
+                Stretch(blockedLabel.rectTransform, Vector2.zero, Vector2.one, new Vector2(4f, 4f), new Vector2(-4f, -4f));
+                blockedLabel.gameObject.SetActive(false);
+
                 inventoryCells.Add(image);
                 inventoryGhostCells.Add(ghostImage);
                 inventoryRecommendationRings.Add(recommendationRing);
                 inventoryCellLabels.Add(label);
+                inventoryCellBlockedLabels.Add(blockedLabel);
                 inventoryCellRects.Add(cellRect);
                 inventoryCellBaseScales[i] = Vector3.one;
                 cellRect.localScale = inventoryCellBaseScales[i];

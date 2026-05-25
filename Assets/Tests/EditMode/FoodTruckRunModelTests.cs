@@ -570,6 +570,20 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildBoardLocalPlacementFailLabel_UsesShortCellLocalCopy()
+        {
+            Assert.AreEqual(
+                "S2 OCCUPIED",
+                FoodTruckPrototypeHud.BuildBoardLocalPlacementFailLabel(PlacementFailReason.Occupied, string.Empty, 1));
+            Assert.AreEqual(
+                "S4 BOUNDS",
+                FoodTruckPrototypeHud.BuildBoardLocalPlacementFailLabel(PlacementFailReason.OutOfBounds, string.Empty, 3));
+            Assert.AreEqual(
+                "S1 ANCHOR",
+                FoodTruckPrototypeHud.BuildBoardLocalPlacementFailLabel(PlacementFailReason.None, "Invalid anchor cell.", 0));
+        }
+
+        [Test]
         public void ResolveDrawChoiceIntentLabel_ReportsHoldWhenHeatWouldSpike()
         {
             var pending = new PendingBlockState(
