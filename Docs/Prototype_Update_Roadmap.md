@@ -32,6 +32,7 @@ sequencing.
 - Combat flow-label readability update: battlefield floaters now use compact source-to-target result labels such as `HIT>Z -5`, `HIT>Z KO`, and `BITE>TRK -7`; Play Mode readability is still pending.
 - Board-local invalid placement update: blocked grid cells now show short local labels such as `S2 OCCUPIED`, `S4 BOUNDS`, or `S1 ANCHOR` while the pending row keeps the longer recovery hint; Play Mode readability is still pending.
 - Rest reward visibility update: rest phase now adds a compact `Release ...` reward chip such as `Release Cooling | -16 Heat` or `Release Stock | +6 Supplies, +4 Momentum`; Play Mode readability is still pending.
+- Resource planning update: `Docs/Fun_Game_Resource_Spec.md` now tracks the next VFX/SFX needs for combat cause readability, payoff, and release rhythm. `Verify-PrototypeAssets.ps1` reports these as `planned_missing` so the backlog is visible without failing the current prototype gate.
 - Draw choice readability update: card tactical text now adds a live-context `Intent` label (`SAFE`, `GREEDY`, `SYNERGY`, `UTILITY`, or `HOLD`) from fit, Heat pressure, assist tag, value, risk, shape, and target data; Play Mode readability is still pending.
 - Recipe preview readability update: Draw cards now show whether the card is a recipe `Seed`, `Near ... 2/3`, `Bingo`, or `Bingo x2` candidate from current ingredient/shape counts; Play Mode readability is still pending.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
@@ -333,6 +334,7 @@ The summary should highlight:
 
 ### Next Actions
 - Define presets for placement success pop, failure shake/red flash, overheat spike, reward claim, and wave payoff summary.
+- Use the planned resource list as the current naming contract for future VFX/SFX drops: attack source trail, hit impact pop, lane leak warning, release reward pulse, wave payoff pulse, and the nine short rhythm SFX files under `Assets/Resources/FoodTruckPrototype/Audio`.
 - Keep placeholder PNG names stable so final assets can replace them cleanly.
 - Use `Verify-PrototypeAssets.ps1` to catch required resource or `.meta` gaps.
 - Re-capture suite screenshots after art replacement and compare readability in the review pack.

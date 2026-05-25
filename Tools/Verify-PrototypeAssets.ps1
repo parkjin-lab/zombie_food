@@ -51,7 +51,15 @@ function Add-Check {
     )
 
     $diagnostics = Get-PngDiagnostics -RelativePath $Path -ExpectedSizes $ExpectedSizes
-    $status = if ($Present) { "ok" } elseif ($Kind -eq "runtime") { "missing_runtime" } else { "missing_art" }
+    $status = if ($Present) {
+        "ok"
+    } elseif ($Kind -eq "runtime") {
+        "missing_runtime"
+    } elseif ($Kind -eq "art") {
+        "missing_art"
+    } else {
+        "missing_planned"
+    }
     $checks.Add([pscustomobject]@{
         category = $Category
         label = $Label
@@ -184,6 +192,7 @@ $kitchenDir = "Assets\Resources\FoodTruckPrototype\Sprites\KitchenModules"
 $ingredientDir = "Assets\Resources\FoodTruckPrototype\Sprites\Ingredients"
 $errorDir = "Assets\Resources\FoodTruckPrototype\Sprites\PlacementErrors"
 $vfxDir = "Assets\Resources\FoodTruckPrototype\VFX"
+$audioDir = "Assets\Resources\FoodTruckPrototype\Audio"
 
 Add-AnyOfCheck -Category "final_art" -Label "Food truck lane sprite" -Kind "art" -RelativeDirectory $truckDir -FileNames @("FoodTruck.png", "food_truck.png", "Truck.png", "truck.png") -Fallback "Lane marker uses placeholder TRK text." -Recommendation "512x256 or 384x192 transparent side-view PNG facing right." -ExpectedSizes @("512x256", "384x192")
 Add-AnyOfCheck -Category "final_art" -Label "Kitchen module block sprite" -Kind "art" -RelativeDirectory $kitchenDir -FileNames @("KitchenModule.png", "kitchen_module.png", "Kitchen.png", "kitchen.png") -Fallback "Block cells use colored rectangles and labels." -Recommendation "256x256 transparent PNG, readable inside a 3x3 block cell." -ExpectedSizes @("256x256")
@@ -214,8 +223,35 @@ foreach ($fileName in $vfxFiles) {
     Add-RequiredFileCheck -Category "runtime_feedback" -Label ("Prototype VFX: " + $fileName) -Kind "runtime" -RelativePath (Join-Path $vfxDir $fileName) -Fallback "HUD falls back to simple color flash where possible." -Recommendation "Keep 256x256 transparent PNG until final VFX replaces it." -ExpectedSizes @("256x256")
 }
 
+$plannedVfxFiles = @(
+    "attack_source_trail.png",
+    "hit_impact_pop.png",
+    "lane_leak_warning.png",
+    "release_reward_pulse.png",
+    "wave_payoff_pulse.png"
+)
+foreach ($fileName in $plannedVfxFiles) {
+    Add-RequiredFileCheck -Category "planned_feedback" -Label ("Planned VFX: " + $fileName) -Kind "planned" -RelativePath (Join-Path $vfxDir $fileName) -Fallback "Current prototype uses text floaters, lane flash, and generic prototype VFX." -Recommendation "Future 256x256 transparent PNG or sprite-sheet frame set. Keep no embedded text so labels can stay localized/readable." -ExpectedSizes @("256x256", "512x512")
+}
+
+$plannedAudioFiles = @(
+    "placement_success.wav",
+    "placement_fail.wav",
+    "wave_start.wav",
+    "heat_warning.wav",
+    "overheat_spike.wav",
+    "combo_ready.wav",
+    "recipe_activate.wav",
+    "release_reward.wav",
+    "wave_payoff.wav"
+)
+foreach ($fileName in $plannedAudioFiles) {
+    Add-RequiredFileCheck -Category "planned_audio" -Label ("Planned SFX: " + $fileName) -Kind "planned" -RelativePath (Join-Path $audioDir $fileName) -Fallback "Prototype can run silently or with existing imported fallback audio if available." -Recommendation "Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat." -ExpectedSizes @()
+}
+
 $missingRuntime = @($checks | Where-Object { $_.status -eq "missing_runtime" })
 $missingArt = @($checks | Where-Object { $_.status -eq "missing_art" })
+$missingPlanned = @($checks | Where-Object { $_.status -eq "missing_planned" })
 $missingMeta = @($checks | Where-Object { $_.status -eq "ok" -and $_.meta_status -eq "warning" })
 $diagnosticWarnings = @($checks | Where-Object { $_.dimension_status -eq "warning" -or $_.alpha_status -eq "warning" -or $_.meta_status -eq "warning" })
 $assetStatus = if ($missingRuntime.Count -gt 0) {
@@ -234,6 +270,7 @@ if ($JsonOnly) {
         strict = [bool]$Strict
         runtime_required_missing = $missingRuntime.Count
         final_art_missing = $missingArt.Count
+        planned_missing = $missingPlanned.Count
         missing_meta = $missingMeta.Count
         diagnostic_warnings = $diagnosticWarnings.Count
         checks = $checks
@@ -242,6 +279,7 @@ if ($JsonOnly) {
     Write-Host ("asset_status=" + $assetStatus)
     Write-Host ("runtime_required_missing=" + $missingRuntime.Count)
     Write-Host ("final_art_missing=" + $missingArt.Count)
+    Write-Host ("planned_missing=" + $missingPlanned.Count)
     Write-Host ("missing_meta=" + $missingMeta.Count)
     Write-Host ("diagnostic_warnings=" + $diagnosticWarnings.Count)
 

@@ -238,6 +238,11 @@ pass is complete. Rest phase now surfaces a compact reward chip such as
 `Release Cooling | -16 Heat` or `Release Stock | +6 Supplies, +4 Momentum` in
 the mid-panel chip row, instead of relying only on the status line and log.
 
+2026-05-26 resource planning update: the next feedback resource list is now
+machine-visible without becoming a release blocker. `Verify-PrototypeAssets.ps1`
+reports `planned_missing` for future combat/payoff/release VFX and rhythm SFX,
+while runtime placeholder art remains `asset_status=ok`.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
@@ -260,12 +265,15 @@ the mid-panel chip row, instead of relying only on the status line and log.
    review should confirm whether the `Release ...` chip reads as a satisfying
    rest payoff without crowding recipe chips.
 9. Heat ramp review after pressure spawn ramp is visually judged.
+10. Planned combat/payoff/release VFX and rhythm SFX production: list and asset
+   verifier tracking are complete; actual media production/import remains
+   pending and should not be confused with runtime-required assets.
 
 ### Later
-10. Rest reward choice.
-11. Wave-specific pressure themes.
-12. Build archetype/replay motivation pass.
-13. Audio/SFX rhythm policy.
+11. Rest reward choice.
+12. Wave-specific pressure themes.
+13. Build archetype/replay motivation pass.
+14. Audio/SFX rhythm policy.
 
 ## Acceptance Standards
 - The game view occupies at least half of the first viewport in required states.
