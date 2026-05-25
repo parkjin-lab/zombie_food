@@ -223,11 +223,17 @@ complete. Draw choices now preview whether the card is a `Recipe Seed`, `Recipe
 Near ... 2/3`, `Recipe Bingo ...`, or `Recipe Bingo x2` candidate based on
 current placed ingredient and shape counts.
 
+2026-05-25 combat flow-label update: the next Combat cause label pass is
+complete. Battlefield floaters now use compact source-to-target result copy
+such as `HIT>Z -5`, `HIT>Z KO`, and `BITE>TRK -7` so damage and survival beats
+read as a cause chain instead of isolated numbers.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
-3. Combat cause labels: continue from truck HP cause labels toward full
-   `source -> target -> result` attack trails.
+3. Combat cause labels: source-to-target result floater pass complete; continue
+   toward visual attack trails that start at specific placed block/recipe
+   sources once Play Mode evidence confirms the compact labels are readable.
 4. Payoff best-contributor summary: first source pass complete; next visual
    review should confirm the `Best ...` cause is readable and useful.
 5. Draw card intent labels: first source pass complete; next visual review

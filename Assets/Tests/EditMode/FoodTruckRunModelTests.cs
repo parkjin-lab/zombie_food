@@ -557,8 +557,16 @@ namespace ZombieFoodcenter.Tests.EditMode
         [Test]
         public void BuildTruckDamageFloaterLabel_IncludesCauseAndAmount()
         {
-            Assert.AreEqual("BITE -7", FoodTruckPrototypeHud.BuildTruckDamageFloaterLabel("BITE", 6.2f));
-            Assert.AreEqual("TRUCK -1", FoodTruckPrototypeHud.BuildTruckDamageFloaterLabel("", 0.2f));
+            Assert.AreEqual("BITE>TRK -7", FoodTruckPrototypeHud.BuildTruckDamageFloaterLabel("BITE", 6.2f));
+            Assert.AreEqual("TRUCK>TRK -1", FoodTruckPrototypeHud.BuildTruckDamageFloaterLabel("", 0.2f));
+        }
+
+        [Test]
+        public void BuildEnemyDamageFloaterLabel_UsesSourceTargetResultFlow()
+        {
+            Assert.AreEqual("HIT>Z -5", FoodTruckPrototypeHud.BuildEnemyDamageFloaterLabel(4.2f, false));
+            Assert.AreEqual("HIT>Z KO", FoodTruckPrototypeHud.BuildEnemyDamageFloaterLabel(10f, true));
+            Assert.AreEqual("RECIPE>LANE KO", FoodTruckPrototypeHud.BuildCombatHitFlowLabel("RECIPE", "LANE", "KO"));
         }
 
         [Test]

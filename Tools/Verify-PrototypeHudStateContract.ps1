@@ -415,10 +415,12 @@ Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_
     'SpawnEnemyDamageFloater(widget, damageTaken, knockout);',
     'SpawnEnemyLeakFloater(widget);',
     'SpawnCombatFloatingText(',
+    'BuildEnemyDamageFloaterLabel(damageAmount, knockout)',
     'BuildTruckDamageFloaterLabel(causeLabel, damageAmount)',
+    'BuildCombatHitFlowLabel("HIT", "Z"',
     '"LEAK"',
     '"KO"'
-) "Combat feedback should label enemy damage, knockouts, leaks, and truck HP loss directly in the battlefield."
+) "Combat feedback should label enemy damage, knockouts, leaks, and truck HP loss directly in the battlefield with compact source-to-target result flow."
 
 Add-ContractCheck $checks "combat_feedback" "truck_damage_cause_labels_explain_hp_loss" ($sources.model + $sources.enemyVisuals + $sources.playModeVerification + $sources.tests) @(
     'public enum TruckDamageCause',
@@ -431,7 +433,8 @@ Add-ContractCheck $checks "combat_feedback" "truck_damage_cause_labels_explain_h
     'public static int GetTruckDamageCausePriority(TruckDamageCause cause)',
     'SpawnTruckDamageFloater(7f, "BITE");',
     'BuildTruckDamageCauseLabel_ReturnsCauseForCombatFloaters',
-    'BuildTruckDamageFloaterLabel_IncludesCauseAndAmount'
+    'BuildTruckDamageFloaterLabel_IncludesCauseAndAmount',
+    'BuildEnemyDamageFloaterLabel_UsesSourceTargetResultFlow'
 ) "Truck HP loss should show whether the cause was a bite, pressure chip, or overheat."
 
 Add-ContractCheck $checks "recipe_feedback" "recipe_activation_payload_explains_cause" $sources.model @(

@@ -550,7 +550,7 @@ namespace ZombieFoodcenter.Prototype
             }
 
             float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
-            string label = knockout ? "KO" : BuildCombatDamageLabel(damageAmount);
+            string label = BuildEnemyDamageFloaterLabel(damageAmount, knockout);
             Color color = knockout
                 ? new Color(1f, 0.94f, 0.42f, 1f)
                 : new Color(1f, 0.64f, 0.28f, 1f);
@@ -691,7 +691,20 @@ namespace ZombieFoodcenter.Prototype
         public static string BuildTruckDamageFloaterLabel(string causeLabel, float amount)
         {
             string resolvedCause = string.IsNullOrEmpty(causeLabel) ? "TRUCK" : causeLabel.Trim();
-            return resolvedCause + " " + BuildCombatDamageLabel(amount);
+            return BuildCombatHitFlowLabel(resolvedCause, "TRK", BuildCombatDamageLabel(amount));
+        }
+
+        public static string BuildEnemyDamageFloaterLabel(float amount, bool knockout)
+        {
+            return BuildCombatHitFlowLabel("HIT", "Z", knockout ? "KO" : BuildCombatDamageLabel(amount));
+        }
+
+        public static string BuildCombatHitFlowLabel(string sourceLabel, string targetLabel, string resultLabel)
+        {
+            string source = string.IsNullOrEmpty(sourceLabel) ? "HIT" : sourceLabel.Trim();
+            string target = string.IsNullOrEmpty(targetLabel) ? "Z" : targetLabel.Trim();
+            string result = string.IsNullOrEmpty(resultLabel) ? "--" : resultLabel.Trim();
+            return source + ">" + target + " " + result;
         }
 
         private void UpdateEnemyHitEffects(float dt)
