@@ -212,6 +212,12 @@ outcome summaries now append a compact `Best ...` cause such as `Best combo x3`,
 `Best KO chain`, `Best damage`, `Best cooling`, `Best recovery`, or `Best stock`
 so the Payoff beat teaches what worked before the next Read beat.
 
+2026-05-25 draw intent update: the first Draw card intent pass is complete.
+Draw choices now keep their `Fit`, `Heat`, and `Role` tactical labels while
+adding a compact live-context `Intent` label: `SAFE`, `GREEDY`, `SYNERGY`,
+`UTILITY`, or `HOLD`. The label is derived from board fit count, Heat warning
+thresholds, assist tag, value bucket, risk tag, shape size, and target type.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
@@ -219,7 +225,8 @@ so the Payoff beat teaches what worked before the next Read beat.
    `source -> target -> result` attack trails.
 4. Payoff best-contributor summary: first source pass complete; next visual
    review should confirm the `Best ...` cause is readable and useful.
-5. Draw card intent labels tied to live context.
+5. Draw card intent labels: first source pass complete; next visual review
+   should confirm whether the added `Intent` line is readable in the card row.
 
 ### Medium Priority
 6. Board-local invalid placement labels near the failed cell.

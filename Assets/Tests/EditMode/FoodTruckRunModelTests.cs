@@ -562,6 +562,81 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void ResolveDrawChoiceIntentLabel_ReportsHoldWhenHeatWouldSpike()
+        {
+            var pending = new PendingBlockState(
+                "Spicy Soup",
+                2,
+                0,
+                7f,
+                3.0f,
+                new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up },
+                19,
+                BlockTargetType.HighestHp,
+                "L3");
+
+            string intent = FoodTruckPrototypeHud.ResolveDrawChoiceIntentLabel(
+                pending,
+                "BAL",
+                "HIGH",
+                "HIGH",
+                fitSlots: 2,
+                currentHeat: 94f,
+                heatWarningThreshold: 70f,
+                overheatThreshold: 100f);
+
+            Assert.AreEqual("HOLD", intent);
+        }
+
+        [Test]
+        public void ResolveDrawChoiceIntentLabel_SeparatesGreedySynergyAndHold()
+        {
+            var greedy = new PendingBlockState(
+                "Steak",
+                3,
+                0,
+                9f,
+                2.0f,
+                new[] { Vector2Int.zero, Vector2Int.right },
+                23,
+                BlockTargetType.HighestHp,
+                "LineH2");
+            var synergy = new PendingBlockState(
+                "Combo Rice",
+                1,
+                0,
+                4f,
+                2.2f,
+                new[] { Vector2Int.zero, Vector2Int.right, Vector2Int.up },
+                31,
+                BlockTargetType.RandomLane,
+                "L3");
+            var safe = new PendingBlockState(
+                "Onion",
+                1,
+                0,
+                2f,
+                1.4f,
+                new[] { Vector2Int.zero },
+                7,
+                BlockTargetType.Nearest,
+                "Dot");
+
+            Assert.AreEqual(
+                "GREEDY",
+                FoodTruckPrototypeHud.ResolveDrawChoiceIntentLabel(greedy, "POWER", "HIGH", "HIGH", 1, 20f, 70f, 100f));
+            Assert.AreEqual(
+                "SYNERGY",
+                FoodTruckPrototypeHud.ResolveDrawChoiceIntentLabel(synergy, "BAL", "MID", "MID", 4, 20f, 70f, 100f));
+            Assert.AreEqual(
+                "SAFE",
+                FoodTruckPrototypeHud.ResolveDrawChoiceIntentLabel(safe, "BAL", "LOW", "LOW", 2, 20f, 70f, 100f));
+            Assert.AreEqual(
+                "HOLD",
+                FoodTruckPrototypeHud.ResolveDrawChoiceIntentLabel(synergy, "BAL", "MID", "MID", 0, 20f, 70f, 100f));
+        }
+
+        [Test]
         public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
         {
             var model = new FoodTruckRunModel(seed: 163);

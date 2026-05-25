@@ -373,7 +373,11 @@ namespace ZombieFoodcenter.Prototype
             int fitSlots = EstimateDrawChoiceFitSlots(choice);
             int heatCost = Mathf.CeilToInt(3f + choice.CellCount * 1.15f);
             string roleLabel = GetDrawChoiceRoleLabel(choice, assistTag, valueBucket, riskTag, fitSlots);
-            return "Fit " + fitSlots + "  Heat +" + heatCost + "  Role " + roleLabel;
+            float currentHeat = model == null ? 0f : model.Heat;
+            float warningHeat = model == null ? 70f : model.HeatWarningThresholdValue;
+            float overheatHeat = model == null ? 100f : model.OverheatThresholdValue;
+            string intentLabel = ResolveDrawChoiceIntentLabel(choice, assistTag, valueBucket, riskTag, fitSlots, currentHeat, warningHeat, overheatHeat);
+            return "Fit " + fitSlots + "  Heat +" + heatCost + "  Role " + roleLabel + "  Intent " + intentLabel;
         }
 
         private int EstimateDrawChoiceFitSlots(PendingBlockState choice)
@@ -524,6 +528,57 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return choice.CellCount <= 2 ? "Lane patch" : "Lane cover";
+        }
+
+        public static string ResolveDrawChoiceIntentLabel(
+            PendingBlockState choice,
+            string assistTag,
+            string valueBucket,
+            string riskTag,
+            int fitSlots,
+            float currentHeat,
+            float heatWarningThreshold,
+            float overheatThreshold)
+        {
+            if (choice == null)
+            {
+                return "UNKNOWN";
+            }
+
+            if (fitSlots <= 0)
+            {
+                return "HOLD";
+            }
+
+            int heatCost = Mathf.CeilToInt(3f + choice.CellCount * 1.15f);
+            float heatAfterPick = currentHeat + heatCost;
+            bool heatIsDangerous = heatAfterPick >= overheatThreshold ||
+                (heatAfterPick >= heatWarningThreshold && string.Equals(riskTag, "HIGH", StringComparison.Ordinal));
+
+            if (heatIsDangerous)
+            {
+                return "HOLD";
+            }
+
+            if (string.Equals(assistTag, "SAFE", StringComparison.Ordinal) ||
+                (choice.CellCount <= 1 && string.Equals(riskTag, "LOW", StringComparison.Ordinal)))
+            {
+                return "SAFE";
+            }
+
+            if (string.Equals(valueBucket, "HIGH", StringComparison.Ordinal) &&
+                (string.Equals(riskTag, "HIGH", StringComparison.Ordinal) || string.Equals(assistTag, "POWER", StringComparison.Ordinal)))
+            {
+                return "GREEDY";
+            }
+
+            if (fitSlots >= 3 &&
+                (choice.CellCount >= 3 || choice.TargetType == BlockTargetType.RandomLane))
+            {
+                return "SYNERGY";
+            }
+
+            return "UTILITY";
         }
 
         private float EstimateDrawChoiceValue(PendingBlockState choice)

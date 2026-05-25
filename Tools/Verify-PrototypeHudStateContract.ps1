@@ -105,8 +105,10 @@ Add-ContractCheck $checks "draw_choice" "card_text_has_tactical_labels" $sources
     'EstimateDrawChoiceFitSlots(choice)',
     '"Fit " + fitSlots + "  Heat +" + heatCost + "  Role " + roleLabel',
     'GetDrawChoiceRoleLabel(choice, assistTag, valueBucket, riskTag, fitSlots)',
+    'ResolveDrawChoiceIntentLabel(choice, assistTag, valueBucket, riskTag, fitSlots, currentHeat, warningHeat, overheatHeat)',
+    '"  Intent " + intentLabel',
     '"Value " + valueBucket + "  Risk " + riskTag'
-) "Draw cards must remain explainable without opening extra panels."
+) "Draw cards must remain explainable without opening extra panels and expose a live-context intent label."
 
 Add-ContractCheck $checks "draw_choice" "risk_scale_and_icons_are_bound" $sources.drawRisk @(
     'float value = EstimateDrawChoiceValue(choice);',
