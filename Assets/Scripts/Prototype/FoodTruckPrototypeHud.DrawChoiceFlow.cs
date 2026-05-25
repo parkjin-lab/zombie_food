@@ -348,11 +348,13 @@ namespace ZombieFoodcenter.Prototype
             string shapeLabel = GetShapeLabel(choice.ShapeKey);
             string resolvedAssistTag = string.IsNullOrEmpty(assistTag) ? "BAL" : assistTag;
             string tacticalChips = BuildDrawChoiceTacticalChipLine(choice, resolvedAssistTag, valueBucket, riskTag);
+            string recipeProgress = model == null ? "Recipe --" : model.BuildDrawChoiceRecipeProgressLabel(choice);
             if (IsGameplayFocusHudActive())
             {
                 return choice.IngredientName + " G" + choice.Grade + " " + resolvedAssistTag + "\n"
                     + shapeLabel + " / " + targetLabel + "\n"
-                    + tacticalChips;
+                    + tacticalChips + "\n"
+                    + recipeProgress;
             }
 
             return choice.IngredientName + "  G" + choice.Grade + "  " + resolvedAssistTag + "\n"
@@ -361,6 +363,7 @@ namespace ZombieFoodcenter.Prototype
                 + "  CD " + choice.CooldownSeconds.ToString("0.0") + "s"
                 + "  DPS " + dps.ToString("0.0") + "\n"
                 + tacticalChips + "\n"
+                + recipeProgress + "\n"
                 + "Value " + valueBucket + "  Risk " + riskTag;
         }
 

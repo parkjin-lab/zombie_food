@@ -1210,6 +1210,71 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildDrawChoiceRecipeProgressLabel_PreviewsNearAndBingoStates()
+        {
+            var model = new FoodTruckRunModel(seed: 35);
+            SeedPlacedBlock(
+                model,
+                new PlacedBlockState(
+                    id: 1,
+                    ingredientName: "Onion",
+                    grade: 1,
+                    occupiedCellIndices: new[] { 0 },
+                    damage: 8f,
+                    cooldownSeconds: 1f,
+                    colorSeed: 1,
+                    targetType: BlockTargetType.Nearest,
+                    shapeKey: "Dot"));
+            SeedPlacedBlock(
+                model,
+                new PlacedBlockState(
+                    id: 2,
+                    ingredientName: "Onion",
+                    grade: 2,
+                    occupiedCellIndices: new[] { 1 },
+                    damage: 8f,
+                    cooldownSeconds: 1f,
+                    colorSeed: 2,
+                    targetType: BlockTargetType.Nearest,
+                    shapeKey: "Dot"));
+
+            var seed = new PendingBlockState(
+                "Rice",
+                1,
+                3,
+                4f,
+                1.5f,
+                new[] { Vector2Int.zero },
+                3,
+                BlockTargetType.Nearest,
+                "LineH2");
+            var near = new PendingBlockState(
+                "Rice",
+                1,
+                3,
+                4f,
+                1.5f,
+                new[] { Vector2Int.zero },
+                4,
+                BlockTargetType.Nearest,
+                "Dot");
+            var bingo = new PendingBlockState(
+                "Onion",
+                1,
+                3,
+                4f,
+                1.5f,
+                new[] { Vector2Int.zero },
+                5,
+                BlockTargetType.Nearest,
+                "Dot");
+
+            Assert.AreEqual("Recipe Seed Rice/LineH2", model.BuildDrawChoiceRecipeProgressLabel(seed));
+            Assert.AreEqual("Recipe Near Dot 2/3", model.BuildDrawChoiceRecipeProgressLabel(near));
+            Assert.AreEqual("Recipe Bingo x2", model.BuildDrawChoiceRecipeProgressLabel(bingo));
+        }
+
+        [Test]
         public void TriggerRandomRecipe_LogsActivationCause()
         {
             var model = new FoodTruckRunModel(seed: 72);

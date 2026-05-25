@@ -649,6 +649,72 @@ namespace ZombieFoodcenter.Prototype
             return ing + block.Grade + TargetTypeToShortCode(block.TargetType);
         }
 
+        public string BuildDrawChoiceRecipeProgressLabel(PendingBlockState choice)
+        {
+            if (choice == null)
+            {
+                return "Recipe --";
+            }
+
+            int ingredientProgress = CountPlacedBlocksByRecipeKey(choice.IngredientName, true) + 1;
+            int shapeProgress = CountPlacedBlocksByRecipeKey(choice.ShapeKey, false) + 1;
+            bool ingredientBingo = ingredientProgress >= 3;
+            bool shapeBingo = shapeProgress >= 3;
+
+            if (ingredientBingo && shapeBingo)
+            {
+                return "Recipe Bingo x2";
+            }
+
+            if (ingredientBingo)
+            {
+                return "Recipe Bingo " + choice.IngredientName;
+            }
+
+            if (shapeBingo)
+            {
+                return "Recipe Bingo " + choice.ShapeKey;
+            }
+
+            if (ingredientProgress >= 2 || shapeProgress >= 2)
+            {
+                if (ingredientProgress >= shapeProgress)
+                {
+                    return "Recipe Near " + choice.IngredientName + " " + ingredientProgress + "/3";
+                }
+
+                return "Recipe Near " + choice.ShapeKey + " " + shapeProgress + "/3";
+            }
+
+            return "Recipe Seed " + choice.IngredientName + "/" + choice.ShapeKey;
+        }
+
+        private int CountPlacedBlocksByRecipeKey(string key, bool ingredient)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return 0;
+            }
+
+            int count = 0;
+            foreach (KeyValuePair<int, PlacedBlockState> entry in placedBlocks)
+            {
+                PlacedBlockState block = entry.Value;
+                if (block == null)
+                {
+                    continue;
+                }
+
+                string blockKey = ingredient ? block.IngredientName : block.ShapeKey;
+                if (string.Equals(blockKey, key, StringComparison.Ordinal))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
 
         public int GetLaneEnemyCount(int laneIndex)
         {

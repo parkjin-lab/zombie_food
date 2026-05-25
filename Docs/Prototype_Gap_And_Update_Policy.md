@@ -218,6 +218,11 @@ adding a compact live-context `Intent` label: `SAFE`, `GREEDY`, `SYNERGY`,
 `UTILITY`, or `HOLD`. The label is derived from board fit count, Heat warning
 thresholds, assist tag, value bucket, risk tag, shape size, and target type.
 
+2026-05-25 recipe preview update: the first Draw recipe-progress pass is
+complete. Draw choices now preview whether the card is a `Recipe Seed`, `Recipe
+Near ... 2/3`, `Recipe Bingo ...`, or `Recipe Bingo x2` candidate based on
+current placed ingredient and shape counts.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
@@ -230,7 +235,9 @@ thresholds, assist tag, value bucket, risk tag, shape size, and target type.
 
 ### Medium Priority
 6. Board-local invalid placement labels near the failed cell.
-7. Recipe progress/near-bingo signal during Draw.
+7. Recipe progress/near-bingo signal during Draw: first source pass complete;
+   next visual review should confirm whether the `Recipe` line is readable in
+   all Draw card layouts.
 8. Rest reward visibility tuning.
 9. Heat ramp review after pressure spawn ramp is visually judged.
 

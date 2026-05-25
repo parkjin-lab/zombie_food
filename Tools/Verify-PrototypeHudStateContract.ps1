@@ -468,6 +468,16 @@ Add-ContractCheck $checks "recipe_feedback" "active_recipe_chips_describe_effect
     'CreateChip(chipText, color, 320f, 380f, 13)'
 ) "Active recipe chips should show what the recipe is doing, not only name and remaining time."
 
+Add-ContractCheck $checks "recipe_feedback" "draw_cards_preview_recipe_bingo_progress" ($sources.model + $sources.drawFlow + $sources.tests) @(
+    'public string BuildDrawChoiceRecipeProgressLabel(PendingBlockState choice)',
+    'CountPlacedBlocksByRecipeKey(choice.IngredientName, true) + 1',
+    'CountPlacedBlocksByRecipeKey(choice.ShapeKey, false) + 1',
+    '"Recipe Bingo x2"',
+    '"Recipe Near " + choice.IngredientName + " " + ingredientProgress + "/3"',
+    'model.BuildDrawChoiceRecipeProgressLabel(choice)',
+    'BuildDrawChoiceRecipeProgressLabel_PreviewsNearAndBingoStates'
+) "Draw cards should preview whether a card seeds, nears, or completes recipe bingo progress."
+
 Add-ContractCheck $checks "recipe_feedback" "recipe_expiry_reports_accumulated_payoff" ($sources.model + $sources.hud + $sources.presentation) @(
     'RecipeExpired',
     'public string LastRecipeResultSummary => lastRecipeResultSummary;',
