@@ -25,6 +25,7 @@
 - 최신 웨이브 payoff는 이제 Synergy Bar의 별도 칩으로도 남겨, 다음 드로우/배치 판단 중 다시 확인할 수 있게 하는 방향으로 보강 중이다.
 - 전장 레이아웃은 이제 Draw/Pending Placement에서도 푸드트럭과 좀비가 화면의 절반 이상을 차지하도록 보강됐다. 트럭은 lane마다 반복하지 않고 한 대의 긴 마커로 보여주며, 피격 순간에는 공격 궤적과 충격 플래시가 더 크게 보이도록 보강됐다.
 - 전투 결과 판독성은 이제 좀비 피격 `-damage`, 처치 `KO`, 트럭 도달 `LEAK`, 트럭 피해 `TRUCK -HP` 플로팅 텍스트로 보강됐다.
+- 트럭 피해 원인 판독성은 이제 `BITE -HP`, `PRESSURE -HP`, `OVERHEAT -HP`처럼 원인 라벨을 붙이는 방향으로 보강됐다.
 - Wave Combat suite 캡처는 이제 검증용 액션 showcase를 포함해 `-12`, `KO`, `LEAK`, `TRUCK -7` 표식과 lane flash가 찍히도록 보강됐다.
 - Review pack은 이제 Wave Combat action showcase 준비 여부와 사유를 같이 보여주며, 네 상태의 시각 판정 체크리스트를 한 장에 포함한다.
 - 게임 리듬감 기준은 이제 별도 audit로 승격됐다. 현재 판정은 "리듬 재료는 있으나, beat map과 tension/release 검증 기준이 부족하다"이며, 다음 기능은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release` 중 어느 beat를 개선하는지 먼저 밝혀야 한다.

@@ -81,6 +81,14 @@ namespace ZombieFoodcenter.Prototype
         Peak
     }
 
+    public enum TruckDamageCause
+    {
+        None,
+        Bite,
+        Pressure,
+        Overheat
+    }
+
     public enum RestRewardProfile
     {
         None,
@@ -402,6 +410,7 @@ namespace ZombieFoodcenter.Prototype
         private string lastWaveOutcomeCue = string.Empty;
         private string lastWaveOutcomeNextHint = string.Empty;
         private WaveCadencePlan lastWaveCadencePlan;
+        private TruckDamageCause lastTruckDamageCause = TruckDamageCause.None;
         private RestRewardProfile lastRestRewardProfile = RestRewardProfile.None;
         private string lastRestRewardSummary = string.Empty;
         private string lastRecipeActivationName = string.Empty;
@@ -490,6 +499,8 @@ namespace ZombieFoodcenter.Prototype
         public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);
         public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
         public float CurrentPressureRampSpawnMultiplier => BuildPressureRampSpawnMultiplier(CurrentPressureRampIntensity01, IsRestPhase, EventPending, HasDrawChoice);
+        public TruckDamageCause LastTruckDamageCause => lastTruckDamageCause;
+        public string LastTruckDamageCauseLabel => BuildTruckDamageCauseLabel(lastTruckDamageCause);
         public RestRewardProfile LastRestRewardProfile => lastRestRewardProfile;
         public string LastRestRewardLabel => BuildRestRewardLabel(lastRestRewardProfile);
         public string LastRestRewardSummary => lastRestRewardSummary;
@@ -548,6 +559,7 @@ namespace ZombieFoodcenter.Prototype
             lastWaveOutcomeCue = string.Empty;
             lastWaveOutcomeNextHint = string.Empty;
             lastWaveCadencePlan = BuildWaveCadencePlan(Wave);
+            lastTruckDamageCause = TruckDamageCause.None;
             lastRestRewardProfile = RestRewardProfile.None;
             lastRestRewardSummary = string.Empty;
             lastRecipeActivationName = string.Empty;
@@ -1330,6 +1342,7 @@ namespace ZombieFoodcenter.Prototype
         }
         private void SimulateSecond()
         {
+            lastTruckDamageCause = TruckDamageCause.None;
             TickRecipes();
             TickCombo();
             if (ventCooldownRemaining > 0f)
@@ -1538,7 +1551,7 @@ namespace ZombieFoodcenter.Prototype
                 }
 
                 float hitDamage = ((enemy.IsSpecial ? 9f : 5f) + Wave * 0.35f) * GetHeatRiskMultiplier();
-                TruckHp -= hitDamage;
+                ApplyTruckDamage(hitDamage, TruckDamageCause.Bite);
                 waveTruckHits += 1;
                 AddHeatProgressive(enemy.IsSpecial ? 3f : 1.6f);
                 Threat += (enemy.IsSpecial ? 0.8f : 0.3f) * GetHeatRiskMultiplier();
@@ -1551,7 +1564,7 @@ namespace ZombieFoodcenter.Prototype
             float chip = (Mathf.Max(0f, (Threat - 18f) * 0.05f) + Mathf.Max(0f, (Heat - 70f) * 0.07f)) * GetHeatRiskMultiplier();
             if (chip > 0f)
             {
-                TruckHp -= chip;
+                ApplyTruckDamage(chip, TruckDamageCause.Pressure);
             }
         }
         private void ApplyOverheatPressureDamage()
@@ -1563,7 +1576,21 @@ namespace ZombieFoodcenter.Prototype
 
             float severity = OverheatSeverity01;
             float chip = (OverheatSelfDamageBase + severity * OverheatSelfDamageScale) * GetHeatRiskMultiplier();
-            TruckHp -= chip;
+            ApplyTruckDamage(chip, TruckDamageCause.Overheat);
+        }
+
+        private void ApplyTruckDamage(float amount, TruckDamageCause cause)
+        {
+            if (amount <= 0f)
+            {
+                return;
+            }
+
+            TruckHp -= amount;
+            if (GetTruckDamageCausePriority(cause) >= GetTruckDamageCausePriority(lastTruckDamageCause))
+            {
+                lastTruckDamageCause = cause;
+            }
         }
 
         private void AdvanceWave()
@@ -1903,6 +1930,36 @@ namespace ZombieFoodcenter.Prototype
                     return "Rest Reward: Stock +6 Supplies, +4 Momentum.";
                 default:
                     return "Rest Reward: None.";
+            }
+        }
+
+        public static string BuildTruckDamageCauseLabel(TruckDamageCause cause)
+        {
+            switch (cause)
+            {
+                case TruckDamageCause.Bite:
+                    return "BITE";
+                case TruckDamageCause.Pressure:
+                    return "PRESSURE";
+                case TruckDamageCause.Overheat:
+                    return "OVERHEAT";
+                default:
+                    return "TRUCK";
+            }
+        }
+
+        public static int GetTruckDamageCausePriority(TruckDamageCause cause)
+        {
+            switch (cause)
+            {
+                case TruckDamageCause.Bite:
+                    return 3;
+                case TruckDamageCause.Overheat:
+                    return 2;
+                case TruckDamageCause.Pressure:
+                    return 1;
+                default:
+                    return 0;
             }
         }
 

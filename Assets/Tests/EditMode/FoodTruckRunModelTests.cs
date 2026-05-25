@@ -499,6 +499,33 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildTruckDamageCauseLabel_ReturnsCauseForCombatFloaters()
+        {
+            Assert.AreEqual("BITE", FoodTruckRunModel.BuildTruckDamageCauseLabel(TruckDamageCause.Bite));
+            Assert.AreEqual("PRESSURE", FoodTruckRunModel.BuildTruckDamageCauseLabel(TruckDamageCause.Pressure));
+            Assert.AreEqual("OVERHEAT", FoodTruckRunModel.BuildTruckDamageCauseLabel(TruckDamageCause.Overheat));
+            Assert.AreEqual("TRUCK", FoodTruckRunModel.BuildTruckDamageCauseLabel(TruckDamageCause.None));
+        }
+
+        [Test]
+        public void GetTruckDamageCausePriority_KeepsDirectHitsMostVisible()
+        {
+            Assert.Greater(
+                FoodTruckRunModel.GetTruckDamageCausePriority(TruckDamageCause.Bite),
+                FoodTruckRunModel.GetTruckDamageCausePriority(TruckDamageCause.Overheat));
+            Assert.Greater(
+                FoodTruckRunModel.GetTruckDamageCausePriority(TruckDamageCause.Overheat),
+                FoodTruckRunModel.GetTruckDamageCausePriority(TruckDamageCause.Pressure));
+        }
+
+        [Test]
+        public void BuildTruckDamageFloaterLabel_IncludesCauseAndAmount()
+        {
+            Assert.AreEqual("BITE -7", FoodTruckPrototypeHud.BuildTruckDamageFloaterLabel("BITE", 6.2f));
+            Assert.AreEqual("TRUCK -1", FoodTruckPrototypeHud.BuildTruckDamageFloaterLabel("", 0.2f));
+        }
+
+        [Test]
         public void Tick_WhenWaveThreeStarts_ReportsEventCadence()
         {
             var model = new FoodTruckRunModel(seed: 163);

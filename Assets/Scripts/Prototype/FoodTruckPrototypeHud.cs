@@ -1590,7 +1590,7 @@ namespace ZombieFoodcenter.Prototype
 
             if (truckDamagedThisFrame)
             {
-                SpawnTruckDamageFloater(truckDamageThisFrame);
+                SpawnTruckDamageFloater(truckDamageThisFrame, model.LastTruckDamageCauseLabel);
             }
 
             RefreshEnemyVisuals(truckDamagedThisFrame);

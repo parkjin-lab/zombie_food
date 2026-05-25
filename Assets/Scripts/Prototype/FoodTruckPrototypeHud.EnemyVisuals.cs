@@ -585,7 +585,7 @@ namespace ZombieFoodcenter.Prototype
                 1f);
         }
 
-        private void SpawnTruckDamageFloater(float damageAmount)
+        private void SpawnTruckDamageFloater(float damageAmount, string causeLabel)
         {
             if (laneTrackRoots.Length < 2)
             {
@@ -605,7 +605,7 @@ namespace ZombieFoodcenter.Prototype
             SpawnCombatFloatingText(
                 laneRoot,
                 new Vector2(truckX, Mathf.Clamp(laneHeight * 0.14f, 10f, 26f)),
-                "TRUCK " + BuildCombatDamageLabel(damageAmount),
+                BuildTruckDamageFloaterLabel(causeLabel, damageAmount),
                 new Color(1f, 0.40f, 0.26f, 1f),
                 Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.18f), 13, 22),
                 1.12f);
@@ -686,6 +686,12 @@ namespace ZombieFoodcenter.Prototype
         private static string BuildCombatDamageLabel(float amount)
         {
             return "-" + Mathf.CeilToInt(Mathf.Max(1f, amount));
+        }
+
+        public static string BuildTruckDamageFloaterLabel(string causeLabel, float amount)
+        {
+            string resolvedCause = string.IsNullOrEmpty(causeLabel) ? "TRUCK" : causeLabel.Trim();
+            return resolvedCause + " " + BuildCombatDamageLabel(amount);
         }
 
         private void UpdateEnemyHitEffects(float dt)

@@ -216,7 +216,7 @@ namespace ZombieFoodcenter.Prototype
                 "LEAK",
                 new Color(1f, 0.32f, 0.22f, 1f),
                 1.35f);
-            SpawnTruckDamageFloater(7f);
+            SpawnTruckDamageFloater(7f, "BITE");
         }
 
         private void SpawnVerificationCombatLabel(
