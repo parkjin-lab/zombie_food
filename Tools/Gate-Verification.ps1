@@ -421,6 +421,9 @@ if (-not $SkipAssets) {
         Write-Host ("asset_status=" + $assetObj.asset_status)
         Write-Host ("runtime_required_missing=" + $assetObj.runtime_required_missing)
         Write-Host ("final_art_missing=" + $assetObj.final_art_missing)
+        if ($null -ne $assetObj.PSObject.Properties["planned_missing"]) {
+            Write-Host ("planned_missing=" + $assetObj.planned_missing)
+        }
     }
 
     if ($assetResult.exit_code -ne 0) {

@@ -133,6 +133,13 @@ $playModeRetakePlanData = $playModeRetakePlanResult.data
 $playModeRetakePlanVerifierData = $playModeRetakePlanVerifierResult.data
 
 $assetStatus = if ($null -ne $assetData) { $assetData.asset_status } elseif ($null -ne $gateAssets) { $gateAssets.asset_status } else { "unknown" }
+$assetPlannedMissing = if ($null -ne $assetData -and $null -ne $assetData.PSObject.Properties["planned_missing"]) {
+    $assetData.planned_missing
+} elseif ($null -ne $gateAssets -and $null -ne $gateAssets.PSObject.Properties["planned_missing"]) {
+    $gateAssets.planned_missing
+} else {
+    0
+}
 $layoutStatus = if ($null -ne $gateLayout) { $gateLayout.layout_status } else { "unknown" }
 $hudContractStatus = if ($null -ne $hudContractData) { $hudContractData.hud_contract_status } elseif ($null -ne $gateHudContract) { $gateHudContract.hud_contract_status } else { "unknown" }
 $hudContractFailedChecks = if ($null -ne $hudContractData) { $hudContractData.failed_checks } elseif ($null -ne $gateHudContract) { $gateHudContract.failed_checks } else { $null }
@@ -271,6 +278,9 @@ $unresolvedIssues.Add("Play Mode review pack readiness: " + $reviewReadiness + "
 $unresolvedIssues.Add("Play Mode retake plan status: " + $retakePlanStatus + ".") | Out-Null
 $unresolvedIssues.Add("Play Mode retake plan document status: " + $retakePlanDocStatus + ".") | Out-Null
 $unresolvedIssues.Add("Manual Unity Play Mode verification record status: " + $playModeRecordStatus + ".") | Out-Null
+if ($assetPlannedMissing -gt 0) {
+    $unresolvedIssues.Add("Planned feedback resources still missing: " + $assetPlannedMissing + " non-blocking VFX/SFX items.") | Out-Null
+}
 $unresolvedIssues.Add("Top issue: " + $topIssue) | Out-Null
 $unresolvedIssues.Add("Draw Choice, Pending Placement, and Invalid Placement still need visual confirmation when Play Mode input is reliable again.") | Out-Null
 
@@ -283,6 +293,7 @@ $summary = [ordered]@{
     next_code_target = $nextCodeTarget
     gate_status = if ($null -ne $gateData) { $gateData.gate_status } else { "unknown" }
     asset_status = $assetStatus
+    asset_planned_missing = $assetPlannedMissing
     layout_status = $layoutStatus
     hud_contract_status = $hudContractStatus
     hud_contract_failed_checks = $hudContractFailedChecks
@@ -343,6 +354,7 @@ $summary = [ordered]@{
     recommended_next_actions = @(
         ($nextEvidenceAction),
         ("Next code target: " + $nextCodeTarget),
+        ("Track planned VFX/SFX backlog via asset_planned_missing=" + $assetPlannedMissing + "; it is non-blocking until assets are intentionally produced/imported."),
         "Continue code-level next work if this PC cannot reliably interact with Play Mode.",
         "Run Tools\Write-PrototypePlayModeRetakePlan.ps1 to generate a focused retake checklist before opening Unity.",
         "Run Tools\Verify-PrototypePlayModeRetakePlan.ps1 to confirm the focused retake checklist is not stale.",
@@ -381,6 +393,7 @@ Write-Host ("next_evidence_action=" + $summary.next_evidence_action)
 Write-Host ("next_code_target=" + $summary.next_code_target)
 Write-Host ("gate_status=" + $summary.gate_status)
 Write-Host ("asset_status=" + $summary.asset_status)
+Write-Host ("asset_planned_missing=" + $summary.asset_planned_missing)
 Write-Host ("layout_status=" + $summary.layout_status)
 Write-Host ("hud_contract_status=" + $summary.hud_contract_status)
 Write-Host ("hud_contract_failed_checks=" + $summary.hud_contract_failed_checks)

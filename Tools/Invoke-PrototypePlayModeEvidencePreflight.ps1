@@ -187,6 +187,7 @@ $reviewPackData = $reviewPackResult.data
 
 $gateStatus = Get-ObjectProperty $sessionData "gate_status" "unknown"
 $assetStatus = Get-ObjectProperty $sessionData "asset_status" "unknown"
+$assetPlannedMissing = Get-ObjectProperty $sessionData "asset_planned_missing" 0
 $layoutStatus = Get-ObjectProperty $sessionData "layout_status" "unknown"
 $hudContractStatus = Get-ObjectProperty $sessionData "hud_contract_status" "unknown"
 $staticStatus = Get-ObjectProperty $sessionData "static_status" "unknown"
@@ -287,6 +288,7 @@ $result = [ordered]@{
     project_path = $ProjectPath
     gate_status = $gateStatus
     asset_status = $assetStatus
+    asset_planned_missing = $assetPlannedMissing
     layout_status = $layoutStatus
     hud_contract_status = $hudContractStatus
     static_status = $staticStatus
@@ -330,6 +332,7 @@ if ($JsonOnly) {
 }
 else {
     Write-Host ("playmode_evidence_preflight_status=" + $preflightStatus)
+    Write-Host ("asset_planned_missing=" + $assetPlannedMissing)
     Write-Host ("focused_retake_count=" + $focusedRetakeStates.Count)
     Write-Host ("focused_retake_states=" + (Join-StateList $focusedRetakeStates))
     Write-Host ("retake_plan_doc_status=" + $retakePlanDocStatus)
