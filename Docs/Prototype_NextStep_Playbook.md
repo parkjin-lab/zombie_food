@@ -5,8 +5,10 @@
 - 수동 Play Mode 검증표: `Docs/Prototype_PlayMode_Verification.md`.
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
 - 리듬 디자인 점검: `Docs/Prototype_RhythmDesign_Audit.md`.
+- 부족한 부분/업데이트 정책 통합 문서: `Docs/Prototype_Gap_And_Update_Policy.md`.
 - 2026-05-08 01:52 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 PlayMode evidence preflight 경로를 추가한 뒤에도 통과한다.
 - 2026-05-17 01:18 KST 기준 sub-agent review 결과, 디자인 방향성은 rhythm-first로 유지한다. 즉시는 Play Mode evidence closure, 그 다음 구현 후보는 `Wave Cadence Composer`와 `Payoff-to-Read Panel`이다.
+- 2026-05-25 기준 sub-agent gap review 결과, 다음 정책은 `Evidence first, weakest beat next`로 고정한다. Play Mode 증거가 막힌 동안은 문서/검증/retake tooling/소스 가드만 진행하고, 새 기능은 named beat와 source guard가 있을 때만 좁게 진행한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - tracked 코드/문서는 이 업데이트 전 깨끗했지만, Unity/Asset Store import 흔적으로 보이는 대형 untracked 폴더들이 남아 있다. 명시적 에셋 결정 없이 스테이징하지 않는다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.

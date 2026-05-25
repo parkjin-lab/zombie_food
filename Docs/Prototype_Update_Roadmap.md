@@ -10,6 +10,10 @@ The priority is not adding broad new systems yet. First, keep the loop readable,
 repeatable, and easy to verify with code guards, screenshots, and manual Play Mode
 evidence.
 
+Policy reference: `Docs/Prototype_Gap_And_Update_Policy.md` consolidates the
+2026-05-25 sub-agent gap review, work authorization rules, and future update
+sequencing.
+
 ## Current Status
 - Code guard status: `gate_status=ok`, `layout_status=ok`, `hud_contract_status=ok`, `static_status=ok`.
 - Environment limit: Unity compile/tests remain `inconclusive` in the current PC/headless setup.
@@ -26,6 +30,7 @@ evidence.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
 - Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md` now treats rhythm as the central difficulty/fun lens. Verdict: the prototype has strong rhythm ingredients, but needs an explicit beat map and review criteria so tension, variation, payoff, and release are tuned intentionally.
 - 2026-05-17 sub-agent review: tracked source/docs were clean before this pass, code guards remain stable, Play Mode evidence is still the blocker, and imported Unity/Asset Store folders remain untracked. Do not let untracked asset imports blur the prototype checkpoint.
+- 2026-05-25 sub-agent gap review: source guards remain useful, but the project still lacks current 4-state Play Mode evidence, stronger combat cause labels, clearer Draw intent, placement-to-combat causality, and a future policy for evidence-blocked work.
 
 ## Start Here
 1. Print the current session status, including Wave Combat action showcase readiness, review pack readiness, and next-work focus.
