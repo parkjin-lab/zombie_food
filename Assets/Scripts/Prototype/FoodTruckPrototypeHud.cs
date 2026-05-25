@@ -2325,6 +2325,14 @@ namespace ZombieFoodcenter.Prototype
                 CreateChip("Next: " + BuildPayoffToReadHintChipText(nextDecisionHint), new Color(0.28f, 0.58f, 0.44f, 1f), 260f, 320f, 13);
             }
 
+            string restRewardChip = model != null && model.IsRestPhase
+                ? BuildRestRewardChipText(model.LastRestRewardLabel, model.LastRestRewardSummary)
+                : string.Empty;
+            if (!string.IsNullOrEmpty(restRewardChip))
+            {
+                CreateChip(restRewardChip, new Color(0.48f, 0.42f, 0.78f, 1f), 280f, 340f, 13);
+            }
+
             if (model.ActiveRecipes.Count == 0)
             {
                 string lastRecipeResultCue = model != null ? model.LastRecipeResultCue : string.Empty;
@@ -2434,6 +2442,32 @@ namespace ZombieFoodcenter.Prototype
             string trimmed = hint.Trim();
             const int maxLength = 28;
             return trimmed.Length <= maxLength ? trimmed : trimmed.Substring(0, maxLength - 1) + "...";
+        }
+
+        public static string BuildRestRewardChipText(string label, string summary)
+        {
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                return string.Empty;
+            }
+
+            string resolvedLabel = string.IsNullOrWhiteSpace(label) ? "Reward" : label.Trim();
+            string detail = summary.Trim();
+            const string prefix = "Rest Reward:";
+            if (detail.StartsWith(prefix, StringComparison.Ordinal))
+            {
+                detail = detail.Substring(prefix.Length).Trim();
+            }
+
+            if (detail.StartsWith(resolvedLabel, StringComparison.Ordinal))
+            {
+                detail = detail.Substring(resolvedLabel.Length).Trim();
+            }
+
+            detail = detail.TrimEnd('.');
+            return string.IsNullOrEmpty(detail)
+                ? "Release " + resolvedLabel
+                : "Release " + resolvedLabel + " | " + detail;
         }
 
     }

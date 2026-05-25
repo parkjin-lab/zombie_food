@@ -233,6 +233,11 @@ label pass is complete. Blocked inventory cells now show compact local labels
 such as `S2 OCCUPIED`, `S4 BOUNDS`, or `S1 ANCHOR` during invalid hover/fail
 feedback, while the longer recovery hint remains in the pending help row.
 
+2026-05-26 rest reward visibility update: the first Release reward visibility
+pass is complete. Rest phase now surfaces a compact reward chip such as
+`Release Cooling | -16 Heat` or `Release Stock | +6 Supplies, +4 Momentum` in
+the mid-panel chip row, instead of relying only on the status line and log.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
@@ -251,7 +256,9 @@ feedback, while the longer recovery hint remains in the pending help row.
 7. Recipe progress/near-bingo signal during Draw: first source pass complete;
    next visual review should confirm whether the `Recipe` line is readable in
    all Draw card layouts.
-8. Rest reward visibility tuning.
+8. Rest reward visibility tuning: first source pass complete; next visual
+   review should confirm whether the `Release ...` chip reads as a satisfying
+   rest payoff without crowding recipe chips.
 9. Heat ramp review after pressure spawn ramp is visually judged.
 
 ### Later

@@ -409,6 +409,9 @@ Add-ContractCheck $checks "rest_reward" "model_applies_named_rest_reward" $sourc
 Add-ContractCheck $checks "rest_reward" "hud_and_telemetry_surface_rest_reward" ($sources.hud + $sources.telemetry) @(
     'string restReward = model.IsRestPhase && !string.IsNullOrEmpty(model.LastRestRewardSummary)',
     '"  |  Rest " + model.LastRestRewardLabel',
+    'BuildRestRewardChipText(model.LastRestRewardLabel, model.LastRestRewardSummary)',
+    'public static string BuildRestRewardChipText(string label, string summary)',
+    '"Release " + resolvedLabel + " | " + detail',
     'rest_reward,rest_reward_summary',
     'CsvEscape(restReward)',
     'CsvEscape(restRewardSummary)',
@@ -417,7 +420,8 @@ Add-ContractCheck $checks "rest_reward" "hud_and_telemetry_surface_rest_reward" 
 
 Add-ContractCheck $checks "rest_reward" "editmode_covers_rest_reward_profile" $sources.tests @(
     'ResolveRestRewardProfile_PrioritizesRepairCoolingThenStock',
-    'BuildRestRewardSummary_ReturnsReadablePayoff'
+    'BuildRestRewardSummary_ReturnsReadablePayoff',
+    'BuildRestRewardChipText_CondensesReleaseReward'
 ) "EditMode coverage should lock rest reward priority and copy."
 
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(

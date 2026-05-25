@@ -535,6 +535,18 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void BuildRestRewardChipText_CondensesReleaseReward()
+        {
+            Assert.AreEqual(
+                "Release Cooling | -16 Heat",
+                FoodTruckPrototypeHud.BuildRestRewardChipText("Cooling", "Rest Reward: Cooling -16 Heat."));
+            Assert.AreEqual(
+                "Release Stock | +6 Supplies, +4 Momentum",
+                FoodTruckPrototypeHud.BuildRestRewardChipText("Stock", "Rest Reward: Stock +6 Supplies, +4 Momentum."));
+            Assert.AreEqual(string.Empty, FoodTruckPrototypeHud.BuildRestRewardChipText("Repair", string.Empty));
+        }
+
+        [Test]
         public void BuildTruckDamageCauseLabel_ReturnsCauseForCombatFloaters()
         {
             Assert.AreEqual("BITE", FoodTruckRunModel.BuildTruckDamageCauseLabel(TruckDamageCause.Bite));
