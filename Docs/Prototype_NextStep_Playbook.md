@@ -23,6 +23,7 @@
 - Recipe expiry 피드백은 이제 레시피가 실제로 만든 피해, KO, 회복, Heat 완화 성과를 짧게 남기는 방향으로 보강 중이다.
 - Active recipe 칩은 이제 만료 전에도 `Dmg`, `KO`, `HP`, `Heat` 진행 성과나 `Warming up` 상태를 보여주는 방향으로 보강 중이다.
 - 최신 웨이브 payoff는 이제 Synergy Bar의 별도 칩으로도 남겨, 다음 드로우/배치 판단 중 다시 확인할 수 있게 하는 방향으로 보강 중이다.
+- 최신 웨이브 payoff는 이제 `Best combo x3`, `Best KO chain`, `Best cooling` 같은 기여 원인을 함께 남겨, 다음 선택 전에 무엇이 실제로 일했는지 학습하게 하는 방향으로 보강됐다.
 - 전장 레이아웃은 이제 Draw/Pending Placement에서도 푸드트럭과 좀비가 화면의 절반 이상을 차지하도록 보강됐다. 트럭은 lane마다 반복하지 않고 한 대의 긴 마커로 보여주며, 피격 순간에는 공격 궤적과 충격 플래시가 더 크게 보이도록 보강됐다.
 - 전투 결과 판독성은 이제 좀비 피격 `-damage`, 처치 `KO`, 트럭 도달 `LEAK`, 트럭 피해 `TRUCK -HP` 플로팅 텍스트로 보강됐다.
 - 트럭 피해 원인 판독성은 이제 `BITE -HP`, `PRESSURE -HP`, `OVERHEAT -HP`처럼 원인 라벨을 붙이는 방향으로 보강됐다.

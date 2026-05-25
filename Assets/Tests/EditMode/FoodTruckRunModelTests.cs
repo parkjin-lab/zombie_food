@@ -246,7 +246,43 @@ namespace ZombieFoodcenter.Tests.EditMode
             StringAssert.Contains("PeakHeat +13", model.LastWaveOutcomeSummary);
             StringAssert.Contains("Combo x3", model.LastWaveOutcomeSummary);
             StringAssert.Contains("Leak x1", model.LastWaveOutcomeSummary);
+            StringAssert.Contains("Best combo x3", model.LastWaveOutcomeSummary);
+            Assert.AreEqual("Best combo x3", model.LastWaveOutcomeBestContributor);
             Assert.AreEqual("Pick COOL/SAFE", model.LastWaveOutcomeNextHint);
+        }
+
+        [Test]
+        public void BuildWaveOutcomeBestContributor_PrioritizesVisiblePayoffCause()
+        {
+            Assert.AreEqual(
+                "Best KO chain",
+                FoodTruckRunModel.BuildWaveOutcomeBestContributor(
+                    enemiesDefeated: 3,
+                    damageDealt: 20f,
+                    bestComboStreak: 1,
+                    suppliesDelta: 0,
+                    hpDelta: 0f,
+                    heatDelta: 0f));
+
+            Assert.AreEqual(
+                "Best damage",
+                FoodTruckRunModel.BuildWaveOutcomeBestContributor(
+                    enemiesDefeated: 1,
+                    damageDealt: 50f,
+                    bestComboStreak: 1,
+                    suppliesDelta: 0,
+                    hpDelta: 0f,
+                    heatDelta: 0f));
+
+            Assert.AreEqual(
+                "Best cooling",
+                FoodTruckRunModel.BuildWaveOutcomeBestContributor(
+                    enemiesDefeated: 0,
+                    damageDealt: 0f,
+                    bestComboStreak: 0,
+                    suppliesDelta: 0,
+                    hpDelta: 0f,
+                    heatDelta: -8f));
         }
 
         [Test]

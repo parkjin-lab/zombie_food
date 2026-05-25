@@ -409,6 +409,7 @@ namespace ZombieFoodcenter.Prototype
         private string lastWaveOutcomeSummary = string.Empty;
         private string lastWaveOutcomeCue = string.Empty;
         private string lastWaveOutcomeNextHint = string.Empty;
+        private string lastWaveOutcomeBestContributor = string.Empty;
         private WaveCadencePlan lastWaveCadencePlan;
         private TruckDamageCause lastTruckDamageCause = TruckDamageCause.None;
         private RestRewardProfile lastRestRewardProfile = RestRewardProfile.None;
@@ -483,6 +484,7 @@ namespace ZombieFoodcenter.Prototype
         public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;
         public string LastWaveOutcomeCue => lastWaveOutcomeCue;
         public string LastWaveOutcomeNextHint => lastWaveOutcomeNextHint;
+        public string LastWaveOutcomeBestContributor => lastWaveOutcomeBestContributor;
         public WaveCadencePlan LastWaveCadencePlan => lastWaveCadencePlan;
         public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;
         public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;
@@ -558,6 +560,7 @@ namespace ZombieFoodcenter.Prototype
             lastWaveOutcomeSummary = string.Empty;
             lastWaveOutcomeCue = string.Empty;
             lastWaveOutcomeNextHint = string.Empty;
+            lastWaveOutcomeBestContributor = string.Empty;
             lastWaveCadencePlan = BuildWaveCadencePlan(Wave);
             lastTruckDamageCause = TruckDamageCause.None;
             lastRestRewardProfile = RestRewardProfile.None;
@@ -1721,6 +1724,13 @@ namespace ZombieFoodcenter.Prototype
                 ? ", Combo x" + waveBestComboStreak
                 : (waveComboActions > 0 ? ", Actions " + waveComboActions : string.Empty);
             string leakPart = waveTruckHits > 0 ? ", Leak x" + waveTruckHits : string.Empty;
+            lastWaveOutcomeBestContributor = BuildWaveOutcomeBestContributor(
+                waveEnemiesDefeated,
+                waveDamageDealt,
+                waveBestComboStreak,
+                suppliesDelta,
+                hpDelta,
+                heatDelta);
 
             lastWaveOutcomeCue = "Wave " + completedWave + ": " + primaryImpact + ", " + hpPart + ", " + heatPart + ".";
             lastWaveOutcomeSummary =
@@ -1730,6 +1740,7 @@ namespace ZombieFoodcenter.Prototype
                 (peakHeatDelta > heatDelta + 0.5f ? ", PeakHeat " + FormatSignedRounded(peakHeatDelta) : string.Empty) +
                 comboPart +
                 leakPart +
+                (string.IsNullOrEmpty(lastWaveOutcomeBestContributor) ? string.Empty : ", " + lastWaveOutcomeBestContributor) +
                 ".";
             lastWaveOutcomeNextHint = BuildWaveOutcomeNextHint(
                 waveTruckHits,
@@ -1776,6 +1787,47 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return "Keep balanced draw";
+        }
+
+        public static string BuildWaveOutcomeBestContributor(
+            int enemiesDefeated,
+            float damageDealt,
+            int bestComboStreak,
+            int suppliesDelta,
+            float hpDelta,
+            float heatDelta)
+        {
+            if (enemiesDefeated >= 3)
+            {
+                return "Best KO chain";
+            }
+
+            if (damageDealt >= 45f)
+            {
+                return "Best damage";
+            }
+
+            if (bestComboStreak >= 3)
+            {
+                return "Best combo x" + bestComboStreak;
+            }
+
+            if (heatDelta <= -6f)
+            {
+                return "Best cooling";
+            }
+
+            if (hpDelta >= 6f)
+            {
+                return "Best recovery";
+            }
+
+            if (suppliesDelta >= 6)
+            {
+                return "Best stock";
+            }
+
+            return "Best hold";
         }
 
         public static RhythmBeatType ResolveRhythmBeat(

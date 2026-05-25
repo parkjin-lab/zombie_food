@@ -207,12 +207,18 @@ damage floaters now use cause labels such as `BITE`, `PRESSURE`, or `OVERHEAT`
 instead of a generic `TRUCK` label, and the Wave Combat verification showcase
 uses the same cause-labeled truck damage floater.
 
+2026-05-25 payoff update: the first best-contributor pass is complete. Wave
+outcome summaries now append a compact `Best ...` cause such as `Best combo x3`,
+`Best KO chain`, `Best damage`, `Best cooling`, `Best recovery`, or `Best stock`
+so the Payoff beat teaches what worked before the next Read beat.
+
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
 2. Wave Combat retake with action showcase labels.
 3. Combat cause labels: continue from truck HP cause labels toward full
    `source -> target -> result` attack trails.
-4. Payoff best-contributor summary.
+4. Payoff best-contributor summary: first source pass complete; next visual
+   review should confirm the `Best ...` cause is readable and useful.
 5. Draw card intent labels tied to live context.
 
 ### Medium Priority

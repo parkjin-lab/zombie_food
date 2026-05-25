@@ -234,13 +234,27 @@ Add-ContractCheck $checks "telemetry" "hud_reports_core_ux_metrics" $sources.tel
 Add-ContractCheck $checks "wave_outcome" "model_tracks_wave_payoff_summary" $sources.model @(
     'public string LastWaveOutcomeSummary => lastWaveOutcomeSummary;',
     'public string LastWaveOutcomeCue => lastWaveOutcomeCue;',
+    'public string LastWaveOutcomeBestContributor => lastWaveOutcomeBestContributor;',
     'CaptureWaveOutcomeBaseline();',
     'CaptureWaveOutcomeSummary();',
     'waveDamageDealt',
     'waveEnemiesDefeated',
     'waveTruckHits',
+    'lastWaveOutcomeBestContributor = BuildWaveOutcomeBestContributor(',
     'FormatSignedRounded'
 ) "Wave transitions must preserve a concise payoff summary that links combat results to the next decision."
+
+Add-ContractCheck $checks "wave_outcome" "model_tracks_wave_best_contributor" ($sources.model + $sources.tests) @(
+    'public static string BuildWaveOutcomeBestContributor(',
+    'return "Best KO chain";',
+    'return "Best damage";',
+    'return "Best combo x" + bestComboStreak;',
+    'return "Best cooling";',
+    'return "Best recovery";',
+    'return "Best stock";',
+    'BuildWaveOutcomeBestContributor_PrioritizesVisiblePayoffCause',
+    'Assert.AreEqual("Best combo x3", model.LastWaveOutcomeBestContributor);'
+) "Wave payoff should name the most visible contributor so the player can learn from the result."
 
 Add-ContractCheck $checks "wave_outcome" "hud_surfaces_wave_payoff_cue" $sources.hud @(
     'model.LastWaveOutcomeCue',
