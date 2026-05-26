@@ -10,6 +10,7 @@ $ErrorActionPreference = "Stop"
 $suiteVerifier = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $screenshotVerifier = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
 $recordVerifier = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRecord.ps1"
+$assetVerifier = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $defaultOutputPath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_ReviewPack.md"
 $requiredStates = @("Draw Choice", "Pending Placement", "Invalid Placement", "Wave Combat")
 
@@ -175,6 +176,16 @@ function Get-TriagedNonStateScreenshots {
     return @($ScreenshotData.triaged_non_state_screenshots)
 }
 
+function Get-PlannedResourceRows {
+    param([object]$AssetData)
+
+    if ($null -eq $AssetData -or $null -eq $AssetData.checks) {
+        return @()
+    }
+
+    return @($AssetData.checks | Where-Object { $_.status -eq "missing_planned" })
+}
+
 function Get-ReviewReadiness {
     param(
         [object]$SuiteData,
@@ -235,6 +246,7 @@ function Build-ReviewPackMarkdown {
     param(
         [object]$SuiteData,
         [object]$ScreenshotData,
+        [object]$AssetData,
         [object]$RecordData,
         [string]$OutputFilePath
     )
@@ -243,6 +255,7 @@ function Build-ReviewPackMarkdown {
     $screenshotRows = Get-ScreenshotRows -ScreenshotData $ScreenshotData
     $manualRegistrationCommands = Get-ManualRegistrationCommands -ScreenshotData $ScreenshotData
     $triagedNonStateScreenshots = Get-TriagedNonStateScreenshots -ScreenshotData $ScreenshotData
+    $plannedResourceRows = Get-PlannedResourceRows -AssetData $AssetData
     $builder = New-Object System.Text.StringBuilder
 
     [void]$builder.AppendLine("# Prototype Play Mode Review Pack")
@@ -265,9 +278,26 @@ function Build-ReviewPackMarkdown {
         [void]$builder.AppendLine('- Triaged non-state screenshots: `' + $ScreenshotData.triaged_non_state_count + '`')
     }
     [void]$builder.AppendLine('- Manual record status: `' + $RecordData.playmode_record_status + '`')
+    if ($null -ne $AssetData) {
+        [void]$builder.AppendLine('- Asset status: `' + $AssetData.asset_status + '`, planned missing: `' + $AssetData.planned_missing + '`')
+    }
     [void]$builder.AppendLine('- Wave Combat action showcase: ' + (Get-WaveCombatActionShowcaseLine -SuiteData $SuiteData))
     if ($ScreenshotData.missing_states.Count -gt 0) {
         [void]$builder.AppendLine("- Missing labeled states: " + ($ScreenshotData.missing_states -join ", "))
+    }
+    [void]$builder.AppendLine()
+
+    [void]$builder.AppendLine("## Planned Resource Backlog")
+    [void]$builder.AppendLine("These missing planned resources are not runtime blockers. Use them to separate feedback polish from Play Mode readability failures.")
+    if ($plannedResourceRows.Count -eq 0) {
+        [void]$builder.AppendLine("No planned VFX/SFX resources are missing.")
+    }
+    else {
+        [void]$builder.AppendLine("| Category | Resource | Intended role |")
+        [void]$builder.AppendLine("| --- | --- | --- |")
+        foreach ($resource in $plannedResourceRows) {
+            [void]$builder.AppendLine("| " + $resource.category + " | ``" + $resource.path + "`` | " + $resource.recommendation + " |")
+        }
     }
     [void]$builder.AppendLine()
 
@@ -354,8 +384,9 @@ function Build-ReviewPackMarkdown {
 $suiteData = Invoke-JsonVerifier -ScriptPath $suiteVerifier -RootPath $ProjectPath
 $screenshotData = Invoke-JsonVerifier -ScriptPath $screenshotVerifier -RootPath $ProjectPath
 $recordData = Invoke-JsonVerifier -ScriptPath $recordVerifier -RootPath $ProjectPath
+$assetData = Invoke-JsonVerifier -ScriptPath $assetVerifier -RootPath $ProjectPath
 $readiness = Get-ReviewReadiness -SuiteData $suiteData -ScreenshotData $screenshotData
-$markdown = Build-ReviewPackMarkdown -SuiteData $suiteData -ScreenshotData $screenshotData -RecordData $recordData -OutputFilePath $OutputPath
+$markdown = Build-ReviewPackMarkdown -SuiteData $suiteData -ScreenshotData $screenshotData -AssetData $assetData -RecordData $recordData -OutputFilePath $OutputPath
 
 $actualOutputPath = "PREVIEW_ONLY"
 if (-not $PreviewOnly) {
@@ -387,6 +418,8 @@ $result = [ordered]@{
     triaged_non_state_count = $screenshotData.triaged_non_state_count
     triaged_non_state_screenshots = $screenshotData.triaged_non_state_screenshots
     manual_record_status = $recordData.playmode_record_status
+    asset_status = $assetData.asset_status
+    asset_planned_missing = $assetData.planned_missing
     wave_combat_action_showcase_ready = $suiteData.wave_combat_action_showcase_ready
     wave_combat_action_showcase_reason = $suiteData.wave_combat_action_showcase_reason
     visual_review_required = $screenshotData.visual_review_required
@@ -404,6 +437,8 @@ else {
     Write-Host ("screenshot_status=" + $screenshotData.playmode_screenshot_status)
     Write-Host ("screenshot_count=" + $screenshotData.screenshot_count)
     Write-Host ("manual_record_status=" + $recordData.playmode_record_status)
+    Write-Host ("asset_status=" + $assetData.asset_status)
+    Write-Host ("asset_planned_missing=" + $assetData.planned_missing)
     Write-Host ("next_action=" + $result.next_action)
 }
 
