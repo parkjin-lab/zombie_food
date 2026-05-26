@@ -47,20 +47,22 @@ function Write-TextWithFallback {
         [string]$Contents
     )
 
+    $normalizedContents = $Contents -replace "`r`n", "`n" -replace "`r", "`n"
+
     try {
         $preferredDir = Split-Path -Parent $PreferredPath
         if (-not [string]::IsNullOrWhiteSpace($preferredDir)) {
             [System.IO.Directory]::CreateDirectory($preferredDir) | Out-Null
         }
 
-        [System.IO.File]::WriteAllText($PreferredPath, $Contents, [System.Text.Encoding]::UTF8)
+        [System.IO.File]::WriteAllText($PreferredPath, $normalizedContents, [System.Text.Encoding]::UTF8)
         return $PreferredPath
     }
     catch {
         $fallbackRoot = Join-Path ([System.IO.Path]::GetTempPath()) "zombieFoodcenter-verification"
         [System.IO.Directory]::CreateDirectory($fallbackRoot) | Out-Null
         $fallbackPath = Join-Path $fallbackRoot (Split-Path -Leaf $PreferredPath)
-        [System.IO.File]::WriteAllText($fallbackPath, $Contents, [System.Text.Encoding]::UTF8)
+        [System.IO.File]::WriteAllText($fallbackPath, $normalizedContents, [System.Text.Encoding]::UTF8)
         return $fallbackPath
     }
 }
@@ -328,10 +330,10 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine("## Visual Acceptance Checklist")
     [void]$builder.AppendLine("| State | Must see in screenshot | Record as FIX when missing |")
     [void]$builder.AppendLine("| --- | --- | --- |")
-    [void]$builder.AppendLine("| Draw Choice | Three comparable cards with shape, ingredient, value/risk, `Fit`, `Heat`, and `Role` visible. | `FIX_LAYOUT` if clipped or overlapping; `FIX_FEEDBACK` if the choice tradeoff is unclear. |")
-    [void]$builder.AppendLine("| Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |")
-    [void]$builder.AppendLine("| Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |")
-    [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and action labels `-12`, `KO`, `LEAK`, `TRUCK -7` plus lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if action labels or payoff cues are missing. |")
+    [void]$builder.AppendLine("| Draw Choice | Three comparable cards with shape, ingredient, value/risk, ``Fit``, ``Heat``, and ``Role`` visible. | ``FIX_LAYOUT`` if clipped or overlapping; ``FIX_FEEDBACK`` if the choice tradeoff is unclear. |")
+    [void]$builder.AppendLine("| Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | ``FIX_LAYOUT`` if board/controls crowd the battlefield; ``FIX_FEEDBACK`` if the next action is unclear. |")
+    [void]$builder.AppendLine("| Invalid Placement | Blocked reason and ``Next`` recovery hint appear near the board/cue. | ``FIX_FEEDBACK`` if the reason or recovery hint is missing. |")
+    [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and action labels ``-12``, ``KO``, ``LEAK``, ``TRUCK -7`` plus lane flash are visible. | ``FIX_LAYOUT`` if the battlefield is crowded; ``FIX_FEEDBACK`` if action labels or payoff cues are missing. |")
     [void]$builder.AppendLine()
 
     [void]$builder.AppendLine("## Manual Evidence Registration Hints")

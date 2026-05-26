@@ -711,7 +711,7 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     'Screenshot Contact Sheet',
     'Visual Acceptance Checklist',
     'Wave Combat action showcase',
-    '`-12`, `KO`, `LEAK`, `TRUCK -7`',
+    '``-12``, ``KO``, ``LEAK``, ``TRUCK -7``',
     'Recommended Result Commands',
     'Write-TextWithFallback',
     'visual_review_required'
