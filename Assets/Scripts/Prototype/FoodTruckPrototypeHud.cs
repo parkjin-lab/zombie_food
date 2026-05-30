@@ -1848,8 +1848,11 @@ namespace ZombieFoodcenter.Prototype
             }
 
             bool drawChoiceFocus = gameplayFocusHud && hasDrawChoice;
+            float combatLaneHeight = minimalCombatStrip ? 96f : 960f;
+            float combatLaneRowHeight = minimalCombatStrip ? 30f : 306f;
+            float combatLaneRowMinHeight = minimalCombatStrip ? 24f : 236f;
             float laneHeight = gameplayFocusHud
-                ? (focusPlacementMode ? 420f : (drawChoiceFocus ? 560f : (hasPlacementContext ? 620f : 480f)))
+                ? (focusPlacementMode ? 420f : (drawChoiceFocus ? 560f : (hasPlacementContext ? 620f : combatLaneHeight)))
                 : 196f;
             float meterHeight = gameplayFocusHud
                 ? (drawChoiceFocus ? 0f : (hasPlacementContext ? 86f : 58f))
@@ -1901,10 +1904,10 @@ namespace ZombieFoodcenter.Prototype
             bool showInventoryGrid = actionVisibility.ShowInventoryGrid;
             bool showBottomPanel = showPendingRow || showInventoryGrid || actionVisibility.ShowsAnyActionRow;
             float laneRowHeight = gameplayFocusHud
-                ? (focusPlacementMode ? 128f : (drawChoiceFocus ? 176f : (hasPlacementContext ? 190f : 136f)))
+                ? (focusPlacementMode ? 128f : (drawChoiceFocus ? 176f : (hasPlacementContext ? 190f : combatLaneRowHeight)))
                 : 60f;
             float laneRowMinHeight = gameplayFocusHud
-                ? (focusPlacementMode ? 96f : (drawChoiceFocus ? 132f : (hasPlacementContext ? 140f : 112f)))
+                ? (focusPlacementMode ? 96f : (drawChoiceFocus ? 132f : (hasPlacementContext ? 140f : combatLaneRowMinHeight)))
                 : 56f;
 
             VerticalLayoutGroup topLayout = topPanelRect != null ? topPanelRect.GetComponent<VerticalLayoutGroup>() : null;
