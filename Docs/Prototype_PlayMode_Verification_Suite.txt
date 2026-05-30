@@ -1,36 +1,36 @@
-FoodTruck Prototype Play Mode Verification Suite
+﻿FoodTruck Prototype Play Mode Verification Suite
 Date: 2026-05-06 01:28 KST
-Completed: 2026-05-06 01:28 KST
+Completed: 2026-05-30 14:49 KST
 Unity version: manual evidence; Unity version unavailable
 Aspect ratio / resolution: 1170x2532 (195:422)
-Suite status: manual_partial
+Suite status: manual_completed
 Evidence source: manual screenshot registration
 
 Captured states:
-1. Draw Choice: not_recorded | not captured
-2. Pending Placement: not_recorded | not captured
-3. Invalid Placement: not_recorded | not captured
+1. Draw Choice: manual_registered | Docs\PlayModeScreenshots\foodtruck-playmode-20260530-144551-837-draw-choice.png
+2. Pending Placement: manual_registered | Docs\PlayModeScreenshots\foodtruck-playmode-20260530-144625-512-pending-placement.png
+3. Invalid Placement: manual_registered | Docs\PlayModeScreenshots\foodtruck-playmode-20260530-144641-778-invalid-placement.png
 4. Wave Combat: manual_registered | Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010153.png
 
 State details:
 - Draw Choice
-  Prepared: NOT_RECORDED
-  Prepare result: NOT_RECORDED
-  HUD state summary: NOT_RECORDED
-  Evidence source: NOT_RECORDED
-  Screenshot: not captured
+  Prepared: yes
+  Prepare result: manual visual pass: draw choice options visible
+  HUD state summary: Draw choice: 3 options visible, pending choose 1/3
+  Evidence source: manual_registration
+  Screenshot: Docs\PlayModeScreenshots\foodtruck-playmode-20260530-144551-837-draw-choice.png
 - Pending Placement
-  Prepared: NOT_RECORDED
-  Prepare result: NOT_RECORDED
-  HUD state summary: NOT_RECORDED
-  Evidence source: NOT_RECORDED
-  Screenshot: not captured
+  Prepared: yes
+  Prepare result: manual visual pass: pending block and legal cells visible
+  HUD state summary: Pending placement: selected block, footprint preview, legal placement highlights
+  Evidence source: manual_registration
+  Screenshot: Docs\PlayModeScreenshots\foodtruck-playmode-20260530-144625-512-pending-placement.png
 - Invalid Placement
-  Prepared: NOT_RECORDED
-  Prepare result: NOT_RECORDED
-  HUD state summary: NOT_RECORDED
-  Evidence source: NOT_RECORDED
-  Screenshot: not captured
+  Prepared: yes
+  Prepare result: manual visual pass: invalid placement warning tint visible
+  HUD state summary: Invalid placement: red warning tint and unavailable cells visible
+  Evidence source: manual_registration
+  Screenshot: Docs\PlayModeScreenshots\foodtruck-playmode-20260530-144641-778-invalid-placement.png
 - Wave Combat
   Prepared: yes
   Prepare result: Manual screenshot registered from existing Play Mode evidence.

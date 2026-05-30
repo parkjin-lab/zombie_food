@@ -1,30 +1,21 @@
-# Prototype Play Mode Retake Plan
+﻿# Prototype Play Mode Retake Plan
 
-Generated: 2026-05-08 01:44 KST
+Generated: 2026-05-30 14:51 KST
 Retake plan status: `ok`
 
-Reviewed: 2026-05-17 01:18 KST
-Current status remains unchanged: Draw Choice, Pending Placement, and Invalid Placement still need focused retake evidence; no standalone registration candidates are available.
-
 ## Machine Summary
-- Suite status: `manual_partial` (1/4)
+- Suite status: `captured_manual` (4/4)
 - Suite evidence source: `manual screenshot registration`
-- Screenshot status: `partial` (1/4 covered)
-- Missing labeled states: Draw Choice, Pending Placement, Invalid Placement
+- Screenshot status: `suite_ready` (4/4 covered)
+- Missing labeled states: none
 - Manual registration candidates: `0`
 - Triaged non-state screenshots: `1`
-- Review readiness: `partial_evidence`
+- Review readiness: `ready_for_visual_review`
 - Manual record status: `not_recorded`
 - Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_labels)
 
-No standalone PNG candidates remain for the missing required states. Capture fresh evidence instead of trying to register old screenshots.
-
 ## Focused Retake Targets
-| State | Unity menu path | Must see |
-| --- | --- | --- |
-| Draw Choice | `Tools > Food Truck Prototype > Prepare and Capture State > Draw Choice` | Three comparable cards; shape, ingredient, value/risk, Fit, Heat, and Role readable; battlefield is still visible. |
-| Pending Placement | `Tools > Food Truck Prototype > Prepare and Capture State > Pending Placement` | Pending block, 3x3 board, recommendation reason, rotation, and next action readable; battlefield still occupies the main screen. |
-| Invalid Placement | `Tools > Food Truck Prototype > Prepare and Capture State > Invalid Placement` | Blocked reason and Next recovery hint appear near the board or cue, without requiring the full log. |
+No Draw/Pending/Invalid focused retakes are currently missing. Continue with review pack judgment or the next recorded blocker.
 
 ## Wave Combat Note
 Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.

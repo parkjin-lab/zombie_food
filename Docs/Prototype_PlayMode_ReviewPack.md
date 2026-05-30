@@ -1,20 +1,19 @@
 ﻿# Prototype Play Mode Review Pack
 
-Generated: 2026-05-27 00:26 KST
-Review readiness: `partial_evidence`
+Generated: 2026-05-30 14:49 KST
+Review readiness: `ready_for_visual_review`
 Visual review required: `True`
 
 ## Machine Summary
-- Suite status: `manual_partial` (1/4)
+- Suite status: `captured_manual` (4/4)
 - Suite evidence source: `manual screenshot registration`
-- Screenshot status: `partial` (2/2 quality pass)
+- Screenshot status: `suite_ready` (5/5 quality pass)
 - Unlabeled screenshots: `0`
 - Manual registration candidates: `0`
 - Triaged non-state screenshots: `1`
 - Manual record status: `not_recorded`
 - Asset status: `ok`, planned missing: `14`
 - Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_labels)
-- Missing labeled states: Draw Choice, Pending Placement, Invalid Placement
 
 ## Planned Resource Backlog
 These missing planned resources are not runtime blockers. Use them to separate feedback polish from Play Mode readability failures.
@@ -38,15 +37,27 @@ These missing planned resources are not runtime blockers. Use them to separate f
 ## State Review Table
 | State | Evidence | Current record | Visual decision |
 | --- | --- | --- | --- |
-| Draw Choice | missing | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
-| Pending Placement | missing | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
-| Invalid Placement | missing | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+| Draw Choice | suite: PlayModeScreenshots/foodtruck-playmode-20260530-144551-837-draw-choice.png | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+| Pending Placement | suite: PlayModeScreenshots/foodtruck-playmode-20260530-144625-512-pending-placement.png | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+| Invalid Placement | suite: PlayModeScreenshots/foodtruck-playmode-20260530-144641-778-invalid-placement.png | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
 | Wave Combat | suite: PlayModeScreenshots/foodtruck-playmode-20260504-010153.png | `PASS` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
 
 ## Screenshot Contact Sheet
+### Invalid Placement
+- Quality: `True`, size: `1170x2532`, bytes: `172749`
+![Invalid Placement](playmodescreenshots/foodtruck-playmode-20260530-144641-778-invalid-placement.png)
+
 ### Wave Combat
 - Quality: `True`, size: `1170x2532`, bytes: `119229`
 ![Wave Combat](playmodescreenshots/foodtruck-playmode-20260504-010153.png)
+
+### Pending Placement
+- Quality: `True`, size: `1170x2532`, bytes: `178641`
+![Pending Placement](playmodescreenshots/foodtruck-playmode-20260530-144625-512-pending-placement.png)
+
+### Draw Choice
+- Quality: `True`, size: `1170x2532`, bytes: `295476`
+![Draw Choice](playmodescreenshots/foodtruck-playmode-20260530-144551-837-draw-choice.png)
 
 ### Triaged Non-State
 - Quality: `True`, size: `1170x2532`, bytes: `114110`
