@@ -427,6 +427,9 @@ Add-ContractCheck $checks "rest_reward" "editmode_covers_rest_reward_profile" $s
 Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_and_leaks" ($sources.hud + $sources.enemyVisuals) @(
     'private sealed class CombatFloatingTextWidget',
     'private readonly List<CombatFloatingTextWidget> combatFloatingTexts',
+    'private float combatFloatingTextDuration = 1.18f;',
+    'private float combatFloatingTextRiseSpeed = 26f;',
+    'private float laneHitFlashDuration = 0.52f;',
     'UpdateCombatFloatingTexts(dt);',
     'SpawnTruckDamageFloater(truckDamageThisFrame, model.LastTruckDamageCauseLabel);',
     'SpawnEnemyDamageFloater(widget, damageTaken, knockout);',
@@ -435,6 +438,12 @@ Add-ContractCheck $checks "combat_feedback" "floating_damage_text_explains_hits_
     'BuildEnemyDamageFloaterLabel(damageAmount, knockout)',
     'BuildTruckDamageFloaterLabel(causeLabel, damageAmount)',
     'BuildCombatHitFlowLabel("HIT", "Z"',
+    'SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 0f, 1.00f',
+    'SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 52f, 0.72f',
+    'SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, -48f, 0.58f',
+    'rect.SetAsLastSibling();',
+    'Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.29f), 19, 38)',
+    'Mathf.Clamp(laneHeight * 1.90f, 128f, 300f)',
     '"LEAK"',
     '"KO"'
 ) "Combat feedback should label enemy damage, knockouts, leaks, and truck HP loss directly in the battlefield with compact source-to-target result flow."

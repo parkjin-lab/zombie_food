@@ -467,29 +467,42 @@ namespace ZombieFoodcenter.Prototype
                 return;
             }
 
+            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 0f, 1.00f, new Color(1f, 0.96f, 0.18f, 1f));
+            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 52f, 0.72f, new Color(1f, 0.55f, 0.16f, 0.96f));
+            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, -48f, 0.58f, new Color(1f, 1f, 1f, 0.88f));
+        }
+
+        private void SpawnEnemyHitSlash(RectTransform laneRoot, Vector2 center, float angleOffset, float scale, Color color)
+        {
+            if (laneRoot == null)
+            {
+                return;
+            }
+
             RectTransform rect = new GameObject("EnemyHitFx", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
             rect.transform.SetParent(laneRoot, false);
-            rect.anchorMin = source.Rect.anchorMin;
-            rect.anchorMax = source.Rect.anchorMax;
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = source.Rect.anchoredPosition;
+            rect.anchoredPosition = center;
             float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
-            float width = Mathf.Max(enemyHitEffectSize, laneHeight * 0.56f);
-            rect.sizeDelta = new Vector2(width, width * 0.32f);
-            rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-18f, 18f));
+            float width = Mathf.Max(enemyHitEffectSize, laneHeight * 0.88f * Mathf.Clamp(scale, 0.35f, 1.2f));
+            rect.sizeDelta = new Vector2(width, Mathf.Clamp(width * 0.24f, 22f, 70f));
+            rect.localRotation = Quaternion.Euler(0f, 0f, angleOffset + UnityEngine.Random.Range(-10f, 10f));
             rect.localScale = Vector3.one;
+            rect.SetAsLastSibling();
 
             Image image = rect.GetComponent<Image>();
             image.raycastTarget = false;
-            image.color = new Color(1f, 0.92f, 0.34f, 0.96f);
+            image.color = color;
 
-            Vector2 direction = new Vector2(1f, UnityEngine.Random.Range(-0.45f, 0.45f)).normalized;
+            Vector2 direction = new Vector2(UnityEngine.Random.Range(-0.18f, 0.18f), UnityEngine.Random.Range(0.12f, 0.36f)).normalized;
             EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
             effect.Rect = rect;
             effect.Image = image;
-            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration);
+            effect.Duration = Mathf.Max(0.12f, enemyHitEffectDuration * 1.12f);
             effect.Remaining = effect.Duration;
-            effect.Velocity = direction * Mathf.Max(8f, enemyHitEffectTravelSpeed);
+            effect.Velocity = direction * Mathf.Max(4f, enemyHitEffectTravelSpeed * 0.26f);
             enemyHitEffects.Add(effect);
         }
 
@@ -517,22 +530,23 @@ namespace ZombieFoodcenter.Prototype
                 ? Mathf.Clamp(laneHeight * 1.66f, 118f, 252f)
                 : Mathf.Clamp(laneHeight * 0.82f, 64f, 136f);
             Vector2 target = source.Rect.anchoredPosition;
-            float width = Mathf.Max(laneHeight * 0.34f, target.x - truckEndX);
+            float width = Mathf.Max(laneHeight * 0.58f, target.x - truckEndX);
             rect.anchoredPosition = new Vector2(Mathf.Min(truckEndX, target.x - width), target.y + UnityEngine.Random.Range(-3f, 3f));
-            rect.sizeDelta = new Vector2(width, Mathf.Clamp(laneHeight * 0.08f, 8f, 18f));
+            rect.sizeDelta = new Vector2(width, Mathf.Clamp(laneHeight * 0.13f, 14f, 34f));
             rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-5f, 5f));
             rect.localScale = Vector3.one;
 
             Image image = rect.GetComponent<Image>();
             image.raycastTarget = false;
-            image.color = new Color(1f, 0.92f, 0.28f, 0.72f);
+            image.color = new Color(1f, 0.88f, 0.18f, 0.92f);
+            rect.SetAsLastSibling();
 
             EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
             effect.Rect = rect;
             effect.Image = image;
-            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration * 0.72f);
+            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration * 0.95f);
             effect.Remaining = effect.Duration;
-            effect.Velocity = new Vector2(Mathf.Max(24f, enemyHitEffectTravelSpeed * 0.38f), 0f);
+            effect.Velocity = new Vector2(Mathf.Max(12f, enemyHitEffectTravelSpeed * 0.18f), 0f);
             enemyHitEffects.Add(effect);
         }
 
@@ -555,10 +569,10 @@ namespace ZombieFoodcenter.Prototype
                 ? new Color(1f, 0.94f, 0.42f, 1f)
                 : new Color(1f, 0.64f, 0.28f, 1f);
             int fontSize = knockout
-                ? Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.24f), 15, 26)
-                : Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.20f), 13, 22);
-            Vector2 position = source.Rect.anchoredPosition + new Vector2(0f, Mathf.Clamp(laneHeight * 0.22f, 12f, 32f));
-            SpawnCombatFloatingText(laneRoot, position, label, color, fontSize, 1f);
+                ? Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.29f), 19, 38)
+                : Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.25f), 17, 34);
+            Vector2 position = source.Rect.anchoredPosition + new Vector2(0f, Mathf.Clamp(laneHeight * 0.30f, 20f, 62f));
+            SpawnCombatFloatingText(laneRoot, position, label, color, fontSize, 1.12f);
         }
 
         private void SpawnEnemyLeakFloater(EnemyVisualWidget source)
@@ -575,14 +589,14 @@ namespace ZombieFoodcenter.Prototype
             }
 
             float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
-            Vector2 position = source.Rect.anchoredPosition + new Vector2(0f, Mathf.Clamp(laneHeight * 0.16f, 10f, 26f));
+            Vector2 position = source.Rect.anchoredPosition + new Vector2(0f, Mathf.Clamp(laneHeight * 0.24f, 18f, 54f));
             SpawnCombatFloatingText(
                 laneRoot,
                 position,
                 "LEAK",
                 new Color(1f, 0.32f, 0.22f, 1f),
-                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.20f), 13, 23),
-                1f);
+                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.27f), 18, 36),
+                1.18f);
         }
 
         private void SpawnTruckDamageFloater(float damageAmount, string causeLabel)
@@ -604,11 +618,11 @@ namespace ZombieFoodcenter.Prototype
                 : Mathf.Clamp(laneHeight * 0.58f, 52f, 112f);
             SpawnCombatFloatingText(
                 laneRoot,
-                new Vector2(truckX, Mathf.Clamp(laneHeight * 0.14f, 10f, 26f)),
+                new Vector2(truckX, Mathf.Clamp(laneHeight * 0.22f, 18f, 52f)),
                 BuildTruckDamageFloaterLabel(causeLabel, damageAmount),
                 new Color(1f, 0.40f, 0.26f, 1f),
-                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.18f), 13, 22),
-                1.12f);
+                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.25f), 18, 34),
+                1.22f);
         }
 
         private void SpawnCombatFloatingText(
@@ -634,7 +648,7 @@ namespace ZombieFoodcenter.Prototype
             rect.anchorMax = new Vector2(0f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = new Vector2(Mathf.Clamp(laneHeight * 1.45f, 86f, 170f), Mathf.Clamp(laneHeight * 0.36f, 26f, 58f));
+            rect.sizeDelta = new Vector2(Mathf.Clamp(laneHeight * 1.90f, 128f, 300f), Mathf.Clamp(laneHeight * 0.48f, 38f, 92f));
             rect.SetAsLastSibling();
 
             CombatFloatingTextWidget floating = new CombatFloatingTextWidget();

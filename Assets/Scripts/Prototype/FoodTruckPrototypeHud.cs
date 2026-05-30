@@ -406,7 +406,7 @@ namespace ZombieFoodcenter.Prototype
         private float enemyRunAnimationFps = 10f;
 
         [SerializeField]
-        private float enemyHitPoseDuration = 0.24f;
+        private float enemyHitPoseDuration = 0.42f;
 
         [SerializeField]
         private float enemyIconSize = 34f;
@@ -418,22 +418,22 @@ namespace ZombieFoodcenter.Prototype
         private float enemyDeathFadeSeconds = 0.24f;
 
         [SerializeField]
-        private float enemyHitEffectDuration = 0.36f;
+        private float enemyHitEffectDuration = 0.58f;
 
         [SerializeField]
         private float enemyHitEffectSize = 26f;
 
         [SerializeField]
-        private float enemyHitEffectTravelSpeed = 92f;
+        private float enemyHitEffectTravelSpeed = 68f;
 
         [SerializeField]
-        private float combatFloatingTextDuration = 0.78f;
+        private float combatFloatingTextDuration = 1.18f;
 
         [SerializeField]
-        private float combatFloatingTextRiseSpeed = 46f;
+        private float combatFloatingTextRiseSpeed = 26f;
 
         [SerializeField]
-        private float combatFloatingTextSideDrift = 20f;
+        private float combatFloatingTextSideDrift = 10f;
 
         [SerializeField]
         private float enemyHitShakeDistance = 14f;
@@ -442,7 +442,7 @@ namespace ZombieFoodcenter.Prototype
         private float enemyHitScalePulse = 0.28f;
 
         [SerializeField]
-        private float laneHitFlashDuration = 0.32f;
+        private float laneHitFlashDuration = 0.52f;
 
         [SerializeField]
         private Color laneBaseColor = new Color(0.11f, 0.14f, 0.18f, 1f);
