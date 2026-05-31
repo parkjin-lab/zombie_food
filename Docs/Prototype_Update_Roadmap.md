@@ -78,6 +78,7 @@ sequencing.
 ### Goal
 - Keep code, document, and screenshot evidence from drifting apart.
 - Let automated guards catch contract/layout regressions, while human Play Mode review covers actual usability and readability.
+- Minimize player verification. Agents should exhaust local guards, suite/screenshot verifiers, review pack generation, manual evidence registration, and result draft writing before asking for human input. Human review should be a short visual call on fresh evidence, not repeated direct play.
 - Treat current PC Play Mode limits as an evidence gap, not as a gameplay pass.
 
 ### Next Actions
@@ -93,7 +94,7 @@ sequencing.
 - Record visually reviewed non-required PNGs in the screenshot triage manifest so they stop appearing as manual registration candidates.
 - Confirm all suite states are represented in the suite verifier output.
 - Use screenshot verification to distinguish partial portrait evidence from full suite-ready evidence.
-- Build the review pack before visual judgment.
+- Build the review pack before visual judgment, and ask for the smallest possible judgment: PASS/FIX/BLOCKED for the captured state or confirmation that a single screenshot is readable.
 - Require the review pack to show whether the Wave Combat action showcase is ready before recording Wave Combat as PASS.
 - Use `Write-PrototypePlayModeResultFromSuite.ps1` or the Unity `Record PASS Manual Result` menu only after fresh evidence exists.
 

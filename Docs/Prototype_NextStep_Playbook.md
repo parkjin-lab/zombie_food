@@ -9,6 +9,7 @@
 - 2026-05-08 01:52 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 PlayMode evidence preflight 경로를 추가한 뒤에도 통과한다.
 - 2026-05-17 01:18 KST 기준 sub-agent review 결과, 디자인 방향성은 rhythm-first로 유지한다. 즉시는 Play Mode evidence closure, 그 다음 구현 후보는 `Wave Cadence Composer`와 `Payoff-to-Read Panel`이다.
 - 2026-05-25 기준 sub-agent gap review 결과, 다음 정책은 `Evidence first, weakest beat next`로 고정한다. Play Mode 증거가 막힌 동안은 문서/검증/retake tooling/소스 가드만 진행하고, 새 기능은 named beat와 source guard가 있을 때만 좁게 진행한다.
+- 2026-06-01 기준 플레이어 검증 예산은 최소화한다. 에이전트가 자동 가드, evidence preflight, suite/screenshot 검증, review pack/result draft를 먼저 닫고, 사람에게는 새 캡처 한 장의 시각 판정이나 최종 PASS/FIX 승인만 요청한다.
 - 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
 - tracked 코드/문서는 이 업데이트 전 깨끗했지만, Unity/Asset Store import 흔적으로 보이는 대형 untracked 폴더들이 남아 있다. 명시적 에셋 결정 없이 스테이징하지 않는다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
@@ -41,13 +42,14 @@
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
-- PC 입력 불안정성 완화: 긴 직접 플레이보다 전체 suite 캡처를 먼저 실행하고, 실패한 상태만 focused retake로 다시 찍는다.
+- PC 입력 불안정성 완화: 긴 직접 플레이보다 전체 suite 캡처를 먼저 실행하고, 실패한 상태만 focused retake로 다시 찍는다. 플레이어에게 반복 플레이를 요청하지 않는다.
 - UX 다음 작업 게이트 고정: PASS/FIX/BLOCKED 결과가 기록되기 전에는 새 메커니즘보다 레이아웃/피드백 수정에 집중한다.
 - 리듬감 기준 고정: 새 시스템을 추가하기 전 현재 loop가 읽기, 선택, 배치, 압박, 보상, 회복의 박자로 느껴지는지 판정한다.
 
 ## 우선순위
 ### P0 (즉시: Play Mode 증거와 결과 기록)
 - 첫 상태 확인은 `Tools\Show-PrototypeSessionStatus.ps1`로 시작한다. suite/스크린샷/review pack/record/showcase 상태가 기대와 다르면 먼저 인계 문서를 확인한다.
+- 플레이어 검증은 P0의 마지막 단계로만 둔다. 에이전트가 가능한 확인과 문서 갱신을 끝낸 뒤, 사람이 볼 것은 "새 캡처가 읽히는가"와 "PASS/FIX/BLOCKED 중 무엇인가"로 제한한다.
 - 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다.
 - 현재 `manual_registration_candidate_count=0`이고 missing state가 남아 있으면 Unity를 열기 전에 `Tools\Write-PrototypePlayModeRetakePlan.ps1`을 실행해 retake checklist를 먼저 만든다.
 - retake checklist 생성 뒤 `Tools\Verify-PrototypePlayModeRetakePlan.ps1`로 문서가 현재 증거 상태와 동기화되어 있는지 확인한다.
@@ -142,7 +144,8 @@
 - Pending Placement 추천을 바꿨다면 추천 이유가 raw score보다 먼저 보이는지 확인했는가?
 
 ### 플레이테스트
-- Play Mode 진입 후 긴 직접 플레이보다 `Capture Verification Suite`를 먼저 실행했는가?
+- Play Mode 진입 후 긴 직접 플레이보다 `Capture Verification Suite` 또는 `Prepare and Capture State`를 먼저 실행했는가?
+- 사람에게 요청한 확인이 한 장의 캡처 판정 또는 최종 PASS/FIX 승인으로 제한되는가?
 - suite verifier -> screenshot verifier -> review pack -> result writer 순서로 증거를 닫았는가?
 - focused retake는 전체 suite에서 실패하거나 빠진 상태에만 사용했는가?
 - 실패 로그 상위 2개 원인을 `FIX_LAYOUT`, `FIX_ASSET`, `FIX_FEEDBACK`, `BLOCKED` 중 하나와 다음 코드 타겟으로 연결했는가?

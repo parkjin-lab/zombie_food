@@ -3,7 +3,13 @@
 Last updated: 2026-05-17 01:18 KST
 
 ## Purpose
-Unity Editor에서 직접 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 수동 Play Mode 검증의 기준으로 사용한다.
+Unity Editor에서 확인해야 하는 UI/UX 검증 기준이다. 현재 로컬 headless 검증은 `compile_status=inconclusive`, `tests_status=inconclusive`가 나올 수 있으므로, 이 문서를 Play Mode 증거 판정 기준으로 사용한다.
+
+## Player Verification Budget
+- 플레이어/기획자 직접 검증은 최소화한다. 긴 직접 플레이를 요구하지 않고, 에이전트가 코드 가드, suite/screenshot 검증, review pack 생성, manual evidence 등록, 결과 draft 작성을 먼저 끝낸다.
+- 사람이 해야 하는 일은 자동화가 대체할 수 없는 마지막 시각 판정으로 제한한다: 새 Wave Combat/Draw/Pending/Invalid 캡처가 실제로 읽히는지 확인하거나, review pack의 PASS/FIX/BLOCKED 결정을 승인하는 정도다.
+- 새 코드 작업은 `Tools\Verify-PrototypeLayout.ps1`, `Tools\Verify-PrototypeHudStateContract.ps1`, `Tools\Verify-PrototypeStatic.ps1`, `Tools\Gate-Verification.ps1`로 먼저 걸러야 한다. 플레이어 검증은 이 가드가 통과한 뒤에도 화면 의미를 판정해야 할 때만 요청한다.
+- Play Mode가 필요하면 직접 조작보다 `Capture Verification Suite`, `Prepare and Capture State`, standalone PNG 등록 경로를 우선한다. 캡처 이후 정리와 문서 반영은 에이전트가 처리한다.
 
 ## Preflight
 1. Unity Editor로 `D:\uni\zombieFoodcenter` 프로젝트를 연다.
