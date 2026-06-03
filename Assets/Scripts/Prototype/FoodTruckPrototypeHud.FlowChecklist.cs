@@ -14,11 +14,12 @@ namespace ZombieFoodcenter.Prototype
 
             bool chooseReady = model.HasDrawChoice;
             bool pendingReady = model.HasPendingBlock;
+            bool waveChoiceUsed = model.WaveBlockChoiceUsed;
             bool placementReady = pendingReady && pendingHoverAnchorCell >= 0 && pendingHoverValid;
             bool placementBlocked = pendingReady && pendingHoverAnchorCell >= 0 && !pendingHoverValid;
-            bool waveLive = !model.IsRestPhase && !model.EventPending;
+            bool waveLive = !model.IsRestPhase && !model.EventPending && waveChoiceUsed;
 
-            string drawLine = (chooseReady || pendingReady ? "[OK]" : "[ ]") + " Draw: spend supplies to reveal 3 options";
+            string drawLine = (waveChoiceUsed ? "[OK]" : (chooseReady || pendingReady ? "[NOW]" : "[ ]")) + " Wave Pick: one block choice per wave";
             string chooseLine = (chooseReady ? "[NOW]" : (pendingReady ? "[OK]" : "[ ]")) + " Choose: pick 1 of 3 blocks";
             string rotateLine = (pendingReady ? "[LIVE]" : "[ ]") + " Rotate: Q/E or ROT L/R to fit the grid";
 
@@ -34,7 +35,8 @@ namespace ZombieFoodcenter.Prototype
             }
 
             string placeChecklistLine = placeState + " " + placeLine;
-            string waveLine = (waveLive ? "[LIVE]" : "[REST]") + " Wave: survive combat, manage heat, then reset";
+            string waveState = model.IsRestPhase ? "[REST]" : (waveLive ? "[LIVE]" : "[READY]");
+            string waveLine = waveState + " Wave: fight after the wave choice is placed";
 
             flowChecklistTexts[0].text = drawLine;
             flowChecklistTexts[1].text = chooseLine;

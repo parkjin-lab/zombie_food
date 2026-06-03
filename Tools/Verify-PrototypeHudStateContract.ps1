@@ -50,10 +50,12 @@ $relativeFiles = [ordered]@{
     drawFlow = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceFlow.cs"
     drawVisuals = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceVisuals.cs"
     drawRisk = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.DrawChoiceRiskUI.cs"
+    controls = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.Controls.cs"
     playModeVerification = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PlayModeVerification.cs"
     pendingAssist = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PendingPlacementAssist.cs"
     placementFeedback = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PlacementFeedback.cs"
     presentation = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PresentationActions.cs"
+    flowChecklist = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.FlowChecklist.cs"
     enemyVisuals = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.EnemyVisuals.cs"
     prototypeVfx = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.PrototypeVfx.cs"
     telemetry = "Assets\Scripts\Prototype\FoodTruckPrototypeHud.Telemetry.cs"
@@ -418,6 +420,32 @@ Add-ContractCheck $checks "first_block_combat_lock" "editmode_covers_first_block
     'Assert.AreEqual("Place pending block to start combat", model.CombatFlowLockReason);',
     'SeedStarterBlock(model)'
 ) "EditMode coverage should lock the initial preparation gate and prove existing wave-advance tests opt into combat by seeding a starter block."
+
+Add-ContractCheck $checks "per_wave_choice" "model_limits_block_choice_to_once_per_wave" $sources.model @(
+    'private int waveBlockChoiceUsedWave;',
+    'public bool WaveBlockChoiceUsed => waveBlockChoiceUsedWave == Wave;',
+    'public bool CanDrawIngredient => CanDrawIngredientNow();',
+    'public string DrawLockReason => GetDrawLockReason();',
+    'waveBlockChoiceUsedWave = Wave;',
+    '"Next choice on wave " + (Wave + 1)',
+    '"Wave rule: choose and place 1 block before each combat wave."'
+) "The run model should make block shopping a once-per-wave preparation beat instead of a repeatable combat action."
+
+Add-ContractCheck $checks "per_wave_choice" "hud_labels_wave_choice_without_midwave_shop_pressure" ($sources.hud + $sources.controls + $sources.presentation + $sources.flowChecklist + $sources.playModeVerification) @(
+    'drawButton.interactable = model.CanDrawIngredient;',
+    'if (model.WaveBlockChoiceUsed)',
+    '"Choice Done\nNext Wave"',
+    'Wave Pick: one block choice per wave',
+    '", wave_choice_used=" + model.WaveBlockChoiceUsed'
+) "The HUD should present the block offer as a single wave pick and hide repeat-buy affordance during combat."
+
+Add-ContractCheck $checks "per_wave_choice" "editmode_covers_wave_choice_lock_and_recovery" $sources.tests @(
+    'DrawIngredient_AfterWaveChoicePlacement_LocksUntilNextWave',
+    'SellIngredient_WithPendingBeforePlacement_ReopensWaveChoice',
+    'SellIngredient_LastCommittedWaveBlock_FailsToAvoidPreparationDeadlock',
+    'Assert.IsFalse(model.CanDrawIngredient);',
+    'Assert.IsFalse(model.WaveBlockChoiceUsed);'
+) "EditMode coverage should lock same-wave redraw rejection, next-wave refresh, pending sell recovery, and last-block deadlock protection."
 
 Add-ContractCheck $checks "rest_reward" "model_applies_named_rest_reward" $sources.model @(
     'public enum RestRewardProfile',

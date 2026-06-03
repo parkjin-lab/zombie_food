@@ -284,22 +284,27 @@ namespace ZombieFoodcenter.Prototype
 
             string inputHint = Application.isMobilePlatform ? "Tap" : "[D]";
             int cost = Mathf.Max(0, model.GetDrawCost());
+            if (model.WaveBlockChoiceUsed)
+            {
+                return "Choice Done\nNext Wave";
+            }
+
             if (flowLocked)
             {
-                return "Draw Locked\nFlow";
+                return "Choice Locked\nFlow";
             }
 
             if (hasPending)
             {
-                return "Draw Locked\nPending";
+                return "Place Block\nFirst";
             }
 
             if (model.Supplies < cost)
             {
-                return "Need " + cost + " Sup\nDraw";
+                return "Need " + cost + " Sup\nPick";
             }
 
-            return "Draw " + cost + " Sup\n" + inputHint;
+            return "Wave Pick\n" + cost + " Sup " + inputHint;
         }
 
         private string BuildNextWaveButtonLabel(bool readyNow, bool flowLocked)

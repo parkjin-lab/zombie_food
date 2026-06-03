@@ -1453,26 +1453,32 @@ namespace ZombieFoodcenter.Prototype
 
             string pendingStatus = model.HasDrawChoice
                 ? "choose 1/3"
-                : (model.HasPendingBlock ? model.PendingBlock.Label + " @" + model.PendingRotationDegrees + "deg" : "none");
+                : (model.HasPendingBlock ? model.PendingBlock.Label + " @" + model.PendingRotationDegrees + "deg" : (model.WaveBlockChoiceUsed ? "wave choice done" : "none"));
             if (inventoryTitleText != null)
             {
                 if (model.HasDrawChoice)
                 {
-                    inventoryTitleText.text = "Build Flow: Pick 1 block, then place it on the 3x3 board";
+                    inventoryTitleText.text = "Build Flow: Pick this wave's block, then place it on the 3x3 board";
                 }
                 else if (model.HasPendingBlock)
                 {
                     inventoryTitleText.text = "Build Flow: Place the pending block on the 3x3 board";
                 }
+                else if (model.WaveBlockChoiceUsed)
+                {
+                    inventoryTitleText.text = "Combat Flow: Wave choice placed, focus the lanes";
+                }
                 else
                 {
-                    inventoryTitleText.text = "Build Flow: Draw a block to start placement";
+                    inventoryTitleText.text = "Build Flow: Take 1 wave choice before combat";
                 }
             }
 
             string keyboardHint = Application.isMobilePlatform
                 ? (model.HasDrawChoice ? "Tap 1/2/3" : "Tap/Drag/Buttons")
-                : (model.HasDrawChoice ? "1/2/3 pick | K export | R reset" : "D/S/Q/E/F/T/C/Space/M/N/K/R");
+                : (model.HasDrawChoice
+                    ? "1/2/3 pick | K export | R reset"
+                    : (model.WaveBlockChoiceUsed ? "S/Q/E/F/T/C/Space/M/N/K/R" : "D/S/Q/E/F/T/C/Space/M/N/K/R"));
             string ventMiniState = BuildVentStatusText(true);
             string burstMiniState = BuildBurstStatusText(true);
             string drawAssistTag = model.DrawAssistTag;
@@ -1531,7 +1537,7 @@ namespace ZombieFoodcenter.Prototype
                     else
                     {
                         combatLineText.text =
-                            "Draw " + model.GetDrawCost() +
+                            (model.WaveBlockChoiceUsed ? "Choice done" : "Wave Pick " + model.GetDrawCost()) +
                             "  |  Assist " + drawAssistTag +
                             "  |  Pending " + pendingStatus +
                             "  |  Vent " + ventMiniState +
@@ -1544,7 +1550,7 @@ namespace ZombieFoodcenter.Prototype
                     string telemetryMini = BuildTelemetryMiniLine();
                     string recommendationMini = BuildRecommendationMiniLine();
                     combatLineText.text =
-                        "Draw Cost: " + model.GetDrawCost() +
+                        "Wave Choice: " + (model.WaveBlockChoiceUsed ? "done, next wave" : model.GetDrawCost() + " Sup available") +
                         "   Assist: " + drawAssistTag +
                         "   Pending: " + pendingStatus +
                         "   Keyboard: " + keyboardHint +

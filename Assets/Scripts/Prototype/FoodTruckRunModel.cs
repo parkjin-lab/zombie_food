@@ -383,6 +383,7 @@ namespace ZombieFoodcenter.Prototype
         private RunEvent pendingEvent;
         private readonly List<PendingBlockState> drawChoices = new List<PendingBlockState>();
         private readonly List<DrawProfile> drawChoiceProfiles = new List<DrawProfile>();
+        private int waveBlockChoiceUsedWave;
         private int pendingRotationQuarterTurns;
         private int comboStreak;
         private float comboTimerRemaining;
@@ -452,6 +453,9 @@ namespace ZombieFoodcenter.Prototype
         public PendingBlockState PendingBlock => pendingBlock;
         public bool CombatFlowLocked => IsCombatFlowLocked();
         public string CombatFlowLockReason => GetCombatFlowLockReason();
+        public bool WaveBlockChoiceUsed => waveBlockChoiceUsedWave == Wave;
+        public bool CanDrawIngredient => CanDrawIngredientNow();
+        public string DrawLockReason => GetDrawLockReason();
         public int PendingRotationDegrees => pendingRotationQuarterTurns * 90;
         public int ComboStreak => comboStreak;
         public float ComboTimerRemaining => comboTimerRemaining;
@@ -537,6 +541,7 @@ namespace ZombieFoodcenter.Prototype
             pendingEvent = null;
             drawChoices.Clear();
             drawChoiceProfiles.Clear();
+            waveBlockChoiceUsedWave = 0;
             pendingRotationQuarterTurns = 0;
             lastPlacementFailReason = PlacementFailReason.None;
             comboStreak = 0;
@@ -581,6 +586,7 @@ namespace ZombieFoodcenter.Prototype
             UpdateLanePressures();
             CaptureWaveOutcomeBaseline();
             AppendLog("Run started. Draw, rotate, and drag blocks into the 3x3 inventory.");
+            AppendLog("Wave rule: choose and place 1 block before each combat wave.");
             AppendLog("Progression stage 1 active: NEAREST targeting + basic shapes.");
             RaiseChanged();
         }
@@ -656,6 +662,52 @@ namespace ZombieFoodcenter.Prototype
         public int GetDrawCost()
         {
             return 4 + Mathf.FloorToInt(Wave * 0.6f);
+        }
+
+        private bool CanDrawIngredientNow()
+        {
+            return !IsRunOver &&
+                !EventPending &&
+                !HasDrawChoice &&
+                pendingBlock == null &&
+                !WaveBlockChoiceUsed &&
+                Supplies >= GetDrawCost();
+        }
+
+        private string GetDrawLockReason()
+        {
+            if (IsRunOver)
+            {
+                return "Run over";
+            }
+
+            if (EventPending)
+            {
+                return "Resolve event first";
+            }
+
+            if (HasDrawChoice)
+            {
+                return "Pick current wave choice";
+            }
+
+            if (pendingBlock != null)
+            {
+                return "Place pending block";
+            }
+
+            if (WaveBlockChoiceUsed)
+            {
+                return "Next choice on wave " + (Wave + 1);
+            }
+
+            int drawCost = GetDrawCost();
+            if (Supplies < drawCost)
+            {
+                return "Need " + drawCost + " supplies";
+            }
+
+            return string.Empty;
         }
 
         public int GetCellBlockId(int cellIndex)
@@ -780,27 +832,15 @@ namespace ZombieFoodcenter.Prototype
 
         public bool DrawIngredient()
         {
-            if (IsRunOver || EventPending)
-            {
-                return false;
-            }
-
-            if (HasDrawChoice)
-            {
-                AppendLog("Choose one of the 3 draw options first.");
-                return false;
-            }
-
-            if (pendingBlock != null)
-            {
-                AppendLog("A block is already waiting. Place or sell it first.");
-                return false;
-            }
-
             int drawCost = GetDrawCost();
-            if (Supplies < drawCost)
+            if (!CanDrawIngredient)
             {
-                AppendLog("Not enough supplies to draw.");
+                string reason = DrawLockReason;
+                if (!string.IsNullOrEmpty(reason))
+                {
+                    AppendLog("Wave choice locked: " + reason + ".");
+                }
+
                 return false;
             }
 
@@ -821,7 +861,7 @@ namespace ZombieFoodcenter.Prototype
 
             EnsureRecoveryChoice(drawCost, friction01);
             AppendDrawAssistHint(friction01);
-            AppendLog("Draw ready: choose 1 of 3 blocks.");
+            AppendLog("Wave " + Wave + " choice ready: pick 1 of 3 blocks.");
             RaiseChanged();
             return true;
         }
@@ -940,6 +980,12 @@ namespace ZombieFoodcenter.Prototype
                 return false;
             }
 
+            if (placedBlocks.Count == 1 && WaveBlockChoiceUsed)
+            {
+                AppendLog("Keep one placed block active until the next wave choice.");
+                return false;
+            }
+
             int newestId = int.MinValue;
             foreach (KeyValuePair<int, PlacedBlockState> entry in placedBlocks)
             {
@@ -1017,6 +1063,7 @@ namespace ZombieFoodcenter.Prototype
                 {
                     placementSuccessCount += 1;
                     autoMergeSuccessCount += 1;
+                    waveBlockChoiceUsedWave = Wave;
                     lastPlacementFailReason = PlacementFailReason.None;
                     EmitPresentationTrigger(PresentationTriggerType.AutoMergeSuccess, autoMergePayload);
                     bool autoMergeRecipeBingoActivated = EvaluateRecipeBingo();
@@ -1067,6 +1114,7 @@ namespace ZombieFoodcenter.Prototype
             pendingRotationQuarterTurns = 0;
             lastPlacementFailReason = PlacementFailReason.None;
             placementSuccessCount += 1;
+            waveBlockChoiceUsedWave = Wave;
             Momentum += 4f;
 
             RegisterComboAction("Place");
@@ -1705,6 +1753,7 @@ namespace ZombieFoodcenter.Prototype
             Supplies += 4 + Mathf.FloorToInt(Wave * 0.32f);
             AppendLog(lastWaveOutcomeSummary);
             AppendLog("Wave " + Wave + " started.");
+            AppendLog("Wave " + Wave + " choice available: pick and place 1 block before combat.");
 
             if (lastWaveCadencePlan.ProgressionUnlock && Wave == 4)
             {

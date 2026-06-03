@@ -80,12 +80,11 @@ namespace ZombieFoodcenter.Prototype
             bool flowLocked = model.EventPending || model.HasDrawChoice;
             bool hasPending = model.HasPendingBlock;
             bool hasPlacedBlock = HasPlacedBlockInGrid();
-            int drawCost = Mathf.Max(0, model.GetDrawCost());
             bool nextWaveReady = CanTriggerNextWaveNow();
 
             if (drawButton != null)
             {
-                drawButton.interactable = !flowLocked && !hasPending && model.Supplies >= drawCost;
+                drawButton.interactable = model.CanDrawIngredient;
             }
             if (drawButtonText != null)
             {

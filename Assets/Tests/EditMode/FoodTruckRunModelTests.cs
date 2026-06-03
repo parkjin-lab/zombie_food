@@ -144,6 +144,63 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void DrawIngredient_AfterWaveChoicePlacement_LocksUntilNextWave()
+        {
+            var model = new FoodTruckRunModel(seed: 7);
+            Assert.IsTrue(model.DrawIngredient());
+            Assert.IsTrue(model.ChooseDrawOption(0));
+            Assert.IsTrue(model.TryPlacePendingAtCell(0));
+            Assert.IsTrue(model.WaveBlockChoiceUsed);
+            Assert.IsFalse(model.CanDrawIngredient);
+            StringAssert.Contains("Next choice on wave 2", model.DrawLockReason);
+
+            int suppliesBeforeLockedDraw = model.Supplies;
+            Assert.IsFalse(model.DrawIngredient());
+            Assert.AreEqual(suppliesBeforeLockedDraw, model.Supplies);
+
+            SetPrivateField(model, "waveTimer", 19f);
+            SetAutoProperty(model, "Threat", 0f);
+            SetAutoProperty(model, "MaxTruckHp", 100000f);
+            SetAutoProperty(model, "TruckHp", 100000f);
+
+            model.Tick(1f);
+
+            Assert.AreEqual(2, model.Wave);
+            Assert.IsFalse(model.WaveBlockChoiceUsed);
+            Assert.IsTrue(model.CanDrawIngredient);
+        }
+
+        [Test]
+        public void SellIngredient_WithPendingBeforePlacement_ReopensWaveChoice()
+        {
+            var model = new FoodTruckRunModel(seed: 14);
+            Assert.IsTrue(model.DrawIngredient());
+            Assert.IsTrue(model.ChooseDrawOption(0));
+
+            Assert.IsTrue(model.SellIngredient());
+
+            Assert.IsFalse(model.HasPendingBlock);
+            Assert.IsFalse(model.WaveBlockChoiceUsed);
+            Assert.IsTrue(model.CanDrawIngredient);
+        }
+
+        [Test]
+        public void SellIngredient_LastCommittedWaveBlock_FailsToAvoidPreparationDeadlock()
+        {
+            var model = new FoodTruckRunModel(seed: 7);
+            Assert.IsTrue(model.DrawIngredient());
+            Assert.IsTrue(model.ChooseDrawOption(0));
+            Assert.IsTrue(model.TryPlacePendingAtCell(0));
+            int filledBeforeSell = model.InventoryCellsFilled;
+
+            bool sold = model.SellIngredient();
+
+            Assert.IsFalse(sold);
+            Assert.AreEqual(filledBeforeSell, model.InventoryCellsFilled);
+            Assert.IsFalse(model.CombatFlowLocked);
+        }
+
+        [Test]
         public void RotatePendingClockwise_AdvancesRotationByNinetyDegrees()
         {
             var model = new FoodTruckRunModel(seed: 13);
