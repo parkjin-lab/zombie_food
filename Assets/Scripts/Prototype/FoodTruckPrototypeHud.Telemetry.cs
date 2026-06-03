@@ -346,6 +346,8 @@ namespace ZombieFoodcenter.Prototype
                 string pressureRamp = model.CurrentPressureRampLabel;
                 string pressureRampIntensity = model.CurrentPressureRampIntensity01.ToString("0.###", CultureInfo.InvariantCulture);
                 string pressureRampSpawnMultiplier = model.CurrentPressureRampSpawnMultiplier.ToString("0.###", CultureInfo.InvariantCulture);
+                string pressureTheme = model.CurrentWavePressureThemeLabel;
+                string pressureThemeHint = model.CurrentWavePressureThemeHint;
                 string restReward = model.LastRestRewardLabel;
                 string restRewardSummary = model.LastRestRewardSummary;
                 string waveCadence = model.LastWaveCadenceSummary;
@@ -355,7 +357,7 @@ namespace ZombieFoodcenter.Prototype
                 {
                     if (writeHeader)
                     {
-                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,pressure_ramp_phase,pressure_ramp_intensity,pressure_ramp_spawn_mult,rest_reward,rest_reward_summary,wave_cadence");
+                        writer.WriteLine("timestamp_local,trigger,run_session_id,export_sequence,export_scope,scope_wave,current_wave,placement_attempt,placement_success,placement_direct_success,placement_auto_merge_success,manual_merge_success,placement_success_rate,placement_direct_success_rate,placement_auto_merge_share,blocked_out_of_bounds,blocked_occupied,blocked_invalid_anchor,blocked_no_pending,draw_pick_1,draw_pick_2,draw_pick_3,draw_pick_value_low,draw_pick_value_mid,draw_pick_value_high,draw_pick_risk_low,draw_pick_risk_mid,draw_pick_risk_high,draw_to_place_avg_s,draw_to_place_samples,overheat_entries,overheat_by_wave,rhythm_beat,rhythm_beat_duration_s,rhythm_beat_transition_count,pressure_ramp_phase,pressure_ramp_intensity,pressure_ramp_spawn_mult,pressure_theme,pressure_theme_hint,rest_reward,rest_reward_summary,wave_cadence");
                     }
 
                     string[] row =
@@ -398,6 +400,8 @@ namespace ZombieFoodcenter.Prototype
                         CsvEscape(pressureRamp),
                         CsvEscape(pressureRampIntensity),
                         CsvEscape(pressureRampSpawnMultiplier),
+                        CsvEscape(pressureTheme),
+                        CsvEscape(pressureThemeHint),
                         CsvEscape(restReward),
                         CsvEscape(restRewardSummary),
                         CsvEscape(waveCadence)
@@ -740,6 +744,7 @@ namespace ZombieFoodcenter.Prototype
                     ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount),
                     model.LastWaveCadenceSummary) + "\n" +
                 "Pressure Ramp: " + model.CurrentPressureRampLabel + " " + (model.CurrentPressureRampIntensity01 * 100f).ToString("0") + "% | Spawn x" + model.CurrentPressureRampSpawnMultiplier.ToString("0.00") + "\n" +
+                "Pressure Theme: " + model.CurrentWavePressureThemeLabel + " | " + model.CurrentWavePressureThemeHint + "\n" +
                 "Rest Reward: " + model.LastRestRewardLabel + (string.IsNullOrEmpty(model.LastRestRewardSummary) ? string.Empty : " | " + model.LastRestRewardSummary) + "\n" +
                 "Draw Assist: " + model.DrawAssistTag + "\n" +
                 "Placement: " + success + "/" + attempts + " (" + (successRate * 100f).ToString("0") + "%)\n" +

@@ -1421,6 +1421,8 @@ namespace ZombieFoodcenter.Prototype
             string rhythmBeat = model.CurrentRhythmBeatLabel;
             string pressureRamp = model.CurrentPressureRampLabel;
             string pressureRampTuning = pressureRamp + " x" + model.CurrentPressureRampSpawnMultiplier.ToString("0.00");
+            string pressureTheme = model.CurrentWavePressureThemeLabel;
+            string pressureThemeHint = model.CurrentWavePressureThemeHint;
             string restReward = model.IsRestPhase && !string.IsNullOrEmpty(model.LastRestRewardSummary)
                 ? "  |  Rest " + model.LastRestRewardLabel
                 : string.Empty;
@@ -1429,6 +1431,7 @@ namespace ZombieFoodcenter.Prototype
                 secondLineText.text =
                     "Beat " + rhythmBeat +
                     "  |  Ramp " + pressureRampTuning +
+                    "  |  Theme " + pressureTheme +
                     "  |  " + phase +
                     restReward +
                     "  |  Threat " + model.Threat.ToString("0.0") +
@@ -1448,7 +1451,8 @@ namespace ZombieFoodcenter.Prototype
                     "  |  " + phase +
                     restReward +
                     "  |  Beat " + rhythmBeat +
-                    "  |  Ramp " + pressureRampTuning;
+                    "  |  Ramp " + pressureRampTuning +
+                    "  |  Theme " + pressureTheme;
             }
 
             string pendingStatus = model.HasDrawChoice
@@ -1519,6 +1523,8 @@ namespace ZombieFoodcenter.Prototype
                     {
                         combatLineText.text =
                             "READY  |  " + model.CombatFlowLockReason +
+                            "  |  Theme " + pressureTheme +
+                            "  |  " + pressureThemeHint +
                             "  |  Wave paused";
                     }
                     else if (minimalCombatStripActive)
@@ -1538,6 +1544,7 @@ namespace ZombieFoodcenter.Prototype
                     {
                         combatLineText.text =
                             (model.WaveBlockChoiceUsed ? "Choice done" : "Wave Pick " + model.GetDrawCost()) +
+                            "  |  Theme " + pressureTheme +
                             "  |  Assist " + drawAssistTag +
                             "  |  Pending " + pendingStatus +
                             "  |  Vent " + ventMiniState +
@@ -1551,6 +1558,7 @@ namespace ZombieFoodcenter.Prototype
                     string recommendationMini = BuildRecommendationMiniLine();
                     combatLineText.text =
                         "Wave Choice: " + (model.WaveBlockChoiceUsed ? "done, next wave" : model.GetDrawCost() + " Sup available") +
+                        "   Theme: " + pressureTheme + " (" + pressureThemeHint + ")" +
                         "   Assist: " + drawAssistTag +
                         "   Pending: " + pendingStatus +
                         "   Keyboard: " + keyboardHint +

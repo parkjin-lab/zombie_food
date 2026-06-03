@@ -398,6 +398,38 @@ Add-ContractCheck $checks "pressure_ramp" "editmode_covers_pressure_ramp_profile
     'BuildPressureRampSpawnMultiplier_EasesFromLowToPeakPressure'
 ) "EditMode coverage should lock pressure ramp phase thresholds and flow-lock behavior."
 
+Add-ContractCheck $checks "wave_pressure_theme" "model_exposes_and_applies_wave_pressure_theme" $sources.model @(
+    'public enum WavePressureTheme',
+    'public WavePressureTheme CurrentWavePressureTheme =>',
+    'public string CurrentWavePressureThemeLabel =>',
+    'public string CurrentWavePressureThemeHint =>',
+    'public static WavePressureTheme ResolveWavePressureTheme(',
+    'public static int ResolveWavePressureThemeLaneIndex(',
+    'public static string BuildWavePressureThemeLabel(',
+    'public static string BuildWavePressureThemeHint(',
+    'BuildWavePressureThemeSpawnMultiplier(pressureTheme)',
+    'BuildWavePressureThemeFocusLaneChance(pressureTheme)',
+    'lastWaveCadencePlan.SpawnIntensityMultiplier',
+    'ResolveSpawnLaneForCurrentTheme()'
+) "Wave pressure themes should turn the one-per-wave choice into a readable preparation target."
+
+Add-ContractCheck $checks "wave_pressure_theme" "hud_and_telemetry_surface_wave_pressure_theme" ($sources.hud + $sources.playModeVerification + $sources.telemetry) @(
+    'string pressureTheme = model.CurrentWavePressureThemeLabel;',
+    'string pressureThemeHint = model.CurrentWavePressureThemeHint;',
+    '"  |  Theme " + pressureTheme',
+    '", theme=" + model.CurrentWavePressureThemeLabel',
+    'pressure_theme,pressure_theme_hint',
+    '"Pressure Theme: " + model.CurrentWavePressureThemeLabel'
+) "HUD, PlayMode summaries, and telemetry should show which wave pressure the player is preparing for."
+
+Add-ContractCheck $checks "wave_pressure_theme" "editmode_covers_wave_pressure_theme_mapping" $sources.tests @(
+    'ResolveWavePressureTheme_MapsCadenceToReadableThemes',
+    'BuildWavePressureThemeLabelAndHint_ArePlayerFacing',
+    'Assert.AreEqual(WavePressureTheme.HeatSurge, model.CurrentWavePressureTheme);',
+    'Assert.AreEqual(WavePressureTheme.Bruiser, model.CurrentWavePressureTheme);',
+    'Assert.AreEqual(WavePressureTheme.Balanced, model.CurrentWavePressureTheme);'
+) "EditMode coverage should lock the readable pressure theme mapping for core cadence beats."
+
 Add-ContractCheck $checks "first_block_combat_lock" "model_locks_combat_until_first_block_is_placed" $sources.model @(
     'public bool CombatFlowLocked => IsCombatFlowLocked();',
     'public string CombatFlowLockReason => GetCombatFlowLockReason();',
@@ -859,7 +891,7 @@ $result = [ordered]@{
     missing_files = $missingFiles.ToArray()
     check_count = $checks.Count
     failed_checks = $failedChecks.Count
-    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "pressure_ramp", "rest_reward", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
+    groups = @("draw_choice", "pending_placement", "invalid_placement", "telemetry", "wave_outcome", "wave_cadence", "payoff_to_read", "rhythm_beat", "pressure_ramp", "wave_pressure_theme", "rest_reward", "combat_feedback", "recipe_feedback", "editor_helpers", "regression_tests")
     checks = $checks.ToArray()
     notes = @(
         "This is a source-level contract for Draw Choice, Pending Placement, Invalid Placement, and Recipe Feedback HUD states.",

@@ -81,6 +81,15 @@ namespace ZombieFoodcenter.Prototype
         Peak
     }
 
+    public enum WavePressureTheme
+    {
+        Balanced,
+        LaneRush,
+        Swarm,
+        Bruiser,
+        HeatSurge
+    }
+
     public enum TruckDamageCause
     {
         None,
@@ -137,7 +146,16 @@ namespace ZombieFoodcenter.Prototype
             bool restGranted,
             int scheduledBeatCount,
             bool plannedSpike,
-            string summary)
+            string summary,
+            WavePressureTheme pressureTheme,
+            int pressureThemeLaneIndex,
+            string pressureThemeLabel,
+            string pressureThemeHint,
+            float spawnIntensityMultiplier,
+            float focusLaneSpawnChance,
+            float specialChanceBonus,
+            float enemyHpMultiplier,
+            float enemySpeedBonus)
         {
             Wave = wave;
             ProgressionUnlock = progressionUnlock;
@@ -148,6 +166,15 @@ namespace ZombieFoodcenter.Prototype
             ScheduledBeatCount = scheduledBeatCount;
             PlannedSpike = plannedSpike;
             Summary = summary;
+            PressureTheme = pressureTheme;
+            PressureThemeLaneIndex = pressureThemeLaneIndex;
+            PressureThemeLabel = pressureThemeLabel;
+            PressureThemeHint = pressureThemeHint;
+            SpawnIntensityMultiplier = spawnIntensityMultiplier;
+            FocusLaneSpawnChance = focusLaneSpawnChance;
+            SpecialChanceBonus = specialChanceBonus;
+            EnemyHpMultiplier = enemyHpMultiplier;
+            EnemySpeedBonus = enemySpeedBonus;
         }
 
         public int Wave { get; }
@@ -159,6 +186,15 @@ namespace ZombieFoodcenter.Prototype
         public int ScheduledBeatCount { get; }
         public bool PlannedSpike { get; }
         public string Summary { get; }
+        public WavePressureTheme PressureTheme { get; }
+        public int PressureThemeLaneIndex { get; }
+        public string PressureThemeLabel { get; }
+        public string PressureThemeHint { get; }
+        public float SpawnIntensityMultiplier { get; }
+        public float FocusLaneSpawnChance { get; }
+        public float SpecialChanceBonus { get; }
+        public float EnemyHpMultiplier { get; }
+        public float EnemySpeedBonus { get; }
     }
 
     public sealed class RecipeState
@@ -495,6 +531,9 @@ namespace ZombieFoodcenter.Prototype
         public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;
         public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;
         public int LastWaveCadenceScheduledBeatCount => lastWaveCadencePlan != null ? lastWaveCadencePlan.ScheduledBeatCount : 0;
+        public WavePressureTheme CurrentWavePressureTheme => lastWaveCadencePlan != null ? lastWaveCadencePlan.PressureTheme : WavePressureTheme.Balanced;
+        public string CurrentWavePressureThemeLabel => lastWaveCadencePlan != null ? lastWaveCadencePlan.PressureThemeLabel : BuildWavePressureThemeLabel(WavePressureTheme.Balanced, -1);
+        public string CurrentWavePressureThemeHint => lastWaveCadencePlan != null ? lastWaveCadencePlan.PressureThemeHint : BuildWavePressureThemeHint(WavePressureTheme.Balanced, -1);
         public RhythmBeatType CurrentRhythmBeat => ResolveRhythmBeat(
             IsRestPhase,
             EventPending,
@@ -1570,6 +1609,10 @@ namespace ZombieFoodcenter.Prototype
         private void SpawnLaneEnemies()
         {
             float spawnIntensity = 0.25f + Threat * 0.06f + Wave * 0.045f;
+            if (lastWaveCadencePlan != null)
+            {
+                spawnIntensity *= Mathf.Max(0.35f, lastWaveCadencePlan.SpawnIntensityMultiplier);
+            }
             spawnIntensity *= CurrentPressureRampSpawnMultiplier;
             int spawnCount = Mathf.FloorToInt(spawnIntensity);
             if (random.NextDouble() < spawnIntensity - spawnCount)
@@ -1580,16 +1623,32 @@ namespace ZombieFoodcenter.Prototype
             spawnCount = Mathf.Clamp(spawnCount, 0, 6);
             for (int i = 0; i < spawnCount; i++)
             {
-                int lane = random.Next(0, 3);
-                bool special = random.NextDouble() < Mathf.Clamp01((Wave - 4) * 0.05f + Threat * 0.004f);
+                int lane = ResolveSpawnLaneForCurrentTheme();
+                float specialChance = (Wave - 4) * 0.05f + Threat * 0.004f;
+                if (lastWaveCadencePlan != null)
+                {
+                    specialChance += lastWaveCadencePlan.SpecialChanceBonus;
+                }
+
+                bool special = random.NextDouble() < Mathf.Clamp01(specialChance);
 
                 float hp = 6f + Wave * 1.2f + Threat * 0.25f;
+                if (lastWaveCadencePlan != null)
+                {
+                    hp *= Mathf.Max(0.35f, lastWaveCadencePlan.EnemyHpMultiplier);
+                }
+
                 if (special)
                 {
                     hp *= 1.3f;
                 }
 
                 float speed = 0.045f + Wave * 0.0018f + GetWeatherSpeedBonus();
+                if (lastWaveCadencePlan != null)
+                {
+                    speed += lastWaveCadencePlan.EnemySpeedBonus;
+                }
+
                 if (special)
                 {
                     speed += 0.012f;
@@ -1597,6 +1656,18 @@ namespace ZombieFoodcenter.Prototype
 
                 laneEnemies.Add(new LaneEnemyState(nextEnemyId++, lane, special, hp, speed));
             }
+        }
+
+        private int ResolveSpawnLaneForCurrentTheme()
+        {
+            if (lastWaveCadencePlan != null &&
+                lastWaveCadencePlan.PressureThemeLaneIndex >= 0 &&
+                random.NextDouble() < Mathf.Clamp01(lastWaveCadencePlan.FocusLaneSpawnChance))
+            {
+                return Mathf.Clamp(lastWaveCadencePlan.PressureThemeLaneIndex, 0, 2);
+            }
+
+            return random.Next(0, 3);
         }
 
         private void ResolveBlockAttacks()
@@ -1759,6 +1830,7 @@ namespace ZombieFoodcenter.Prototype
             AppendLog(lastWaveOutcomeSummary);
             AppendLog("Wave " + Wave + " started.");
             AppendLog("Wave " + Wave + " choice available: pick and place 1 block before combat.");
+            AppendLog("Pressure theme: " + lastWaveCadencePlan.PressureThemeLabel + " - " + lastWaveCadencePlan.PressureThemeHint + ".");
 
             if (lastWaveCadencePlan.ProgressionUnlock && Wave == 4)
             {
@@ -1803,6 +1875,8 @@ namespace ZombieFoodcenter.Prototype
             bool bossPressureSpike = wave % 5 == 0;
             bool runEvent = wave % 3 == 0;
             bool restGranted = bossPressureSpike;
+            WavePressureTheme pressureTheme = ResolveWavePressureTheme(wave, bossPressureSpike, weatherRotation, runEvent);
+            int pressureThemeLaneIndex = ResolveWavePressureThemeLaneIndex(wave, pressureTheme);
 
             var beats = new List<string>();
             if (progressionUnlock)
@@ -1844,7 +1918,138 @@ namespace ZombieFoodcenter.Prototype
                 restGranted,
                 scheduledBeatCount,
                 plannedSpike,
-                summary);
+                summary,
+                pressureTheme,
+                pressureThemeLaneIndex,
+                BuildWavePressureThemeLabel(pressureTheme, pressureThemeLaneIndex),
+                BuildWavePressureThemeHint(pressureTheme, pressureThemeLaneIndex),
+                BuildWavePressureThemeSpawnMultiplier(pressureTheme),
+                BuildWavePressureThemeFocusLaneChance(pressureTheme),
+                BuildWavePressureThemeSpecialChanceBonus(pressureTheme),
+                BuildWavePressureThemeEnemyHpMultiplier(pressureTheme),
+                BuildWavePressureThemeEnemySpeedBonus(pressureTheme));
+        }
+
+        public static WavePressureTheme ResolveWavePressureTheme(int wave, bool bossPressureSpike, bool weatherRotation, bool runEvent)
+        {
+            if (bossPressureSpike)
+            {
+                return WavePressureTheme.Bruiser;
+            }
+
+            if (weatherRotation)
+            {
+                return WavePressureTheme.HeatSurge;
+            }
+
+            if (runEvent)
+            {
+                return WavePressureTheme.Swarm;
+            }
+
+            return wave % 2 == 0 ? WavePressureTheme.LaneRush : WavePressureTheme.Balanced;
+        }
+
+        public static int ResolveWavePressureThemeLaneIndex(int wave, WavePressureTheme theme)
+        {
+            return theme == WavePressureTheme.LaneRush ? Mathf.Abs(wave - 1) % 3 : -1;
+        }
+
+        public static string BuildWavePressureThemeLabel(WavePressureTheme theme, int laneIndex)
+        {
+            switch (theme)
+            {
+                case WavePressureTheme.LaneRush:
+                    return "Lane Rush L" + (Mathf.Clamp(laneIndex, 0, 2) + 1);
+                case WavePressureTheme.Swarm:
+                    return "Swarm";
+                case WavePressureTheme.Bruiser:
+                    return "Bruiser";
+                case WavePressureTheme.HeatSurge:
+                    return "Heat Surge";
+                default:
+                    return "Balanced";
+            }
+        }
+
+        public static string BuildWavePressureThemeHint(WavePressureTheme theme, int laneIndex)
+        {
+            switch (theme)
+            {
+                case WavePressureTheme.LaneRush:
+                    return "Cover L" + (Mathf.Clamp(laneIndex, 0, 2) + 1) + " first";
+                case WavePressureTheme.Swarm:
+                    return "Thin small waves";
+                case WavePressureTheme.Bruiser:
+                    return "Bring high damage";
+                case WavePressureTheme.HeatSurge:
+                    return "Cool before burst";
+                default:
+                    return "Hold all lanes";
+            }
+        }
+
+        private static float BuildWavePressureThemeSpawnMultiplier(WavePressureTheme theme)
+        {
+            switch (theme)
+            {
+                case WavePressureTheme.Swarm:
+                    return 1.22f;
+                case WavePressureTheme.LaneRush:
+                    return 1.06f;
+                case WavePressureTheme.HeatSurge:
+                    return 1.08f;
+                case WavePressureTheme.Bruiser:
+                    return 0.96f;
+                default:
+                    return 1f;
+            }
+        }
+
+        private static float BuildWavePressureThemeFocusLaneChance(WavePressureTheme theme)
+        {
+            return theme == WavePressureTheme.LaneRush ? 0.72f : 0f;
+        }
+
+        private static float BuildWavePressureThemeSpecialChanceBonus(WavePressureTheme theme)
+        {
+            switch (theme)
+            {
+                case WavePressureTheme.Bruiser:
+                    return 0.18f;
+                case WavePressureTheme.HeatSurge:
+                    return 0.04f;
+                default:
+                    return 0f;
+            }
+        }
+
+        private static float BuildWavePressureThemeEnemyHpMultiplier(WavePressureTheme theme)
+        {
+            switch (theme)
+            {
+                case WavePressureTheme.Swarm:
+                    return 0.86f;
+                case WavePressureTheme.Bruiser:
+                    return 1.20f;
+                default:
+                    return 1f;
+            }
+        }
+
+        private static float BuildWavePressureThemeEnemySpeedBonus(WavePressureTheme theme)
+        {
+            switch (theme)
+            {
+                case WavePressureTheme.Swarm:
+                    return 0.004f;
+                case WavePressureTheme.HeatSurge:
+                    return 0.006f;
+                case WavePressureTheme.Bruiser:
+                    return -0.002f;
+                default:
+                    return 0f;
+            }
         }
 
         private void CaptureWaveOutcomeBaseline()

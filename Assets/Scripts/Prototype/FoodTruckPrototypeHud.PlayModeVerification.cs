@@ -72,6 +72,7 @@ namespace ZombieFoodcenter.Prototype
             return "wave=" + model.Wave +
                 ", draw_choice=" + model.HasDrawChoice +
                 ", wave_choice_used=" + model.WaveBlockChoiceUsed +
+                ", theme=" + model.CurrentWavePressureThemeLabel +
                 ", pending=" + pending +
                 ", fail_reason=" + model.LastPlacementFailReason +
                 " (" + failText + ")" +

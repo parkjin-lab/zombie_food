@@ -604,6 +604,28 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void ResolveWavePressureTheme_MapsCadenceToReadableThemes()
+        {
+            Assert.AreEqual(WavePressureTheme.LaneRush, FoodTruckRunModel.ResolveWavePressureTheme(2, false, false, false));
+            Assert.AreEqual(WavePressureTheme.Swarm, FoodTruckRunModel.ResolveWavePressureTheme(3, false, false, true));
+            Assert.AreEqual(WavePressureTheme.HeatSurge, FoodTruckRunModel.ResolveWavePressureTheme(4, false, true, false));
+            Assert.AreEqual(WavePressureTheme.Bruiser, FoodTruckRunModel.ResolveWavePressureTheme(5, true, false, false));
+            Assert.AreEqual(WavePressureTheme.Balanced, FoodTruckRunModel.ResolveWavePressureTheme(7, false, false, false));
+        }
+
+        [Test]
+        public void BuildWavePressureThemeLabelAndHint_ArePlayerFacing()
+        {
+            Assert.AreEqual(1, FoodTruckRunModel.ResolveWavePressureThemeLaneIndex(2, WavePressureTheme.LaneRush));
+            Assert.AreEqual("Lane Rush L2", FoodTruckRunModel.BuildWavePressureThemeLabel(WavePressureTheme.LaneRush, 1));
+            Assert.AreEqual("Cover L2 first", FoodTruckRunModel.BuildWavePressureThemeHint(WavePressureTheme.LaneRush, 1));
+            Assert.AreEqual("Swarm", FoodTruckRunModel.BuildWavePressureThemeLabel(WavePressureTheme.Swarm, -1));
+            Assert.AreEqual("Thin small waves", FoodTruckRunModel.BuildWavePressureThemeHint(WavePressureTheme.Swarm, -1));
+            Assert.AreEqual("Heat Surge", FoodTruckRunModel.BuildWavePressureThemeLabel(WavePressureTheme.HeatSurge, -1));
+            Assert.AreEqual("Cool before burst", FoodTruckRunModel.BuildWavePressureThemeHint(WavePressureTheme.HeatSurge, -1));
+        }
+
+        [Test]
         public void ResolveRestRewardProfile_PrioritizesRepairCoolingThenStock()
         {
             Assert.AreEqual(
@@ -796,6 +818,9 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsFalse(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(1, model.LastWaveCadenceScheduledBeatCount);
             Assert.AreEqual("Wave 3: Event", model.LastWaveCadenceSummary);
+            Assert.AreEqual(WavePressureTheme.Swarm, model.CurrentWavePressureTheme);
+            Assert.AreEqual("Swarm", model.CurrentWavePressureThemeLabel);
+            Assert.AreEqual("Thin small waves", model.CurrentWavePressureThemeHint);
         }
 
         [Test]
@@ -810,6 +835,9 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(2, model.LastWaveCadenceScheduledBeatCount);
             Assert.AreEqual("Wave 4: Unlock, Weather (planned spike)", model.LastWaveCadenceSummary);
+            Assert.AreEqual(WavePressureTheme.HeatSurge, model.CurrentWavePressureTheme);
+            Assert.AreEqual("Heat Surge", model.CurrentWavePressureThemeLabel);
+            Assert.AreEqual("Cool before burst", model.CurrentWavePressureThemeHint);
         }
 
         [Test]
@@ -824,6 +852,9 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(2, model.LastWaveCadenceScheduledBeatCount);
             Assert.AreEqual("Wave 5: Boss, Rest (planned spike)", model.LastWaveCadenceSummary);
+            Assert.AreEqual(WavePressureTheme.Bruiser, model.CurrentWavePressureTheme);
+            Assert.AreEqual("Bruiser", model.CurrentWavePressureThemeLabel);
+            Assert.AreEqual("Bring high damage", model.CurrentWavePressureThemeHint);
         }
 
         [Test]
@@ -837,6 +868,9 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsFalse(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(1, model.LastWaveCadenceScheduledBeatCount);
             Assert.AreEqual("Wave 7: Unlock", model.LastWaveCadenceSummary);
+            Assert.AreEqual(WavePressureTheme.Balanced, model.CurrentWavePressureTheme);
+            Assert.AreEqual("Balanced", model.CurrentWavePressureThemeLabel);
+            Assert.AreEqual("Hold all lanes", model.CurrentWavePressureThemeHint);
         }
 
         [Test]
