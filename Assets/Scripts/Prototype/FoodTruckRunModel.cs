@@ -450,6 +450,8 @@ namespace ZombieFoodcenter.Prototype
         public IReadOnlyList<PendingBlockState> DrawChoices => drawChoices;
         public bool HasPendingBlock => pendingBlock != null;
         public PendingBlockState PendingBlock => pendingBlock;
+        public bool CombatFlowLocked => IsCombatFlowLocked();
+        public string CombatFlowLockReason => GetCombatFlowLockReason();
         public int PendingRotationDegrees => pendingRotationQuarterTurns * 90;
         public int ComboStreak => comboStreak;
         public float ComboTimerRemaining => comboTimerRemaining;
@@ -468,7 +470,7 @@ namespace ZombieFoodcenter.Prototype
         public float HeatLootMultiplier => GetHeatLootMultiplier();
         public int ComboBurstRequiredStreakValue => ComboBurstRequiredStreak;
         public bool CanActivateComboBurst => comboStreak >= ComboBurstRequiredStreak && !HasDrawChoice && !EventPending;
-        public bool CanVentHeat => !IsRunOver && !EventPending && !HasDrawChoice && ventCooldownRemaining <= 0f && Supplies >= VentSupplyCost && Heat >= VentMinHeatThreshold;
+        public bool CanVentHeat => !IsRunOver && !CombatFlowLocked && ventCooldownRemaining <= 0f && Supplies >= VentSupplyCost && Heat >= VentMinHeatThreshold;
         public PlacementFailReason LastPlacementFailReason => lastPlacementFailReason;
         public string LastPlacementFailReasonText => GetPlacementFailReasonText(lastPlacementFailReason);
         public int PlacementAttemptCount => placementAttemptCount;
@@ -492,15 +494,15 @@ namespace ZombieFoodcenter.Prototype
         public RhythmBeatType CurrentRhythmBeat => ResolveRhythmBeat(
             IsRestPhase,
             EventPending,
-            HasDrawChoice,
+            HasDrawChoice || (placedBlocks.Count == 0 && !HasPendingBlock),
             HasPendingBlock,
             !string.IsNullOrEmpty(lastWaveOutcomeNextHint),
             GetWaveProgress01());
         public string CurrentRhythmBeatLabel => BuildRhythmBeatLabel(CurrentRhythmBeat);
-        public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
+        public PressureRampPhase CurrentPressureRampPhase => ResolvePressureRampPhase(GetWaveProgress01(), IsRestPhase, EventPending, CombatFlowLocked);
         public string CurrentPressureRampLabel => BuildPressureRampLabel(CurrentPressureRampPhase);
-        public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(GetWaveProgress01(), IsRestPhase, EventPending, HasDrawChoice);
-        public float CurrentPressureRampSpawnMultiplier => BuildPressureRampSpawnMultiplier(CurrentPressureRampIntensity01, IsRestPhase, EventPending, HasDrawChoice);
+        public float CurrentPressureRampIntensity01 => BuildPressureRampIntensity01(GetWaveProgress01(), IsRestPhase, EventPending, CombatFlowLocked);
+        public float CurrentPressureRampSpawnMultiplier => BuildPressureRampSpawnMultiplier(CurrentPressureRampIntensity01, IsRestPhase, EventPending, CombatFlowLocked);
         public TruckDamageCause LastTruckDamageCause => lastTruckDamageCause;
         public string LastTruckDamageCauseLabel => BuildTruckDamageCauseLabel(lastTruckDamageCause);
         public RestRewardProfile LastRestRewardProfile => lastRestRewardProfile;
@@ -619,6 +621,36 @@ namespace ZombieFoodcenter.Prototype
             }
 
             return Mathf.Clamp01(waveTimer / WaveDurationSeconds);
+        }
+
+        private bool IsCombatFlowLocked()
+        {
+            return EventPending || HasDrawChoice || HasPendingBlock || placedBlocks.Count == 0;
+        }
+
+        private string GetCombatFlowLockReason()
+        {
+            if (EventPending)
+            {
+                return "Choose event to start combat";
+            }
+
+            if (HasDrawChoice)
+            {
+                return "Pick 1 block to start combat";
+            }
+
+            if (HasPendingBlock)
+            {
+                return "Place pending block to start combat";
+            }
+
+            if (placedBlocks.Count == 0)
+            {
+                return "Draw/place 1 block to start combat";
+            }
+
+            return string.Empty;
         }
 
         public int GetDrawCost()
@@ -1394,7 +1426,7 @@ namespace ZombieFoodcenter.Prototype
                 return;
             }
 
-            if (EventPending || HasDrawChoice)
+            if (CombatFlowLocked)
             {
                 return;
             }
@@ -1412,6 +1444,7 @@ namespace ZombieFoodcenter.Prototype
         private void SimulateSecond()
         {
             lastTruckDamageCause = TruckDamageCause.None;
+            bool combatFlowLocked = CombatFlowLocked;
             TickRecipes();
             TickCombo();
             if (ventCooldownRemaining > 0f)
@@ -1444,7 +1477,7 @@ namespace ZombieFoodcenter.Prototype
             }
 
             bool advancedWave = false;
-            if (!EventPending)
+            if (!combatFlowLocked)
             {
                 SimulateCombat();
                 waveTimer += 1f;
@@ -1638,7 +1671,7 @@ namespace ZombieFoodcenter.Prototype
         }
         private void ApplyOverheatPressureDamage()
         {
-            if (!IsOverheated || IsRestPhase || EventPending || HasDrawChoice)
+            if (!IsOverheated || IsRestPhase || CombatFlowLocked)
             {
                 return;
             }

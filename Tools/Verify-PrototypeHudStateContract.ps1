@@ -396,6 +396,29 @@ Add-ContractCheck $checks "pressure_ramp" "editmode_covers_pressure_ramp_profile
     'BuildPressureRampSpawnMultiplier_EasesFromLowToPeakPressure'
 ) "EditMode coverage should lock pressure ramp phase thresholds and flow-lock behavior."
 
+Add-ContractCheck $checks "first_block_combat_lock" "model_locks_combat_until_first_block_is_placed" $sources.model @(
+    'public bool CombatFlowLocked => IsCombatFlowLocked();',
+    'public string CombatFlowLockReason => GetCombatFlowLockReason();',
+    'return EventPending || HasDrawChoice || HasPendingBlock || placedBlocks.Count == 0;',
+    '"Draw/place 1 block to start combat"',
+    'if (!combatFlowLocked)',
+    'if (!IsOverheated || IsRestPhase || CombatFlowLocked)'
+) "The run model should pause combat pressure, wave time, and overheat chip until the first block is actually placed."
+
+Add-ContractCheck $checks "first_block_combat_lock" "hud_surfaces_first_block_ready_state" $sources.hud @(
+    'if (model.CombatFlowLocked)',
+    '"READY  |  " + model.CombatFlowLockReason',
+    '"  |  Wave paused"'
+) "The HUD should explain why the first wave is paused instead of feeling frozen."
+
+Add-ContractCheck $checks "first_block_combat_lock" "editmode_covers_first_block_start_gate" $sources.tests @(
+    'Tick_BeforeFirstBlock_DoesNotStartCombatOrWaveTimer',
+    'Tick_WithPendingBlock_DoesNotStartCombatUntilPlaced',
+    'Assert.AreEqual("Draw/place 1 block to start combat", model.CombatFlowLockReason);',
+    'Assert.AreEqual("Place pending block to start combat", model.CombatFlowLockReason);',
+    'SeedStarterBlock(model)'
+) "EditMode coverage should lock the initial preparation gate and prove existing wave-advance tests opt into combat by seeding a starter block."
+
 Add-ContractCheck $checks "rest_reward" "model_applies_named_rest_reward" $sources.model @(
     'public enum RestRewardProfile',
     'public RestRewardProfile LastRestRewardProfile => lastRestRewardProfile;',

@@ -206,6 +206,7 @@ namespace ZombieFoodcenter.Tests.EditMode
         public void Tick_LargeDelta_DoesNotProcessUnboundedSeconds()
         {
             var model = new FoodTruckRunModel(seed: 161);
+            SeedStarterBlock(model);
             SetPrivateField(model, "waveTimer", 19f);
             SetAutoProperty(model, "Threat", 0f);
             SetAutoProperty(model, "MaxTruckHp", 100000f);
@@ -220,9 +221,51 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
+        public void Tick_BeforeFirstBlock_DoesNotStartCombatOrWaveTimer()
+        {
+            var model = new FoodTruckRunModel(seed: 1601);
+            SetAutoProperty(model, "Threat", 100f);
+            SetAutoProperty(model, "Heat", 100f);
+
+            model.Tick(5f);
+
+            Assert.IsTrue(model.CombatFlowLocked);
+            Assert.AreEqual("Draw/place 1 block to start combat", model.CombatFlowLockReason);
+            Assert.AreEqual(0f, GetPrivateField<float>(model, "waveTimer"), 0.0001f);
+            Assert.AreEqual(0, model.LaneEnemies.Count);
+            Assert.AreEqual(120f, model.TruckHp, 0.0001f);
+            Assert.AreEqual(PressureRampPhase.Build, model.CurrentPressureRampPhase);
+            Assert.AreEqual(RhythmBeatType.Read, model.CurrentRhythmBeat);
+        }
+
+        [Test]
+        public void Tick_WithPendingBlock_DoesNotStartCombatUntilPlaced()
+        {
+            var model = new FoodTruckRunModel(seed: 1602);
+            Assert.IsTrue(model.DrawIngredient());
+            Assert.IsTrue(model.ChooseDrawOption(0));
+            SetAutoProperty(model, "Threat", 100f);
+
+            model.Tick(3f);
+
+            Assert.IsTrue(model.CombatFlowLocked);
+            Assert.AreEqual("Place pending block to start combat", model.CombatFlowLockReason);
+            Assert.AreEqual(0f, GetPrivateField<float>(model, "waveTimer"), 0.0001f);
+            Assert.AreEqual(0, model.LaneEnemies.Count);
+
+            Assert.IsTrue(model.TryPlacePendingAtCell(0));
+            Assert.IsFalse(model.CombatFlowLocked);
+
+            model.Tick(1f);
+
+            Assert.Greater(GetPrivateField<float>(model, "waveTimer"), 0f);
+        }
+
+        [Test]
         public void Tick_WhenWaveAdvances_RecordsOutcomeSummary()
         {
             var model = new FoodTruckRunModel(seed: 162);
+            SeedStarterBlock(model);
             SetPrivateField(model, "waveTimer", 19f);
             SetAutoProperty(model, "Threat", 0f);
             SetAutoProperty(model, "TruckHp", 95f);
@@ -1553,9 +1596,26 @@ namespace ZombieFoodcenter.Tests.EditMode
             }
         }
 
+        private static void SeedStarterBlock(FoodTruckRunModel model)
+        {
+            SeedPlacedBlock(
+                model,
+                new PlacedBlockState(
+                    id: 9001,
+                    ingredientName: "Onion",
+                    grade: 1,
+                    occupiedCellIndices: new[] { 0 },
+                    damage: 1f,
+                    cooldownSeconds: 99f,
+                    colorSeed: 1,
+                    targetType: BlockTargetType.Nearest,
+                    shapeKey: "Dot"));
+        }
+
         private static void AdvanceToWave(FoodTruckRunModel model, int targetWave)
         {
             Assert.Greater(targetWave, 1);
+            SeedStarterBlock(model);
             SetAutoProperty(model, "Wave", targetWave - 1);
             SetPrivateField(model, "waveTimer", 19f);
             SetAutoProperty(model, "Threat", 0f);

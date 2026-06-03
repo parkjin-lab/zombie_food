@@ -1509,7 +1509,13 @@ namespace ZombieFoodcenter.Prototype
                 string comboTimer = model.ComboStreak > 0 ? "   ComboTimer: " + model.ComboTimerRemaining.ToString("0") + "s" : string.Empty;
                 if (gameplayFocusHud)
                 {
-                    if (minimalCombatStripActive)
+                    if (model.CombatFlowLocked)
+                    {
+                        combatLineText.text =
+                            "READY  |  " + model.CombatFlowLockReason +
+                            "  |  Wave paused";
+                    }
+                    else if (minimalCombatStripActive)
                     {
                         string comboMini = model.ComboStreak > 0
                             ? ("  C" + model.ComboStreak + "/" + model.ComboBurstRequiredStreakValue + " " + model.ComboTimerRemaining.ToString("0") + "s")
