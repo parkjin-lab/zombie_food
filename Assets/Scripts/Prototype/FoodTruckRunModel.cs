@@ -473,7 +473,7 @@ namespace ZombieFoodcenter.Prototype
         public float HeatRiskMultiplier => GetHeatRiskMultiplier();
         public float HeatLootMultiplier => GetHeatLootMultiplier();
         public int ComboBurstRequiredStreakValue => ComboBurstRequiredStreak;
-        public bool CanActivateComboBurst => comboStreak >= ComboBurstRequiredStreak && !HasDrawChoice && !EventPending;
+        public bool CanActivateComboBurst => comboStreak >= ComboBurstRequiredStreak && !CombatFlowLocked;
         public bool CanVentHeat => !IsRunOver && !CombatFlowLocked && ventCooldownRemaining <= 0f && Supplies >= VentSupplyCost && Heat >= VentMinHeatThreshold;
         public PlacementFailReason LastPlacementFailReason => lastPlacementFailReason;
         public string LastPlacementFailReasonText => GetPlacementFailReasonText(lastPlacementFailReason);
@@ -498,7 +498,7 @@ namespace ZombieFoodcenter.Prototype
         public RhythmBeatType CurrentRhythmBeat => ResolveRhythmBeat(
             IsRestPhase,
             EventPending,
-            HasDrawChoice || (placedBlocks.Count == 0 && !HasPendingBlock),
+            HasDrawChoice || (!HasPendingBlock && (!WaveBlockChoiceUsed || placedBlocks.Count == 0)),
             HasPendingBlock,
             !string.IsNullOrEmpty(lastWaveOutcomeNextHint),
             GetWaveProgress01());
@@ -631,7 +631,7 @@ namespace ZombieFoodcenter.Prototype
 
         private bool IsCombatFlowLocked()
         {
-            return EventPending || HasDrawChoice || HasPendingBlock || placedBlocks.Count == 0;
+            return EventPending || HasDrawChoice || HasPendingBlock || placedBlocks.Count == 0 || !WaveBlockChoiceUsed;
         }
 
         private string GetCombatFlowLockReason()
@@ -654,6 +654,11 @@ namespace ZombieFoodcenter.Prototype
             if (placedBlocks.Count == 0)
             {
                 return "Draw/place 1 block to start combat";
+            }
+
+            if (!WaveBlockChoiceUsed)
+            {
+                return "Take wave choice to start combat";
             }
 
             return string.Empty;
@@ -1331,7 +1336,7 @@ namespace ZombieFoodcenter.Prototype
 
         public bool ActivateComboBurst()
         {
-            if (IsRunOver || EventPending || HasDrawChoice)
+            if (IsRunOver || CombatFlowLocked)
             {
                 return false;
             }

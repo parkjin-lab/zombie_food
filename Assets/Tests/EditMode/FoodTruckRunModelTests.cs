@@ -144,7 +144,7 @@ namespace ZombieFoodcenter.Tests.EditMode
         }
 
         [Test]
-        public void DrawIngredient_AfterWaveChoicePlacement_LocksUntilNextWave()
+        public void DrawIngredient_AfterWaveChoicePlacement_RefreshesButPausesNextWaveUntilPlaced()
         {
             var model = new FoodTruckRunModel(seed: 7);
             Assert.IsTrue(model.DrawIngredient());
@@ -168,6 +168,20 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.AreEqual(2, model.Wave);
             Assert.IsFalse(model.WaveBlockChoiceUsed);
             Assert.IsTrue(model.CanDrawIngredient);
+            Assert.IsTrue(model.CombatFlowLocked);
+            Assert.AreEqual("Take wave choice to start combat", model.CombatFlowLockReason);
+
+            model.Tick(3f);
+
+            Assert.AreEqual(0f, GetPrivateField<float>(model, "waveTimer"), 0.0001f);
+            Assert.AreEqual(2, model.Wave);
+
+            Assert.IsTrue(model.DrawIngredient());
+            Assert.IsTrue(model.ChooseDrawOption(0));
+            PlacePendingAtFirstValidCell(model);
+
+            Assert.IsTrue(model.WaveBlockChoiceUsed);
+            Assert.IsFalse(model.CombatFlowLocked);
         }
 
         [Test]
@@ -1667,13 +1681,30 @@ namespace ZombieFoodcenter.Tests.EditMode
                     colorSeed: 1,
                     targetType: BlockTargetType.Nearest,
                     shapeKey: "Dot"));
+            SetPrivateField(model, "waveBlockChoiceUsedWave", model.Wave);
+        }
+
+        private static void PlacePendingAtFirstValidCell(FoodTruckRunModel model)
+        {
+            for (int anchor = 0; anchor < FoodTruckRunModel.InventoryCellCount; anchor++)
+            {
+                if (!model.TryGetPendingFootprintCellsPreview(anchor, true, out _))
+                {
+                    continue;
+                }
+
+                Assert.IsTrue(model.TryPlacePendingAtCell(anchor));
+                return;
+            }
+
+            Assert.Fail("No valid pending placement anchor was available.");
         }
 
         private static void AdvanceToWave(FoodTruckRunModel model, int targetWave)
         {
             Assert.Greater(targetWave, 1);
-            SeedStarterBlock(model);
             SetAutoProperty(model, "Wave", targetWave - 1);
+            SeedStarterBlock(model);
             SetPrivateField(model, "waveTimer", 19f);
             SetAutoProperty(model, "Threat", 0f);
             SetAutoProperty(model, "MaxTruckHp", 100000f);

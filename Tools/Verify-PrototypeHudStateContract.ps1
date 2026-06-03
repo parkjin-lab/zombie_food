@@ -401,8 +401,9 @@ Add-ContractCheck $checks "pressure_ramp" "editmode_covers_pressure_ramp_profile
 Add-ContractCheck $checks "first_block_combat_lock" "model_locks_combat_until_first_block_is_placed" $sources.model @(
     'public bool CombatFlowLocked => IsCombatFlowLocked();',
     'public string CombatFlowLockReason => GetCombatFlowLockReason();',
-    'return EventPending || HasDrawChoice || HasPendingBlock || placedBlocks.Count == 0;',
+    'return EventPending || HasDrawChoice || HasPendingBlock || placedBlocks.Count == 0 || !WaveBlockChoiceUsed;',
     '"Draw/place 1 block to start combat"',
+    '"Take wave choice to start combat"',
     'if (!combatFlowLocked)',
     'if (!IsOverheated || IsRestPhase || CombatFlowLocked)'
 ) "The run model should pause combat pressure, wave time, and overheat chip until the first block is actually placed."
@@ -440,10 +441,11 @@ Add-ContractCheck $checks "per_wave_choice" "hud_labels_wave_choice_without_midw
 ) "The HUD should present the block offer as a single wave pick and hide repeat-buy affordance during combat."
 
 Add-ContractCheck $checks "per_wave_choice" "editmode_covers_wave_choice_lock_and_recovery" $sources.tests @(
-    'DrawIngredient_AfterWaveChoicePlacement_LocksUntilNextWave',
+    'DrawIngredient_AfterWaveChoicePlacement_RefreshesButPausesNextWaveUntilPlaced',
     'SellIngredient_WithPendingBeforePlacement_ReopensWaveChoice',
     'SellIngredient_LastCommittedWaveBlock_FailsToAvoidPreparationDeadlock',
     'Assert.IsFalse(model.CanDrawIngredient);',
+    'Assert.AreEqual("Take wave choice to start combat", model.CombatFlowLockReason);',
     'Assert.IsFalse(model.WaveBlockChoiceUsed);'
 ) "EditMode coverage should lock same-wave redraw rejection, next-wave refresh, pending sell recovery, and last-block deadlock protection."
 
