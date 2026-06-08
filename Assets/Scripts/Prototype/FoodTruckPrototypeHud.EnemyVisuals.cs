@@ -234,6 +234,8 @@ namespace ZombieFoodcenter.Prototype
 
             if (!widget.KnockoutFloaterSpawned)
             {
+                SpawnEnemyAttackTrail(widget, true);
+                SpawnEnemyHitEffect(widget, true);
                 SpawnEnemyDamageFloater(widget, Mathf.Max(1f, widget.LastHp), true);
                 widget.KnockoutFloaterSpawned = true;
             }
@@ -456,6 +458,11 @@ namespace ZombieFoodcenter.Prototype
 
         private void SpawnEnemyHitEffect(EnemyVisualWidget source)
         {
+            SpawnEnemyHitEffect(source, false);
+        }
+
+        private void SpawnEnemyHitEffect(EnemyVisualWidget source, bool knockout)
+        {
             if (source == null || source.Rect == null || source.LaneIndex < 0 || source.LaneIndex >= laneTrackRoots.Length)
             {
                 return;
@@ -467,9 +474,11 @@ namespace ZombieFoodcenter.Prototype
                 return;
             }
 
-            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 0f, 1.00f, new Color(1f, 0.96f, 0.18f, 1f));
-            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 52f, 0.72f, new Color(1f, 0.55f, 0.16f, 0.96f));
-            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, -48f, 0.58f, new Color(1f, 1f, 1f, 0.88f));
+            float punch = knockout ? 1.22f : 1f;
+            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 0f, 1.08f * punch, new Color(1f, 0.96f, 0.18f, 1f));
+            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, 52f, 0.80f * punch, new Color(1f, 0.55f, 0.16f, 0.96f));
+            SpawnEnemyHitSlash(laneRoot, source.Rect.anchoredPosition, -48f, 0.66f * punch, new Color(1f, 1f, 1f, 0.88f));
+            SpawnEnemyHitImpactCore(laneRoot, source.Rect.anchoredPosition, punch);
         }
 
         private void SpawnEnemyHitSlash(RectTransform laneRoot, Vector2 center, float angleOffset, float scale, Color color)
@@ -508,6 +517,11 @@ namespace ZombieFoodcenter.Prototype
 
         private void SpawnEnemyAttackTrail(EnemyVisualWidget source)
         {
+            SpawnEnemyAttackTrail(source, false);
+        }
+
+        private void SpawnEnemyAttackTrail(EnemyVisualWidget source, bool knockout)
+        {
             if (source == null || source.Rect == null || source.LaneIndex < 0 || source.LaneIndex >= laneTrackRoots.Length)
             {
                 return;
@@ -519,34 +533,112 @@ namespace ZombieFoodcenter.Prototype
                 return;
             }
 
-            RectTransform rect = new GameObject("EnemyAttackTrail", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
-            rect.transform.SetParent(laneRoot, false);
-            rect.anchorMin = new Vector2(0f, 0.5f);
-            rect.anchorMax = new Vector2(0f, 0.5f);
-            rect.pivot = new Vector2(0f, 0.5f);
-
             float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
             float truckEndX = foodTruckSprite != null
                 ? Mathf.Clamp(laneHeight * 1.66f, 118f, 252f)
                 : Mathf.Clamp(laneHeight * 0.82f, 64f, 136f);
             Vector2 target = source.Rect.anchoredPosition;
             float width = Mathf.Max(laneHeight * 0.58f, target.x - truckEndX);
-            rect.anchoredPosition = new Vector2(Mathf.Min(truckEndX, target.x - width), target.y + UnityEngine.Random.Range(-3f, 3f));
-            rect.sizeDelta = new Vector2(width, Mathf.Clamp(laneHeight * 0.13f, 14f, 34f));
-            rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(-5f, 5f));
+            float y = target.y + UnityEngine.Random.Range(-3f, 3f);
+            float startX = Mathf.Min(truckEndX, target.x - width);
+            float angle = UnityEngine.Random.Range(-4f, 4f);
+            float punch = knockout ? 1.22f : 1f;
+
+            SpawnEnemyAttackTrailSegment(laneRoot, startX, y, width, laneHeight, angle, 0.23f * punch, new Color(0.22f, 0.08f, 0.02f, 0.68f), 1.08f);
+            SpawnEnemyAttackTrailSegment(laneRoot, startX, y, width, laneHeight, angle, 0.14f * punch, new Color(1f, 0.72f, 0.10f, 0.96f), 1.00f);
+            SpawnEnemyAttackTrailSegment(laneRoot, startX + width * 0.18f, y, width * 0.62f, laneHeight, angle, 0.07f * punch, new Color(1f, 1f, 0.72f, 0.96f), 0.86f);
+            SpawnEnemyAttackArrowhead(laneRoot, target, laneHeight, knockout);
+        }
+
+        private void SpawnEnemyAttackTrailSegment(
+            RectTransform laneRoot,
+            float startX,
+            float y,
+            float width,
+            float laneHeight,
+            float angle,
+            float heightRatio,
+            Color color,
+            float durationScale)
+        {
+            RectTransform rect = new GameObject("EnemyAttackTrail", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            rect.transform.SetParent(laneRoot, false);
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.pivot = new Vector2(0f, 0.5f);
+            rect.anchoredPosition = new Vector2(startX, y);
+            rect.sizeDelta = new Vector2(width, Mathf.Clamp(laneHeight * heightRatio, 8f, 54f));
+            rect.localRotation = Quaternion.Euler(0f, 0f, angle);
             rect.localScale = Vector3.one;
 
             Image image = rect.GetComponent<Image>();
             image.raycastTarget = false;
-            image.color = new Color(1f, 0.88f, 0.18f, 0.92f);
+            image.color = color;
             rect.SetAsLastSibling();
 
             EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
             effect.Rect = rect;
             effect.Image = image;
-            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration * 0.95f);
+            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration * durationScale);
             effect.Remaining = effect.Duration;
             effect.Velocity = new Vector2(Mathf.Max(12f, enemyHitEffectTravelSpeed * 0.18f), 0f);
+            enemyHitEffects.Add(effect);
+        }
+
+        private void SpawnEnemyAttackArrowhead(RectTransform laneRoot, Vector2 target, float laneHeight, bool knockout)
+        {
+            RectTransform rect = new GameObject("EnemyAttackArrowhead", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            rect.transform.SetParent(laneRoot, false);
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = target + new Vector2(-Mathf.Clamp(laneHeight * 0.10f, 5f, 14f), 0f);
+            float size = Mathf.Clamp(laneHeight * (knockout ? 0.28f : 0.22f), 18f, 52f);
+            rect.sizeDelta = new Vector2(size, size);
+            rect.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            rect.localScale = Vector3.one;
+
+            Image image = rect.GetComponent<Image>();
+            image.raycastTarget = false;
+            image.color = knockout
+                ? new Color(1f, 0.96f, 0.20f, 0.98f)
+                : new Color(1f, 0.70f, 0.12f, 0.92f);
+            rect.SetAsLastSibling();
+
+            EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
+            effect.Rect = rect;
+            effect.Image = image;
+            effect.Duration = Mathf.Max(0.08f, enemyHitEffectDuration * (knockout ? 1.14f : 0.96f));
+            effect.Remaining = effect.Duration;
+            effect.Velocity = new Vector2(Mathf.Max(4f, enemyHitEffectTravelSpeed * 0.08f), Mathf.Max(3f, enemyHitEffectTravelSpeed * 0.05f));
+            enemyHitEffects.Add(effect);
+        }
+
+        private void SpawnEnemyHitImpactCore(RectTransform laneRoot, Vector2 center, float scale)
+        {
+            RectTransform rect = new GameObject("EnemyHitImpactCore", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+            rect.transform.SetParent(laneRoot, false);
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = center;
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            float size = Mathf.Clamp(laneHeight * 0.34f * Mathf.Clamp(scale, 0.6f, 1.5f), 22f, 68f);
+            rect.sizeDelta = new Vector2(size, size);
+            rect.localRotation = Quaternion.Euler(0f, 0f, UnityEngine.Random.Range(0f, 360f));
+            rect.localScale = Vector3.one;
+
+            Image image = rect.GetComponent<Image>();
+            image.raycastTarget = false;
+            image.color = new Color(1f, 0.94f, 0.26f, 0.94f);
+            rect.SetAsLastSibling();
+
+            EnemyHitEffectWidget effect = new EnemyHitEffectWidget();
+            effect.Rect = rect;
+            effect.Image = image;
+            effect.Duration = Mathf.Max(0.10f, enemyHitEffectDuration * 0.76f);
+            effect.Remaining = effect.Duration;
+            effect.Velocity = Vector2.zero;
             enemyHitEffects.Add(effect);
         }
 
