@@ -1,19 +1,19 @@
 ﻿# Prototype Play Mode Review Pack
 
-Generated: 2026-05-30 14:49 KST
+Generated: 2026-06-08 22:59 KST
 Review readiness: `ready_for_visual_review`
 Visual review required: `True`
 
 ## Machine Summary
 - Suite status: `captured_manual` (4/4)
 - Suite evidence source: `manual screenshot registration`
-- Screenshot status: `suite_ready` (5/5 quality pass)
+- Screenshot status: `suite_ready` (7/7 quality pass)
 - Unlabeled screenshots: `0`
 - Manual registration candidates: `0`
 - Triaged non-state screenshots: `1`
 - Manual record status: `not_recorded`
 - Asset status: `ok`, planned missing: `14`
-- Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_labels)
+- Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_trails_and_labels)
 
 ## Planned Resource Backlog
 These missing planned resources are not runtime blockers. Use them to separate feedback polish from Play Mode readability failures.
@@ -63,13 +63,21 @@ These missing planned resources are not runtime blockers. Use them to separate f
 - Quality: `True`, size: `1170x2532`, bytes: `114110`
 ![Triaged Non-State](PlayModeScreenshots/foodtruck-playmode-20260504-010245.png)
 
+### Wave Combat
+- Quality: `True`, size: `1170x2532`, bytes: `106559`
+![Wave Combat](PlayModeScreenshots/foodtruck-playmode-20260531-011713-891-wave-combat.png)
+
+### Wave Combat
+- Quality: `True`, size: `1170x2532`, bytes: `60532`
+![Wave Combat](PlayModeScreenshots/foodtruck-playmode-20260604-004905-153-wave-combat.png)
+
 ## Visual Acceptance Checklist
 | State | Must see in screenshot | Record as FIX when missing |
 | --- | --- | --- |
 | Draw Choice | Three comparable cards with shape, ingredient, value/risk, `Fit`, `Heat`, and `Role` visible. | `FIX_LAYOUT` if clipped or overlapping; `FIX_FEEDBACK` if the choice tradeoff is unclear. |
 | Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |
 | Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |
-| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and action labels `-12`, `KO`, `LEAK`, `TRUCK -7` plus lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if action labels or payoff cues are missing. |
+| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels `-12`, `KO`, `LEAK`, `TRUCK -7` and lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if attack trails, action labels, or payoff cues are missing. |
 
 ## Manual Evidence Registration Hints
 No unlabeled machine-quality PNG candidates are available for manual registration.

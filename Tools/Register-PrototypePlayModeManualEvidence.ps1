@@ -387,7 +387,7 @@ $resolvedPrepareResult = if (-not [string]::IsNullOrWhiteSpace($PrepareResult)) 
     $PrepareResult
 }
 elseif ($State -eq "Wave Combat" -and $WaveCombatActionShowcase) {
-    "Manual screenshot registered; reviewer marked attack labels visible."
+    "Manual screenshot registered; reviewer marked attack trails and attack labels visible."
 }
 else {
     "Manual screenshot registered from existing Play Mode evidence."

@@ -675,7 +675,11 @@ Add-ContractCheck $checks "editor_helpers" "suite_evidence_is_machine_checkable"
     'suite_capture_source',
     'wave_combat_action_showcase_ready',
     'wave_combat_action_showcase_reason',
-    'Get-WaveCombatActionShowcaseStatus'
+    'Get-WaveCombatActionShowcaseStatus',
+    '$prepareResult.Contains("attack trails")',
+    '$prepareResult.Contains("attack labels")',
+    'prepare_result_mentions_attack_trails_and_labels',
+    'legacy_wave_combat_capture_without_attack_trails_and_labels'
 ) "The low-interaction suite evidence must be parsable before manual PASS/FIX recording."
 
 Add-ContractCheck $checks "editor_helpers" "manual_screenshot_evidence_can_update_suite_manifest" $sources.playModeManualEvidenceRegister @(
@@ -689,7 +693,8 @@ Add-ContractCheck $checks "editor_helpers" "manual_screenshot_evidence_can_updat
     'Read-PngHeader',
     'Write-TextWithFallback',
     'manual_evidence_status',
-    'registered_count'
+    'registered_count',
+    'reviewer marked attack trails and attack labels visible'
 ) "PC-limited sessions should be able to register standalone PNG evidence into the suite manifest without pretending it was captured by direct play."
 
 Add-ContractCheck $checks "editor_helpers" "screenshot_evidence_quality_is_machine_checkable" $sources.playModeScreenshotVerifier @(
@@ -813,7 +818,9 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     'Screenshot Contact Sheet',
     'Visual Acceptance Checklist',
     'Wave Combat action showcase',
+    'attack trails plus action labels',
     '``-12``, ``KO``, ``LEAK``, ``TRUCK -7``',
+    '``FIX_FEEDBACK`` if attack trails, action labels, or payoff cues are missing.',
     'Recommended Result Commands',
     'Write-TextWithFallback',
     'visual_review_required'
@@ -829,7 +836,8 @@ Add-ContractCheck $checks "editor_helpers" "retake_plan_collects_focused_capture
     'Pending Placement',
     'Invalid Placement',
     'retake_plan_status',
-    'focused_retake_count'
+    'focused_retake_count',
+    'confirm attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable'
 ) "Focused retake planning should translate partial evidence into state-specific capture work."
 
 Add-ContractCheck $checks "editor_helpers" "retake_plan_doc_is_machine_checkable" $sources.playModeRetakePlanVerifier @(

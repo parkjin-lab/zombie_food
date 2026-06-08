@@ -1,6 +1,6 @@
-﻿# Prototype Play Mode Retake Plan
+# Prototype Play Mode Retake Plan
 
-Generated: 2026-05-30 14:51 KST
+Generated: 2026-06-08 22:59 KST
 Retake plan status: `ok`
 
 ## Machine Summary
@@ -12,13 +12,13 @@ Retake plan status: `ok`
 - Triaged non-state screenshots: `1`
 - Review readiness: `ready_for_visual_review`
 - Manual record status: `not_recorded`
-- Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_labels)
+- Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_trails_and_labels)
 
 ## Focused Retake Targets
 No Draw/Pending/Invalid focused retakes are currently missing. Continue with review pack judgment or the next recorded blocker.
 
 ## Wave Combat Note
-Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.
+Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.
 
 ## Follow-Up Commands
 Before opening Unity, verify this plan still matches the current evidence state:

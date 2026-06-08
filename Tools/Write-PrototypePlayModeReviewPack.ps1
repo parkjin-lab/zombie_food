@@ -333,7 +333,7 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine("| Draw Choice | Three comparable cards with shape, ingredient, value/risk, ``Fit``, ``Heat``, and ``Role`` visible. | ``FIX_LAYOUT`` if clipped or overlapping; ``FIX_FEEDBACK`` if the choice tradeoff is unclear. |")
     [void]$builder.AppendLine("| Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | ``FIX_LAYOUT`` if board/controls crowd the battlefield; ``FIX_FEEDBACK`` if the next action is unclear. |")
     [void]$builder.AppendLine("| Invalid Placement | Blocked reason and ``Next`` recovery hint appear near the board/cue. | ``FIX_FEEDBACK`` if the reason or recovery hint is missing. |")
-    [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and action labels ``-12``, ``KO``, ``LEAK``, ``TRUCK -7`` plus lane flash are visible. | ``FIX_LAYOUT`` if the battlefield is crowded; ``FIX_FEEDBACK`` if action labels or payoff cues are missing. |")
+    [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels ``-12``, ``KO``, ``LEAK``, ``TRUCK -7`` and lane flash are visible. | ``FIX_LAYOUT`` if the battlefield is crowded; ``FIX_FEEDBACK`` if attack trails, action labels, or payoff cues are missing. |")
     [void]$builder.AppendLine()
 
     [void]$builder.AppendLine("## Manual Evidence Registration Hints")

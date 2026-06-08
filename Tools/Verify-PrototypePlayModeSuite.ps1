@@ -130,17 +130,17 @@ function Get-WaveCombatActionShowcaseStatus {
     $prepareResult = if ($waveCombat.Contains("prepare_result")) { [string]$waveCombat["prepare_result"] } else { "NOT_RECORDED" }
     $screenshotExists = if ($waveCombat.Contains("screenshot_exists")) { [bool]$waveCombat["screenshot_exists"] } else { $false }
 
-    if ($prepared.ToLowerInvariant() -eq "yes" -and $prepareResult.Contains("attack labels")) {
+    if ($prepared.ToLowerInvariant() -eq "yes" -and $prepareResult.Contains("attack trails") -and $prepareResult.Contains("attack labels")) {
         return [ordered]@{
             ready = $true
-            reason = "prepare_result_mentions_attack_labels"
+            reason = "prepare_result_mentions_attack_trails_and_labels"
         }
     }
 
     if ($screenshotExists) {
         return [ordered]@{
             ready = $false
-            reason = "legacy_wave_combat_capture_without_attack_labels"
+            reason = "legacy_wave_combat_capture_without_attack_trails_and_labels"
         }
     }
 

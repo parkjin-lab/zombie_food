@@ -75,7 +75,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 ## Rhythm Review Criteria
 - `Read`: Draw Choice에서 세 카드의 차이와 현재 Heat/lane pressure를 3초 안에 읽을 수 있다.
 - `Commit`: Pending/Invalid Placement에서 다음 행동이 막히지 않고, 실패 후 회복 행동이 바로 보인다.
-- `Pressure`: Wave Combat에서 Heat, lane pressure, zombie approach, attack labels가 상승 압박으로 느껴진다.
+- `Pressure`: Wave Combat에서 Heat, lane pressure, zombie approach, attack trails, attack labels가 상승 압박으로 느껴진다.
 - `Payoff`: Wave/recipe 결과 cue가 다음 선택 전에 읽히고, 방금 한 선택의 결과를 설명한다.
 - `Release`: boss/rest/event 후 숨 고르는 구간이나 의도된 변주가 보인다.
 - `FIX_FEEDBACK`: 리듬이 깨진 beat를 같이 기록한다. 예: `FIX_FEEDBACK - Payoff cue too short`.

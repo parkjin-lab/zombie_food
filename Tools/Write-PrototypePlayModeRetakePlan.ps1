@@ -188,10 +188,10 @@ function Build-RetakePlanMarkdown {
 
     [void]$builder.AppendLine("## Wave Combat Note")
     if ($waveReady -eq $true) {
-        [void]$builder.AppendLine("Wave Combat action showcase is already machine-reported as ready. Still judge overlap/readability visually before recording PASS.")
+        [void]$builder.AppendLine("Wave Combat action showcase is already machine-reported as ready. Still judge attack trail overlap/readability visually before recording PASS.")
     }
     else {
-        [void]$builder.AppendLine('Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.')
+        [void]$builder.AppendLine('Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.')
     }
     [void]$builder.AppendLine()
 
