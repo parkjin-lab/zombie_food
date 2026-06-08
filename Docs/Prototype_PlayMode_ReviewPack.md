@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Review Pack
 
-Generated: 2026-06-08 22:59 KST
+Generated: 2026-06-08 23:56 KST
 Review readiness: `ready_for_visual_review`
 Visual review required: `True`
 
@@ -86,13 +86,13 @@ No unlabeled machine-quality PNG candidates are available for manual registratio
 - `Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010245.png`: Build Flow idle screenshot; it does not show 3 Draw Choice cards, a pending block, or invalid placement feedback.
 
 ## Recommended Result Commands
-All PASS after visual review:
+Current Wave Combat evidence is not action-showcase ready; record feedback fix or retake before PASS:
 ```powershell
-powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS -Apply
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat FIX_FEEDBACK -TopIssue "Wave Combat evidence still needs readable attack trails and action labels." -Apply
 ```
 Example FIX result:
 ```powershell
-powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement FIX_LAYOUT -InvalidPlacement FIX_FEEDBACK -WaveCombat PASS -Apply
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement FIX_LAYOUT -InvalidPlacement FIX_FEEDBACK -WaveCombat FIX_FEEDBACK -Apply
 ```
 After applying a result:
 ```powershell

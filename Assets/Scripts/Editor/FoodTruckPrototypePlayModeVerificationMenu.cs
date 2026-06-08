@@ -182,7 +182,7 @@ namespace ZombieFoodcenter.Editor
         {
             bool confirmed = EditorUtility.DisplayDialog(
                 "Record prototype Play Mode PASS?",
-                "Use this only after visually confirming Draw Choice, Pending Placement, Invalid Placement, and Wave Combat are readable and usable. If a verification suite manifest exists, its screenshots will be included as evidence.",
+                "Use this only after visually confirming Draw Choice, Pending Placement, Invalid Placement, and Wave Combat are readable and usable. Wave Combat must show attack trails, -12, KO, LEAK, TRUCK -7, and lane flash. If a verification suite manifest exists, its screenshots will be included as evidence.",
                 "Record PASS",
                 "Cancel");
 
@@ -288,7 +288,7 @@ namespace ZombieFoodcenter.Editor
             builder.AppendLine("- Draw Choice: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
             builder.AppendLine("- Pending Placement: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
             builder.AppendLine("- Invalid Placement: PASS / FIX_FEEDBACK / FIX_LAYOUT / BLOCKED");
-            builder.AppendLine("- Wave Combat: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
+            builder.AppendLine("- Wave Combat: PASS / FIX_FEEDBACK / FIX_LAYOUT / FIX_ASSET / BLOCKED");
             builder.AppendLine();
             builder.AppendLine("After recording, run:");
             builder.AppendLine("powershell -ExecutionPolicy Bypass -File \"Tools\\Verify-PrototypePlayModeRecord.ps1\" -ProjectPath \"D:\\uni\\zombieFoodcenter\" -JsonOnly");
@@ -488,7 +488,7 @@ namespace ZombieFoodcenter.Editor
             builder.AppendLine("Draw Choice: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
             builder.AppendLine("Pending Placement: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
             builder.AppendLine("Invalid Placement: PASS / FIX_FEEDBACK / FIX_LAYOUT / BLOCKED");
-            builder.AppendLine("Wave Combat: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED");
+            builder.AppendLine("Wave Combat: PASS / FIX_FEEDBACK / FIX_LAYOUT / FIX_ASSET / BLOCKED");
             builder.AppendLine();
             builder.AppendLine("After recording, run:");
             builder.AppendLine("powershell -ExecutionPolicy Bypass -File \"Tools\\Verify-PrototypePlayModeRecord.ps1\" -ProjectPath \"D:\\uni\\zombieFoodcenter\" -JsonOnly");

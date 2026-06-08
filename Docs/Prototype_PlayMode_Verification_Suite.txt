@@ -42,7 +42,7 @@ Manual result template:
 Draw Choice: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED
 Pending Placement: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED
 Invalid Placement: PASS / FIX_FEEDBACK / FIX_LAYOUT / BLOCKED
-Wave Combat: PASS / FIX_LAYOUT / FIX_ASSET / BLOCKED
+Wave Combat: PASS / FIX_FEEDBACK / FIX_LAYOUT / FIX_ASSET / BLOCKED
 
 After recording, run:
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly

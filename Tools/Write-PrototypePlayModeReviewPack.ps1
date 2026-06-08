@@ -258,6 +258,7 @@ function Build-ReviewPackMarkdown {
     $manualRegistrationCommands = Get-ManualRegistrationCommands -ScreenshotData $ScreenshotData
     $triagedNonStateScreenshots = Get-TriagedNonStateScreenshots -ScreenshotData $ScreenshotData
     $plannedResourceRows = Get-PlannedResourceRows -AssetData $AssetData
+    $waveCombatActionShowcaseReady = ($SuiteData.wave_combat_action_showcase_ready -eq $true)
     $builder = New-Object System.Text.StringBuilder
 
     [void]$builder.AppendLine("# Prototype Play Mode Review Pack")
@@ -365,13 +366,21 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine()
 
     [void]$builder.AppendLine("## Recommended Result Commands")
-    [void]$builder.AppendLine("All PASS after visual review:")
-    [void]$builder.AppendLine('```powershell')
-    [void]$builder.AppendLine('powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS -Apply')
-    [void]$builder.AppendLine('```')
+    if ($waveCombatActionShowcaseReady) {
+        [void]$builder.AppendLine("All PASS after visual review:")
+        [void]$builder.AppendLine('```powershell')
+        [void]$builder.AppendLine('powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS -Apply')
+        [void]$builder.AppendLine('```')
+    }
+    else {
+        [void]$builder.AppendLine("Current Wave Combat evidence is not action-showcase ready; record feedback fix or retake before PASS:")
+        [void]$builder.AppendLine('```powershell')
+        [void]$builder.AppendLine('powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat FIX_FEEDBACK -TopIssue "Wave Combat evidence still needs readable attack trails and action labels." -Apply')
+        [void]$builder.AppendLine('```')
+    }
     [void]$builder.AppendLine("Example FIX result:")
     [void]$builder.AppendLine('```powershell')
-    [void]$builder.AppendLine('powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement FIX_LAYOUT -InvalidPlacement FIX_FEEDBACK -WaveCombat PASS -Apply')
+    [void]$builder.AppendLine('powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement FIX_LAYOUT -InvalidPlacement FIX_FEEDBACK -WaveCombat FIX_FEEDBACK -Apply')
     [void]$builder.AppendLine('```')
     [void]$builder.AppendLine("After applying a result:")
     [void]$builder.AppendLine('```powershell')

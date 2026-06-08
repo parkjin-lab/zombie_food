@@ -118,6 +118,35 @@ function Get-DefaultNextCodeTarget {
     }
 }
 
+function Assert-WaveCombatPassIsCurrent {
+    param(
+        [object]$SuiteData,
+        [object]$Values
+    )
+
+    if ($Values["Wave Combat"] -ne "PASS") {
+        return
+    }
+
+    $showcaseReady = $false
+    if ($null -ne $SuiteData -and $null -ne $SuiteData.wave_combat_action_showcase_ready) {
+        $showcaseReady = [bool]$SuiteData.wave_combat_action_showcase_ready
+    }
+
+    if ($showcaseReady) {
+        return
+    }
+
+    $reason = if ($null -ne $SuiteData -and -not [string]::IsNullOrWhiteSpace([string]$SuiteData.wave_combat_action_showcase_reason)) {
+        [string]$SuiteData.wave_combat_action_showcase_reason
+    }
+    else {
+        "not_reported"
+    }
+
+    throw "Wave Combat cannot be recorded as PASS until wave_combat_action_showcase_ready=true. Current reason: $reason. Retake/register evidence with attack trails and attack labels, or record FIX_FEEDBACK/BLOCKED instead."
+}
+
 function Build-LatestResultSection {
     param(
         [object]$SuiteData,
@@ -186,6 +215,7 @@ $suiteData = Invoke-SuiteVerifier -ScriptPath $suiteVerifier -RootPath $ProjectP
 if ($RequireSuiteCaptured -and $suiteData.playmode_suite_status -ne "captured") {
     throw "Suite evidence is not captured. Current status: $($suiteData.playmode_suite_status)"
 }
+Assert-WaveCombatPassIsCurrent -SuiteData $suiteData -Values $stateValues
 
 $screenshots = @(Get-SuiteScreenshotPaths -SuiteData $suiteData)
 $recordStatus = Get-RecordStatusPreview -Values $stateValues

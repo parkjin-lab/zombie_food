@@ -822,6 +822,8 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     '``-12``, ``KO``, ``LEAK``, ``TRUCK -7``',
     '``FIX_FEEDBACK`` if attack trails, action labels, or payoff cues are missing.',
     'Recommended Result Commands',
+    'Current Wave Combat evidence is not action-showcase ready; record feedback fix or retake before PASS:',
+    '-WaveCombat FIX_FEEDBACK',
     'Write-TextWithFallback',
     'visual_review_required'
 ) "Manual visual review should have a single evidence pack before PASS/FIX/BLOCKED recording."
@@ -858,7 +860,9 @@ Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_ev
     'Regex.Matches',
     'SuiteDraftRelativePath',
     'AddEvidencePath(paths, seen, match.Groups["path"].Value, true)',
-    'Screenshots captured: '
+    'Screenshots captured: ',
+    'Wave Combat must show attack trails, -12, KO, LEAK, TRUCK -7, and lane flash.',
+    'Wave Combat: PASS / FIX_FEEDBACK / FIX_LAYOUT / FIX_ASSET / BLOCKED'
 ) "The PASS record helper should preserve suite screenshot evidence even after Editor state reloads."
 
 Add-ContractCheck $checks "editor_helpers" "suite_result_writer_handles_pass_fix_and_blocked" $sources.playModeResultWriter @(
@@ -867,6 +871,9 @@ Add-ContractCheck $checks "editor_helpers" "suite_result_writer_handles_pass_fix
     'Prototype_PlayMode_Verification_ResultDraft.txt',
     'Verify-PrototypePlayModeSuite.ps1',
     'Get-RecordStatusPreview',
+    'Assert-WaveCombatPassIsCurrent',
+    'wave_combat_action_showcase_ready=true',
+    'Retake/register evidence with attack trails and attack labels',
     'Write-TextWithFallback',
     'Latest Manual Result',
     '-Apply'
