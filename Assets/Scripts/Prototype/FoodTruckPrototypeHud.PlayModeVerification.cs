@@ -151,7 +151,7 @@ namespace ZombieFoodcenter.Prototype
                 model.Tick(1f);
             }
 
-            message = "Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack labels, and Wave status should be readable.";
+            message = "Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack trails, attack labels, and Wave status should be readable.";
             ShowCueBanner("Verification state: Wave Combat.", AccentOrange);
             return true;
         }
@@ -197,6 +197,9 @@ namespace ZombieFoodcenter.Prototype
             TriggerLaneHitFlash(1);
             TriggerLaneHitFlash(2);
 
+            SpawnVerificationCombatImpact(0, 0.62f, -0.03f, false);
+            SpawnVerificationCombatImpact(1, 0.52f, 0.00f, true);
+
             SpawnVerificationCombatLabel(
                 0,
                 0.62f,
@@ -219,6 +222,43 @@ namespace ZombieFoodcenter.Prototype
                 new Color(1f, 0.32f, 0.22f, 1f),
                 1.35f);
             SpawnTruckDamageFloater(7f, "BITE");
+        }
+
+        private void SpawnVerificationCombatImpact(int laneIndex, float x01, float yOffset01, bool knockout)
+        {
+            if (laneIndex < 0 || laneIndex >= laneTrackRoots.Length)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[laneIndex];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            Vector2 position = BuildVerificationCombatLabelPosition(laneRoot, x01, yOffset01);
+            RectTransform anchor = new GameObject("VerificationCombatImpactAnchor", typeof(RectTransform)).GetComponent<RectTransform>();
+            anchor.transform.SetParent(laneRoot, false);
+            anchor.anchorMin = new Vector2(0f, 0.5f);
+            anchor.anchorMax = new Vector2(0f, 0.5f);
+            anchor.pivot = new Vector2(0.5f, 0.5f);
+            anchor.anchoredPosition = position;
+            anchor.sizeDelta = new Vector2(Mathf.Clamp(laneHeight * 0.48f, 26f, 72f), Mathf.Clamp(laneHeight * 0.48f, 26f, 72f));
+
+            EnemyVisualWidget widget = new EnemyVisualWidget();
+            widget.Rect = anchor;
+            widget.LaneIndex = laneIndex;
+            widget.EnemyId = 900 + laneIndex;
+            widget.IsSpecial = knockout;
+            widget.LastHp = knockout ? 1f : 12f;
+            widget.LastDistance01 = Mathf.Clamp01(x01);
+            widget.KnockoutFloaterSpawned = false;
+
+            SpawnEnemyAttackTrail(widget, knockout);
+            SpawnEnemyHitEffect(widget, knockout);
+            Destroy(anchor.gameObject);
         }
 
         private void SpawnVerificationCombatLabel(

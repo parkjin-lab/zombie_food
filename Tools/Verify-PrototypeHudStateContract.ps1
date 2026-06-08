@@ -623,7 +623,10 @@ Add-ContractCheck $checks "editor_helpers" "hud_can_prepare_manual_capture_state
 Add-ContractCheck $checks "editor_helpers" "wave_combat_capture_has_action_showcase" ($sources.playModeVerification + $sources.enemyVisuals) @(
     'SpawnWaveCombatVerificationShowcase();',
     'ClearTransientCombatVisuals();',
-    'Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack labels, and Wave status should be readable.',
+    'Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack trails, attack labels, and Wave status should be readable.',
+    'SpawnVerificationCombatImpact(',
+    'SpawnEnemyAttackTrail(widget, knockout);',
+    'SpawnEnemyHitEffect(widget, knockout);',
     'SpawnVerificationCombatLabel(',
     'SpawnTruckDamageFloater(7f, "BITE");',
     '"-12"',
