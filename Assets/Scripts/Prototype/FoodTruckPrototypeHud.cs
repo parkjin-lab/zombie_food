@@ -2463,7 +2463,7 @@ namespace ZombieFoodcenter.Prototype
             }
 
             string trimmed = hint.Trim();
-            const int maxLength = 28;
+            const int maxLength = 34;
             return trimmed.Length <= maxLength ? trimmed : trimmed.Substring(0, maxLength - 1) + "...";
         }
 

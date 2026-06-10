@@ -6,11 +6,13 @@
 - 향후 업데이트 방향성: `Docs/Prototype_Update_Roadmap.md`.
 - 리듬 디자인 점검: `Docs/Prototype_RhythmDesign_Audit.md`.
 - 부족한 부분/업데이트 정책 통합 문서: `Docs/Prototype_Gap_And_Update_Policy.md`.
+- 무인 지속 개발 지시서: `Docs/Prototype_Autonomous_Development_Directive.md`.
 - 2026-05-08 01:52 KST 기준 코드 레벨 가드(`gate`, `layout`, `HUD state contract`, `static`)는 PlayMode evidence preflight 경로를 추가한 뒤에도 통과한다.
 - 2026-05-17 01:18 KST 기준 sub-agent review 결과, 디자인 방향성은 rhythm-first로 유지한다. 즉시는 Play Mode evidence closure, 그 다음 구현 후보는 `Wave Cadence Composer`와 `Payoff-to-Read Panel`이다.
 - 2026-05-25 기준 sub-agent gap review 결과, 다음 정책은 `Evidence first, weakest beat next`로 고정한다. Play Mode 증거가 막힌 동안은 문서/검증/retake tooling/소스 가드만 진행하고, 새 기능은 named beat와 source guard가 있을 때만 좁게 진행한다.
 - 2026-06-01 기준 플레이어 검증 예산은 최소화한다. 에이전트가 자동 가드, evidence preflight, suite/screenshot 검증, review pack/result draft를 먼저 닫고, 사람에게는 새 캡처 한 장의 시각 판정이나 최종 PASS/FIX 승인만 요청한다.
-- 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 `playmode_suite_status=manual_partial`, `playmode_screenshot_status=partial`, `playmode_record_status=not_recorded` 상태다.
+- 2026-06-10 기준 무인 지속 개발 지시서는 `Evidence first, weakest beat next`를 반복 heartbeat의 기본 정책으로 고정한다. 상태 확인은 개별 verifier fallback을 우선하고, 공식 PASS/FIX/BLOCKED 기록과 대형 Asset Store import staging은 자동 진행하지 않는다.
+- 남은 핵심 리스크는 Play Mode 수동 검증이다. 현재 suite/screenshot evidence는 `captured_manual`/`suite_ready`까지 올라왔지만, `playmode_record_status=not_recorded`이고 Wave Combat action showcase는 legacy 증거라 최종 PASS로 자동 기록하지 않는다.
 - tracked 코드/문서는 이 업데이트 전 깨끗했지만, Unity/Asset Store import 흔적으로 보이는 대형 untracked 폴더들이 남아 있다. 명시적 에셋 결정 없이 스테이징하지 않는다.
 - 기존 Wave Combat 스크린샷 2장은 PNG/세로 품질은 통과한다. 그중 1장은 suite manifest에 Wave Combat 수동 증거로 등록되어 `covered_state_count=1/4`가 되었고, 다른 1장은 Build Flow idle로 triage되어 `triaged_non_state_count=1`로 표시된다. Draw Choice/Pending Placement/Invalid Placement는 아직 missing이고 `manual_registration_candidate_count=0`이다.
 - Unity MCP와 headless 검증은 환경에 따라 막힐 수 있으므로, 로컬 스크립트와 열린 Unity Editor의 Play Mode 메뉴를 우선 사용한다.
@@ -70,7 +72,7 @@
 - 다음 코드 작업을 고르기 전에 `Docs\Prototype_RhythmDesign_Audit.md`의 beat map을 기준으로 어떤 beat가 약한지 정한다.
 - `FIX_FEEDBACK`이면 먼저 실패한 beat를 분류한다: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
 - `Wave Cadence Composer` 1차 소스 가드는 완료됐다. 모델은 이벤트/날씨/보스/휴식/언락 beat와 `planned spike` 여부를 `LastWaveCadencePlan`으로 노출하고, HUD state contract와 EditMode 테스트가 이를 고정한다.
-- `Payoff-to-Read Panel` 1차 소스 가드도 완료됐다. 기존 wave payoff cue 옆에 `Next` hint chip을 붙여 누수, Heat spike, damage payoff, combo, recovery를 다음 선택 성향으로 번역한다.
+- `Payoff-to-Read Panel` 2차 소스 패스도 완료됐다. 기존 wave payoff cue 옆 `Next` hint가 이제 `Leak x2 -> Stabilize lanes`, `PeakHeat +19 -> Pick COOL/SAFE`, `3 KO -> Push damage`처럼 원인과 다음 선택을 함께 말한다.
 - `Rhythm Beat HUD/Telemetry` 1차 소스 가드도 완료됐다. 모델은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release`를 계산하고, HUD/UX telemetry가 같은 beat label, current duration, transition count를 표시/CSV export한다.
 - `Pressure Ramp Profile/Tuning` 소스 가드가 완료됐다. 20초 wave 압박을 `Build`, `Climb`, `Peak`와 intensity로 읽을 수 있고, spawn 압박은 `x0.72 -> x1.28` 범위로 실제 전투에 적용되며 HUD/UX telemetry/CSV에 노출된다.
 - `Rest-Phase Reward` 1차 소스 가드가 완료됐다. 보스/휴식 진입 시 직전 wave 결과에 따라 `Repair`, `Cooling`, `Stock` 중 하나의 작은 release reward를 지급하고 HUD/UX telemetry/CSV가 이를 노출한다.

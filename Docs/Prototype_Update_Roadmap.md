@@ -14,12 +14,16 @@ Policy reference: `Docs/Prototype_Gap_And_Update_Policy.md` consolidates the
 2026-05-25 sub-agent gap review, work authorization rules, and future update
 sequencing.
 
+Autonomous work reference: `Docs/Prototype_Autonomous_Development_Directive.md`
+defines the heartbeat/sub-agent operating order for continuing work while the
+designer is unavailable.
+
 ## Current Status
 - Code guard status: `gate_status=ok`, `layout_status=ok`, `hud_contract_status=ok`, `static_status=ok`.
 - Environment limit: Unity compile/tests remain `inconclusive` in the current PC/headless setup.
-- Play Mode suite: `playmode_suite_status=manual_partial`, `captured_count=1/4`, `suite_capture_source=manual screenshot registration`; Wave Combat has one manually registered PNG, while Draw Choice, Pending Placement, and Invalid Placement remain missing.
-- Screenshot evidence: `playmode_screenshot_status=partial`; existing portrait PNG evidence is useful, Wave Combat is labeled through the suite manifest, `manual_registration_candidate_count=0`, `triaged_non_state_count=1`, but full suite coverage is still missing.
-- Manual record: `playmode_record_status=not_recorded`; Wave Combat has a prior `PASS`, while Draw Choice, Pending Placement, and Invalid Placement remain `NOT_RECORDED`.
+- Play Mode suite: `playmode_suite_status=captured_manual`, `captured_count=4/4`, `suite_capture_source=manual screenshot registration`; all four required states are represented in the manifest.
+- Screenshot evidence: `playmode_screenshot_status=suite_ready`; 7/7 portrait PNGs pass machine quality and state coverage is complete.
+- Manual record: `playmode_record_status=not_recorded`; do not auto-record PASS because Wave Combat action-showcase evidence remains legacy until attack trails and action labels are confirmed.
 - Session status/review pack/retake plan/preflight: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, triaged non-state count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `retake_plan_status`, `retake_plan_focused_retake_count`, `retake_plan_doc_status`, `top_issue`, `next_evidence_action`, and `next_code_target`; `Invoke-PrototypePlayModeEvidencePreflight.ps1` combines those checks with suite/screenshot/review preview and currently reports `playmode_evidence_preflight_status=ready_for_focused_retake`.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Payoff contributor update: wave outcome summaries now include a compact `Best ...` cause so the next Read beat can learn whether combo, KOs, damage, cooling, recovery, or stock mattered most; Play Mode visual readability is still pending.
@@ -38,6 +42,7 @@ sequencing.
 - Draw choice readability update: card tactical text now adds a live-context `Intent` label (`SAFE`, `GREEDY`, `SYNERGY`, `UTILITY`, or `HOLD`) from fit, Heat pressure, assist tag, value, risk, shape, and target data; Play Mode readability is still pending.
 - Recipe preview readability update: Draw cards now show whether the card is a recipe `Seed`, `Near ... 2/3`, `Bingo`, or `Bingo x2` candidate from current ingredient/shape counts; Play Mode readability is still pending.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
+- Payoff-to-Read cause update: `Next` hints now include the concrete cause before the recommendation, such as `Leak x2 -> Stabilize lanes`, `PeakHeat +19 -> Pick COOL/SAFE`, or `3 KO -> Push damage`.
 - Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md` now treats rhythm as the central difficulty/fun lens. Verdict: the prototype has strong rhythm ingredients, but needs an explicit beat map and review criteria so tension, variation, payoff, and release are tuned intentionally.
 - 2026-05-17 sub-agent review: tracked source/docs were clean before this pass, code guards remain stable, Play Mode evidence is still the blocker, and imported Unity/Asset Store folders remain untracked. Do not let untracked asset imports blur the prototype checkpoint.
 - 2026-05-25 sub-agent gap review: source guards remain useful, but the project still lacks current 4-state Play Mode evidence, stronger combat cause labels, clearer Draw intent, placement-to-combat causality, and a future policy for evidence-blocked work.
@@ -209,8 +214,9 @@ re-read the last wave result while making the next placement or draw decision.
 
 ### Short-Term Focus: Payoff-to-Read Panel
 The payoff-to-read pass turns wave result into a short next decision prompt:
-`Stabilize lanes`, `Pick COOL/SAFE`, `Push damage`, `Keep combo window`,
-`Spend recovery`, or `Keep balanced draw`.
+`Leak x2 -> Stabilize lanes`, `PeakHeat +19 -> Pick COOL/SAFE`,
+`3 KO -> Push damage`, `Combo x3 -> Keep combo window`,
+`HP +8 -> Spend recovery`, or `Held -> Keep balanced draw`.
 
 This should stay compact. If Play Mode shows the hint competing with urgent
 combat warnings or recipe chips, shorten the copy or reserve it for Draw/Pending

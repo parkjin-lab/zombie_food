@@ -2121,30 +2121,39 @@ namespace ZombieFoodcenter.Prototype
         {
             if (truckHits >= 2 || hpDelta <= -18f)
             {
-                return "Stabilize lanes";
+                string cause = truckHits >= 2
+                    ? "Leak x" + truckHits
+                    : "HP " + FormatSignedRounded(hpDelta);
+                return cause + " -> Stabilize lanes";
             }
 
             if (peakHeatDelta >= 12f || heatDelta >= 12f)
             {
-                return "Pick COOL/SAFE";
+                string cause = peakHeatDelta >= 12f
+                    ? "PeakHeat " + FormatSignedRounded(peakHeatDelta)
+                    : "Heat " + FormatSignedRounded(heatDelta);
+                return cause + " -> Pick COOL/SAFE";
             }
 
             if (enemiesDefeated >= 3 || damageDealt >= 45f)
             {
-                return "Push damage";
+                string cause = enemiesDefeated >= 3
+                    ? enemiesDefeated + " KO"
+                    : Mathf.RoundToInt(damageDealt) + " dmg";
+                return cause + " -> Push damage";
             }
 
             if (bestComboStreak >= 3)
             {
-                return "Keep combo window";
+                return "Combo x" + bestComboStreak + " -> Keep combo window";
             }
 
             if (hpDelta >= 8f)
             {
-                return "Spend recovery";
+                return "HP " + FormatSignedRounded(hpDelta) + " -> Spend recovery";
             }
 
-            return "Keep balanced draw";
+            return "Held -> Keep balanced draw";
         }
 
         public static string BuildWaveOutcomeBestContributor(

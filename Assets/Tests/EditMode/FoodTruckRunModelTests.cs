@@ -362,7 +362,7 @@ namespace ZombieFoodcenter.Tests.EditMode
             StringAssert.Contains("Leak x1", model.LastWaveOutcomeSummary);
             StringAssert.Contains("Best combo x3", model.LastWaveOutcomeSummary);
             Assert.AreEqual("Best combo x3", model.LastWaveOutcomeBestContributor);
-            Assert.AreEqual("Pick COOL/SAFE", model.LastWaveOutcomeNextHint);
+            Assert.AreEqual("PeakHeat +13 -> Pick COOL/SAFE", model.LastWaveOutcomeNextHint);
         }
 
         [Test]
@@ -411,7 +411,7 @@ namespace ZombieFoodcenter.Tests.EditMode
                 damageDealt: 20f,
                 bestComboStreak: 1);
 
-            Assert.AreEqual("Stabilize lanes", hint);
+            Assert.AreEqual("Leak x2 -> Stabilize lanes", hint);
         }
 
         [Test]
@@ -426,7 +426,7 @@ namespace ZombieFoodcenter.Tests.EditMode
                 damageDealt: 30f,
                 bestComboStreak: 2);
 
-            Assert.AreEqual("Pick COOL/SAFE", hint);
+            Assert.AreEqual("PeakHeat +19 -> Pick COOL/SAFE", hint);
         }
 
         [Test]
@@ -441,7 +441,7 @@ namespace ZombieFoodcenter.Tests.EditMode
                 damageDealt: 48f,
                 bestComboStreak: 1);
 
-            Assert.AreEqual("Push damage", hint);
+            Assert.AreEqual("3 KO -> Push damage", hint);
         }
 
         [Test]
@@ -449,7 +449,7 @@ namespace ZombieFoodcenter.Tests.EditMode
         {
             string chipText = FoodTruckPrototypeHud.BuildPayoffToReadHintChipText("Keep combo window with a very long explanation");
 
-            Assert.LessOrEqual(chipText.Length, 28);
+            Assert.LessOrEqual(chipText.Length, 34);
             StringAssert.EndsWith("...", chipText);
         }
 

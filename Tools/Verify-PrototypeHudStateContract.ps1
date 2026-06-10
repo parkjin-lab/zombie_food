@@ -306,18 +306,18 @@ Add-ContractCheck $checks "payoff_to_read" "model_builds_next_decision_hint_from
     'public string LastWaveOutcomeNextHint => lastWaveOutcomeNextHint;',
     'lastWaveOutcomeNextHint = BuildWaveOutcomeNextHint(',
     'public static string BuildWaveOutcomeNextHint(',
-    'return "Stabilize lanes";',
-    'return "Pick COOL/SAFE";',
-    'return "Push damage";',
-    'return "Keep combo window";',
-    'return "Keep balanced draw";'
+    'return cause + " -> Stabilize lanes";',
+    'return cause + " -> Pick COOL/SAFE";',
+    'return cause + " -> Push damage";',
+    'return "Combo x" + bestComboStreak + " -> Keep combo window";',
+    'return "Held -> Keep balanced draw";'
 ) "Wave payoff should become a compact next-decision hint, not only a result label."
 
 Add-ContractCheck $checks "payoff_to_read" "hud_keeps_next_hint_visible_near_wave_chip" $sources.hud @(
     'model.LastWaveOutcomeNextHint',
     'CreateChip("Next: " + BuildPayoffToReadHintChipText(nextDecisionHint)',
     'public static string BuildPayoffToReadHintChipText(string hint)',
-    'const int maxLength = 28;'
+    'const int maxLength = 34;'
 ) "The next-decision hint should persist in the same compact read area as wave payoff, with bounded copy length."
 
 Add-ContractCheck $checks "payoff_to_read" "editmode_covers_next_hint_cases" $sources.tests @(

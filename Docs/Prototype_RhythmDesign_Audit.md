@@ -94,6 +94,11 @@ the first actual Pressure beat tuning pass: early wave seconds should breathe
 more, while late wave seconds should visibly thicken. HUD and telemetry export
 the spawn multiplier for review.
 
+2026-06-10 autonomous payoff update: the `Next` hint now carries a concrete
+cause before the recommendation, such as `Leak x2 -> Stabilize lanes`,
+`PeakHeat +19 -> Pick COOL/SAFE`, or `3 KO -> Push damage`. This makes the
+Payoff beat feed the next Read beat instead of only naming a generic tendency.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
