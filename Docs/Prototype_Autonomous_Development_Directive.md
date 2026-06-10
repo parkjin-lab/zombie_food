@@ -64,10 +64,12 @@ Use this order when the evidence state allows code work:
 
 1. Payoff beat: make `Next` hints explain cause and next action.
    - Example: `Leak x2 -> Stabilize lanes`.
+   - Status: complete as of 2026-06-10.
    - Acceptance: EditMode tests cover leak, Heat spike, damage payoff.
 2. Commit-to-Pressure beat: make first successful placement feel like wave start.
    - Example: a short `Wave live` cue after the first placed block.
-   - Acceptance: HUD contract or EditMode guard proves the cue path exists.
+   - Status: source pass complete as of 2026-06-10.
+   - Acceptance: HUD contract proves the cue path exists.
 3. Pressure beat: tune wave ramp only through bounded, visible values.
    - Acceptance: telemetry exposes Build/Climb/Peak and multiplier.
 4. Release beat: tune rest reward visibility before adding reward choices.

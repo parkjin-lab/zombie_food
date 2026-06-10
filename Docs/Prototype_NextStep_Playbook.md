@@ -73,6 +73,7 @@
 - `FIX_FEEDBACK`이면 먼저 실패한 beat를 분류한다: `Read`, `Commit`, `Pressure`, `Payoff`, `Release`.
 - `Wave Cadence Composer` 1차 소스 가드는 완료됐다. 모델은 이벤트/날씨/보스/휴식/언락 beat와 `planned spike` 여부를 `LastWaveCadencePlan`으로 노출하고, HUD state contract와 EditMode 테스트가 이를 고정한다.
 - `Payoff-to-Read Panel` 2차 소스 패스도 완료됐다. 기존 wave payoff cue 옆 `Next` hint가 이제 `Leak x2 -> Stabilize lanes`, `PeakHeat +19 -> Pick COOL/SAFE`, `3 KO -> Push damage`처럼 원인과 다음 선택을 함께 말한다.
+- `Commit -> Pressure` 스타터 cue 1차 소스 패스도 완료됐다. 웨이브 선택 블록을 배치해 전투가 unlocked되면 HUD가 `Wave live: Build x0.72. Watch lanes.` 계열 cue를 보여준다.
 - `Rhythm Beat HUD/Telemetry` 1차 소스 가드도 완료됐다. 모델은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release`를 계산하고, HUD/UX telemetry가 같은 beat label, current duration, transition count를 표시/CSV export한다.
 - `Pressure Ramp Profile/Tuning` 소스 가드가 완료됐다. 20초 wave 압박을 `Build`, `Climb`, `Peak`와 intensity로 읽을 수 있고, spawn 압박은 `x0.72 -> x1.28` 범위로 실제 전투에 적용되며 HUD/UX telemetry/CSV에 노출된다.
 - `Rest-Phase Reward` 1차 소스 가드가 완료됐다. 보스/휴식 진입 시 직전 wave 결과에 따라 `Repair`, `Cooling`, `Stock` 중 하나의 작은 release reward를 지급하고 HUD/UX telemetry/CSV가 이를 노출한다.

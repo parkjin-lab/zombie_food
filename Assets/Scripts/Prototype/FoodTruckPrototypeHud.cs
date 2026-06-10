@@ -1673,8 +1673,16 @@ namespace ZombieFoodcenter.Prototype
             }
             else if (!model.HasPendingBlock && previousHasPendingBlockState && !model.HasDrawChoice && !model.EventPending && !suppressNextPlacementResolvedCue)
             {
-                cueMessage = "Placement resolved. Draw again or optimize your board.";
-                cueColor = new Color(0.36f, 0.78f, 0.54f, 1f);
+                if (!model.IsRestPhase && model.WaveBlockChoiceUsed && !model.CombatFlowLocked)
+                {
+                    cueMessage = BuildWaveLivePlacementCue();
+                    cueColor = new Color(0.95f, 0.44f, 0.30f, 1f);
+                }
+                else
+                {
+                    cueMessage = "Placement resolved. Draw again or optimize your board.";
+                    cueColor = new Color(0.36f, 0.78f, 0.54f, 1f);
+                }
             }
             else if (model.IsRestPhase && !previousRestPhase)
             {
@@ -1703,6 +1711,17 @@ namespace ZombieFoodcenter.Prototype
             previousHasPendingBlockState = model.HasPendingBlock;
             previousEventPendingState = model.EventPending;
             previousTruckHp = model.TruckHp;
+        }
+
+        private string BuildWaveLivePlacementCue()
+        {
+            if (model == null)
+            {
+                return "Wave live. Watch lanes.";
+            }
+
+            string ramp = model.CurrentPressureRampLabel + " x" + model.CurrentPressureRampSpawnMultiplier.ToString("0.00");
+            return "Wave live: " + ramp + ". Watch lanes.";
         }
 
         private bool IsGameplayFocusHudActive()

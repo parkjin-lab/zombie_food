@@ -99,6 +99,11 @@ cause before the recommendation, such as `Leak x2 -> Stabilize lanes`,
 `PeakHeat +19 -> Pick COOL/SAFE`, or `3 KO -> Push damage`. This makes the
 Payoff beat feed the next Read beat instead of only naming a generic tendency.
 
+2026-06-10 commit-to-pressure update: successful wave-choice placement now gets
+a `Wave live: <ramp> x<mult>. Watch lanes.` cue when combat unlocks. This turns
+the end of Commit into a visible Pressure start instead of a quiet UI state
+change.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |

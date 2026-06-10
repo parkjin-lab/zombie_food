@@ -443,7 +443,10 @@ Add-ContractCheck $checks "first_block_combat_lock" "model_locks_combat_until_fi
 Add-ContractCheck $checks "first_block_combat_lock" "hud_surfaces_first_block_ready_state" $sources.hud @(
     'if (model.CombatFlowLocked)',
     '"READY  |  " + model.CombatFlowLockReason',
-    '"  |  Wave paused"'
+    '"  |  Wave paused"',
+    'BuildWaveLivePlacementCue()',
+    '"Wave live: " + ramp + ". Watch lanes."',
+    'model.WaveBlockChoiceUsed && !model.CombatFlowLocked'
 ) "The HUD should explain why the first wave is paused instead of feeling frozen."
 
 Add-ContractCheck $checks "first_block_combat_lock" "editmode_covers_first_block_start_gate" $sources.tests @(
