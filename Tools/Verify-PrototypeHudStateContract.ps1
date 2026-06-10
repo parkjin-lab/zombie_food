@@ -286,6 +286,8 @@ Add-ContractCheck $checks "wave_cadence" "model_composes_wave_schedule_without_r
     'public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;',
     'public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;',
     'private static WaveCadencePlan BuildWaveCadencePlan(int wave)',
+    'public int LastWaveCadenceSpikeOverlapCount => lastWaveCadencePlan != null ? lastWaveCadencePlan.SpikeOverlapCount : 0;',
+    'int spikeOverlapCount = Mathf.Max(0, scheduledBeatCount - 1);',
     'bool progressionUnlock = wave == 4 || wave == 7;',
     'bool weatherRotation = wave % 4 == 0;',
     'bool bossPressureSpike = wave % 5 == 0;',
@@ -298,6 +300,7 @@ Add-ContractCheck $checks "wave_cadence" "editmode_covers_core_cadence_beats" $s
     'Tick_WhenWaveFourStarts_ReportsUnlockWeatherPlannedSpike',
     'Tick_WhenWaveFiveStarts_ReportsBossRestPlannedSpike',
     'Tick_WhenWaveSevenStarts_ReportsUnlockCadenceWithoutSpike',
+    'Tick_WhenWaveFifteenStarts_ReportsBossRestEventOverlap',
     'AdvanceToWave(FoodTruckRunModel model, int targetWave)'
 ) "EditMode coverage should lock the first event, unlock/weather overlap, boss/rest spike, and non-spike unlock beat."
 
@@ -353,7 +356,9 @@ Add-ContractCheck $checks "rhythm_beat" "hud_and_telemetry_surface_current_beat"
     'ApplyTelemetryScope(telemetryRhythmBeatTransitionCount, telemetryWaveBaseRhythmBeatTransitionCount)',
     'scopedRhythmBeatTransitions.ToString(CultureInfo.InvariantCulture)',
     'CsvEscape(waveCadence)',
-    'model.LastWaveCadenceSummary'
+    'model.LastWaveCadenceSummary',
+    'spike_overlap_count',
+    'model.LastWaveCadenceSpikeOverlapCount'
 ) "HUD and UX telemetry should reuse the same current beat label without adding a large new panel."
 
 Add-ContractCheck $checks "rhythm_beat" "editmode_covers_rhythm_beat_mapping" $sources.tests @(

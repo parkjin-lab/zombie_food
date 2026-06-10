@@ -542,10 +542,12 @@ namespace ZombieFoodcenter.Tests.EditMode
                 "Pressure",
                 12.34f,
                 3,
-                "Wave 4: Unlock, Weather (planned spike)");
+                "Wave 4: Unlock, Weather (planned spike)",
+                1);
 
             StringAssert.Contains("Rhythm Beat: Pressure 12.3s", line);
             StringAssert.Contains("Transitions 3", line);
+            StringAssert.Contains("Overlap 1", line);
             StringAssert.Contains("Wave 4: Unlock, Weather", line);
         }
 
@@ -817,6 +819,7 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(model.LastWaveCadencePlan.RunEvent);
             Assert.IsFalse(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(1, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual(0, model.LastWaveCadenceSpikeOverlapCount);
             Assert.AreEqual("Wave 3: Event", model.LastWaveCadenceSummary);
             Assert.AreEqual(WavePressureTheme.Swarm, model.CurrentWavePressureTheme);
             Assert.AreEqual("Swarm", model.CurrentWavePressureThemeLabel);
@@ -834,6 +837,7 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(model.LastWaveCadencePlan.WeatherRotation);
             Assert.IsTrue(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(2, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual(1, model.LastWaveCadenceSpikeOverlapCount);
             Assert.AreEqual("Wave 4: Unlock, Weather (planned spike)", model.LastWaveCadenceSummary);
             Assert.AreEqual(WavePressureTheme.HeatSurge, model.CurrentWavePressureTheme);
             Assert.AreEqual("Heat Surge", model.CurrentWavePressureThemeLabel);
@@ -851,6 +855,7 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(model.LastWaveCadencePlan.RestGranted);
             Assert.IsTrue(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(2, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual(1, model.LastWaveCadenceSpikeOverlapCount);
             Assert.AreEqual("Wave 5: Boss, Rest (planned spike)", model.LastWaveCadenceSummary);
             Assert.AreEqual(WavePressureTheme.Bruiser, model.CurrentWavePressureTheme);
             Assert.AreEqual("Bruiser", model.CurrentWavePressureThemeLabel);
@@ -867,10 +872,27 @@ namespace ZombieFoodcenter.Tests.EditMode
             Assert.IsTrue(model.LastWaveCadencePlan.ProgressionUnlock);
             Assert.IsFalse(model.LastWaveCadencePlannedSpike);
             Assert.AreEqual(1, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual(0, model.LastWaveCadenceSpikeOverlapCount);
             Assert.AreEqual("Wave 7: Unlock", model.LastWaveCadenceSummary);
             Assert.AreEqual(WavePressureTheme.Balanced, model.CurrentWavePressureTheme);
             Assert.AreEqual("Balanced", model.CurrentWavePressureThemeLabel);
             Assert.AreEqual("Hold all lanes", model.CurrentWavePressureThemeHint);
+        }
+
+        [Test]
+        public void Tick_WhenWaveFifteenStarts_ReportsBossRestEventOverlap()
+        {
+            var model = new FoodTruckRunModel(seed: 175);
+
+            AdvanceToWave(model, 15);
+
+            Assert.IsTrue(model.LastWaveCadencePlan.BossPressureSpike);
+            Assert.IsTrue(model.LastWaveCadencePlan.RestGranted);
+            Assert.IsTrue(model.LastWaveCadencePlan.RunEvent);
+            Assert.IsTrue(model.LastWaveCadencePlannedSpike);
+            Assert.AreEqual(3, model.LastWaveCadenceScheduledBeatCount);
+            Assert.AreEqual(2, model.LastWaveCadenceSpikeOverlapCount);
+            Assert.AreEqual("Wave 15: Boss, Rest, Event (planned spike)", model.LastWaveCadenceSummary);
         }
 
         [Test]

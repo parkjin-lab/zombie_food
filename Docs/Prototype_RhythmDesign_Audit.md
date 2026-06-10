@@ -109,6 +109,12 @@ change.
 beat is `Read`, `Commit`, `Pressure`, `Payoff`, or `Release` before requesting
 new mechanics or broad balance work.
 
+2026-06-11 cadence overlap update: `WaveCadencePlan` now exposes a
+`spike_overlap_count` value for telemetry. A single offbeat stays at 0, a
+two-beat overlap such as Unlock+Weather or Boss+Rest reads as 1, and heavier
+collisions such as Boss+Rest+Event read as 2 so rhythm spikes can be tuned
+intentionally.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |

@@ -76,6 +76,7 @@ Use this order when the evidence state allows code work:
    - Status: source pass complete as of 2026-06-10.
    - Acceptance: HUD contract proves the cue path exists.
 3. Pressure beat: tune wave ramp only through bounded, visible values.
+   - Status: cadence overlap telemetry source pass complete as of 2026-06-11.
    - Acceptance: telemetry exposes Build/Climb/Peak and multiplier.
 4. Release beat: tune rest reward visibility before adding reward choices.
    - Acceptance: review confirms the reward chip reads without crowding.

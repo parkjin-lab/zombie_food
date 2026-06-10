@@ -145,6 +145,7 @@ namespace ZombieFoodcenter.Prototype
             bool runEvent,
             bool restGranted,
             int scheduledBeatCount,
+            int spikeOverlapCount,
             bool plannedSpike,
             string summary,
             WavePressureTheme pressureTheme,
@@ -164,6 +165,7 @@ namespace ZombieFoodcenter.Prototype
             RunEvent = runEvent;
             RestGranted = restGranted;
             ScheduledBeatCount = scheduledBeatCount;
+            SpikeOverlapCount = spikeOverlapCount;
             PlannedSpike = plannedSpike;
             Summary = summary;
             PressureTheme = pressureTheme;
@@ -184,6 +186,7 @@ namespace ZombieFoodcenter.Prototype
         public bool RunEvent { get; }
         public bool RestGranted { get; }
         public int ScheduledBeatCount { get; }
+        public int SpikeOverlapCount { get; }
         public bool PlannedSpike { get; }
         public string Summary { get; }
         public WavePressureTheme PressureTheme { get; }
@@ -531,6 +534,7 @@ namespace ZombieFoodcenter.Prototype
         public string LastWaveCadenceSummary => lastWaveCadencePlan != null ? lastWaveCadencePlan.Summary : string.Empty;
         public bool LastWaveCadencePlannedSpike => lastWaveCadencePlan != null && lastWaveCadencePlan.PlannedSpike;
         public int LastWaveCadenceScheduledBeatCount => lastWaveCadencePlan != null ? lastWaveCadencePlan.ScheduledBeatCount : 0;
+        public int LastWaveCadenceSpikeOverlapCount => lastWaveCadencePlan != null ? lastWaveCadencePlan.SpikeOverlapCount : 0;
         public WavePressureTheme CurrentWavePressureTheme => lastWaveCadencePlan != null ? lastWaveCadencePlan.PressureTheme : WavePressureTheme.Balanced;
         public string CurrentWavePressureThemeLabel => lastWaveCadencePlan != null ? lastWaveCadencePlan.PressureThemeLabel : BuildWavePressureThemeLabel(WavePressureTheme.Balanced, -1);
         public string CurrentWavePressureThemeHint => lastWaveCadencePlan != null ? lastWaveCadencePlan.PressureThemeHint : BuildWavePressureThemeHint(WavePressureTheme.Balanced, -1);
@@ -1901,6 +1905,7 @@ namespace ZombieFoodcenter.Prototype
             }
 
             int scheduledBeatCount = beats.Count;
+            int spikeOverlapCount = Mathf.Max(0, scheduledBeatCount - 1);
             bool plannedSpike = bossPressureSpike || scheduledBeatCount >= 2;
             string beatSummary = scheduledBeatCount > 0 ? string.Join(", ", beats.ToArray()) : "Steady combat";
             string summary = "Wave " + wave + ": " + beatSummary;
@@ -1917,6 +1922,7 @@ namespace ZombieFoodcenter.Prototype
                 runEvent,
                 restGranted,
                 scheduledBeatCount,
+                spikeOverlapCount,
                 plannedSpike,
                 summary,
                 pressureTheme,
