@@ -337,6 +337,17 @@ function Build-ReviewPackMarkdown {
     [void]$builder.AppendLine("| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels ``-12``, ``KO``, ``LEAK``, ``TRUCK -7`` and lane flash are visible. | ``FIX_LAYOUT`` if the battlefield is crowded; ``FIX_FEEDBACK`` if attack trails, action labels, or payoff cues are missing. |")
     [void]$builder.AppendLine()
 
+    [void]$builder.AppendLine("## Rhythm Beat Review Checklist")
+    [void]$builder.AppendLine("Use this table to name which beat failed before requesting new mechanics or broad balance changes.")
+    [void]$builder.AppendLine("| Beat | Screenshot question | Record as FIX when |")
+    [void]$builder.AppendLine("| --- | --- | --- |")
+    [void]$builder.AppendLine("| Read | Can the player compare the current offer and understand the safest/greediest/utility option? | Draw cards do not explain fit, Heat, role, recipe progress, or the next decision pressure. |")
+    [void]$builder.AppendLine("| Commit | Does placement resolve quickly into a clear next state? | Pending/invalid placement does not show a recovery path, or the `Wave live` cue is missing after first placement. |")
+    [void]$builder.AppendLine("| Pressure | Does combat visibly rise from Build to Peak? | The battlefield lacks readable lane pressure, attack trails, action labels, Heat pressure, or enemy approach. |")
+    [void]$builder.AppendLine("| Payoff | Does the result explain why the last choice mattered? | Wave/recipe payoff and `Next` hint are missing, too small, or detached from the screenshot outcome. |")
+    [void]$builder.AppendLine("| Release | Is there a visible breath, reward, or intentional variation after a spike? | Rest reward, event, weather, boss aftermath, or recovery beat is absent or crowded. |")
+    [void]$builder.AppendLine()
+
     [void]$builder.AppendLine("## Manual Evidence Registration Hints")
     if ($manualRegistrationCommands.Count -eq 0) {
         [void]$builder.AppendLine("No unlabeled machine-quality PNG candidates are available for manual registration.")

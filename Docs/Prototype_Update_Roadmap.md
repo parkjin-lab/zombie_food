@@ -1,6 +1,6 @@
 # Prototype Update Roadmap
 
-Last updated: 2026-05-17 01:18 KST
+Last updated: 2026-06-10 KST
 
 ## Purpose
 This roadmap keeps the next prototype updates grounded in the verified core loop:
@@ -24,7 +24,7 @@ designer is unavailable.
 - Play Mode suite: `playmode_suite_status=captured_manual`, `captured_count=4/4`, `suite_capture_source=manual screenshot registration`; all four required states are represented in the manifest.
 - Screenshot evidence: `playmode_screenshot_status=suite_ready`; 7/7 portrait PNGs pass machine quality and state coverage is complete.
 - Manual record: `playmode_record_status=not_recorded`; do not auto-record PASS because Wave Combat action-showcase evidence remains legacy until attack trails and action labels are confirmed.
-- Session status/review pack/retake plan/preflight: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, triaged non-state count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `retake_plan_status`, `retake_plan_focused_retake_count`, `retake_plan_doc_status`, `top_issue`, `next_evidence_action`, and `next_code_target`; `Invoke-PrototypePlayModeEvidencePreflight.ps1` combines those checks with suite/screenshot/review preview and currently reports `playmode_evidence_preflight_status=ready_for_focused_retake`.
+- Session status/review pack/retake plan/preflight: `Show-PrototypeSessionStatus.ps1` now carries Wave Combat action showcase readiness, suite capture source, manual registration candidate count, triaged non-state count, `review_pack_status`, `review_readiness`, `review_pack_visual_review_required`, `retake_plan_status`, `retake_plan_focused_retake_count`, `retake_plan_doc_status`, `top_issue`, `next_evidence_action`, and `next_code_target`; `Invoke-PrototypePlayModeEvidencePreflight.ps1` combines those checks with suite/screenshot/review preview. Recheck it at session start and do not assume `ready_for_focused_retake` when review pack preview already reports `ready_for_visual_review`.
 - Core loop update: source-level wave outcome/payoff summary is now implemented as a model summary plus HUD cue; Play Mode visual readability is still pending.
 - Payoff contributor update: wave outcome summaries now include a compact `Best ...` cause so the next Read beat can learn whether combo, KOs, damage, cooling, recovery, or stock mattered most; Play Mode visual readability is still pending.
 - Draw Choice update: cards now expose tactical `Fit`, `Heat`, and `Role` chips alongside existing shape, target, value, and risk signals; Play Mode readability is still pending.
@@ -44,6 +44,7 @@ designer is unavailable.
 - Wave Combat capture update: verification setup now injects a readable action showcase so suite evidence can catch combat labels and lane flash without long manual play; suite/session/review outputs now expose `wave_combat_action_showcase_ready/reason`.
 - Payoff-to-Read cause update: `Next` hints now include the concrete cause before the recommendation, such as `Leak x2 -> Stabilize lanes`, `PeakHeat +19 -> Pick COOL/SAFE`, or `3 KO -> Push damage`.
 - Commit-to-Pressure starter update: after a wave-choice block is placed and combat unlocks, the HUD now shows a compact `Wave live: Build x0.72. Watch lanes.` style cue so the first placement feels like the wave start beat.
+- Review pack rhythm update: `Write-PrototypePlayModeReviewPack.ps1` now adds a `Rhythm Beat Review Checklist` so visual failures can be tagged as `Read`, `Commit`, `Pressure`, `Payoff`, or `Release` before choosing the next implementation.
 - Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md` now treats rhythm as the central difficulty/fun lens. Verdict: the prototype has strong rhythm ingredients, but needs an explicit beat map and review criteria so tension, variation, payoff, and release are tuned intentionally.
 - 2026-05-17 sub-agent review: tracked source/docs were clean before this pass, code guards remain stable, Play Mode evidence is still the blocker, and imported Unity/Asset Store folders remain untracked. Do not let untracked asset imports blur the prototype checkpoint.
 - 2026-05-25 sub-agent gap review: source guards remain useful, but the project still lacks current 4-state Play Mode evidence, stronger combat cause labels, clearer Draw intent, placement-to-combat causality, and a future policy for evidence-blocked work.

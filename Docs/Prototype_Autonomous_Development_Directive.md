@@ -32,6 +32,9 @@ manual result integrity. Only then should it improve a narrow, named rhythm beat
 2. If review evidence is stale or missing, regenerate review artifacts:
    - `Tools\Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly`
    - full review pack only when a tracked doc update is useful.
+   - If suite/screenshot evidence is already complete and
+     `review_readiness=ready_for_visual_review`, do not generate new retake work;
+     prepare visual judgment/result-recording guidance instead.
 3. If `wave_combat_action_showcase_ready=false`, do not record Wave Combat as
    PASS. Prefer retake guidance or `FIX_FEEDBACK`.
 4. If official manual result is `not_recorded`, keep the next action focused on
@@ -49,6 +52,8 @@ manual result integrity. Only then should it improve a narrow, named rhythm beat
 - Improve evidence tooling, review pack wording, stale checks, and result guards.
 - Make a narrow code change when it improves one named rhythm beat and has tests
   or source guards.
+- Add review-pack decision aids when they reduce the next human judgment to a
+  named beat (`Read`, `Commit`, `Pressure`, `Payoff`, or `Release`).
 
 ## Stop And Ask Or Leave Blocked
 - Officially recording PASS/FIX/BLOCKED without fresh review evidence.
@@ -76,6 +81,10 @@ Use this order when the evidence state allows code work:
    - Acceptance: review confirms the reward chip reads without crowding.
 5. Read beat: simplify draw card intent if review says the card row is too dense.
    - Acceptance: card comparison remains readable in portrait screenshots.
+6. Review beat naming: keep the review pack able to map visual failures to a
+   rhythm beat before asking for new systems.
+   - Status: source pass complete as of 2026-06-10.
+   - Acceptance: HUD contract guards the review-pack rhythm checklist.
 
 ## Files To Update
 - `Docs\Prototype_PlayMode_Verification.md`: official manual result and criteria.

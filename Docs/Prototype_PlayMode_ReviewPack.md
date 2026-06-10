@@ -1,6 +1,6 @@
 ﻿# Prototype Play Mode Review Pack
 
-Generated: 2026-06-08 23:56 KST
+Generated: 2026-06-10 23:57 KST
 Review readiness: `ready_for_visual_review`
 Visual review required: `True`
 
@@ -78,6 +78,16 @@ These missing planned resources are not runtime blockers. Use them to separate f
 | Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |
 | Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |
 | Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels `-12`, `KO`, `LEAK`, `TRUCK -7` and lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if attack trails, action labels, or payoff cues are missing. |
+
+## Rhythm Beat Review Checklist
+Use this table to name which beat failed before requesting new mechanics or broad balance changes.
+| Beat | Screenshot question | Record as FIX when |
+| --- | --- | --- |
+| Read | Can the player compare the current offer and understand the safest/greediest/utility option? | Draw cards do not explain fit, Heat, role, recipe progress, or the next decision pressure. |
+| Commit | Does placement resolve quickly into a clear next state? | Pending/invalid placement does not show a recovery path, or the Wave live cue is missing after first placement. |
+| Pressure | Does combat visibly rise from Build to Peak? | The battlefield lacks readable lane pressure, attack trails, action labels, Heat pressure, or enemy approach. |
+| Payoff | Does the result explain why the last choice mattered? | Wave/recipe payoff and Next hint are missing, too small, or detached from the screenshot outcome. |
+| Release | Is there a visible breath, reward, or intentional variation after a spike? | Rest reward, event, weather, boss aftermath, or recovery beat is absent or crowded. |
 
 ## Manual Evidence Registration Hints
 No unlabeled machine-quality PNG candidates are available for manual registration.

@@ -104,6 +104,11 @@ a `Wave live: <ramp> x<mult>. Watch lanes.` cue when combat unlocks. This turns
 the end of Commit into a visible Pressure start instead of a quiet UI state
 change.
 
+2026-06-10 review-pack rhythm update: the Play Mode review pack now includes a
+`Rhythm Beat Review Checklist` so a screenshot review can name whether the weak
+beat is `Read`, `Commit`, `Pressure`, `Payoff`, or `Release` before requesting
+new mechanics or broad balance work.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |
