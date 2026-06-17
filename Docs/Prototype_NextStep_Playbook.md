@@ -40,6 +40,7 @@
 - `Tools\Register-PrototypePlayModeManualEvidence.ps1`은 standalone PNG를 상태별 suite 증거로 등록한다. 직접 Play Mode 조작이 불안정할 때 Capture Verification Suite의 보조 경로로 사용하며, screenshot verifier와 review pack preview가 상태별 command template을 생성한다.
 - `Docs\Prototype_PlayMode_Screenshot_Triage.txt`는 시각 검토 후 필수 상태 증거가 아니라고 판단한 PNG를 기록한다. triage된 PNG는 더 이상 manual registration candidate로 추천되지 않는다.
 - `Tools\Write-PrototypePlayModeRetakePlan.ps1`은 현재 partial evidence를 읽어 Draw Choice, Pending Placement, Invalid Placement의 focused retake 메뉴와 must-see 기준을 한 장짜리 `Docs\Prototype_PlayMode_RetakePlan.md`로 정리한다.
+- 2026-06-18 기준 `Tools\Write-PrototypePlayModeRetakePlan.ps1`은 missing state가 없어도 `wave_combat_action_showcase_ready=false`이면 Wave Combat를 focused retake target으로 올린다.
 - `Tools\Verify-PrototypePlayModeRetakePlan.ps1`은 `Docs\Prototype_PlayMode_RetakePlan.md`가 현재 suite/screenshot/review preview 상태와 맞는지 확인하고, stale이면 gate/session status에서 바로 드러낸다.
 - `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`은 session status, retake plan doc, suite, screenshot, review pack preview를 한 번에 모아 `ready_for_focused_retake` 또는 `ready_for_visual_review` 같은 다음 행동 상태를 출력한다.
 

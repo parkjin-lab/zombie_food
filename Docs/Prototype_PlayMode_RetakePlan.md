@@ -1,6 +1,6 @@
-# Prototype Play Mode Retake Plan
+﻿# Prototype Play Mode Retake Plan
 
-Generated: 2026-06-08 22:59 KST
+Generated: 2026-06-18 00:37 KST
 Retake plan status: `ok`
 
 ## Machine Summary
@@ -14,8 +14,12 @@ Retake plan status: `ok`
 - Manual record status: `not_recorded`
 - Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_trails_and_labels)
 
+No standalone PNG candidates remain for the required retake targets. Capture fresh evidence instead of trying to register old screenshots.
+
 ## Focused Retake Targets
-No Draw/Pending/Invalid focused retakes are currently missing. Continue with review pack judgment or the next recorded blocker.
+| State | Unity menu path | Must see |
+| --- | --- | --- |
+| Wave Combat | `Tools > Food Truck Prototype > Prepare and Capture State > Wave Combat` | Strengthened action showcase is readable: attack trails, HIT>Z -12, HIT>Z KO, LEAK, BITE>TRK -7, lane flash, and one long truck. |
 
 ## Wave Combat Note
 Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm attack trails, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, and lane flash are readable.

@@ -14,6 +14,8 @@ Last updated: 2026-06-17 KST
 - Source-side Wave Combat verification showcase has been strengthened with
   longer-lived high-contrast `HIT>Z -12`, `HIT>Z KO`, `LEAK`, and `BITE>TRK -7`
   overlays for the next retake.
+- Retake planning now treats `wave_combat_action_showcase_ready=false` as a
+  focused Wave Combat retake target even when all four suite states are covered.
 - Next heartbeat should skip focused retake work unless verifiers regress; keep
   preparing review-pack judgment, result-recording guidance, and narrow
   rhythm-beat improvements guarded by source checks.
@@ -97,6 +99,9 @@ Last updated: 2026-06-17 KST
 - Strengthened the Wave Combat verification showcase on 2026-06-17 so delayed
   manual captures should still show thicker attack trails, longer action labels,
   and outline/shadow contrast for hit, KO, leak, and truck-damage markers.
+- Aligned retake plan and evidence preflight on 2026-06-18 so the next automated
+  instruction is `ready_for_focused_retake` with Wave Combat as the single target
+  until the strengthened action showcase is visually judged.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.

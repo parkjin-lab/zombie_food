@@ -248,13 +248,17 @@ elseif ($retakePlanDocStatus -ne "ok") {
     $preflightStatus = "needs_retake_plan_refresh"
     $nextAction = "Regenerate Docs\Prototype_PlayMode_RetakePlan.md, verify it, then rerun this preflight."
 }
-elseif ($reviewReadiness -eq "ready_for_visual_review" -or ($suiteReady -and $screenshotStatus -eq "suite_ready")) {
-    $preflightStatus = "ready_for_visual_review"
-    $nextAction = "Open the review pack, judge the screenshots visually, then record PASS/FIX/BLOCKED."
-}
 elseif ($focusedRetakeStates.Count -gt 0 -and $manualCandidateCount -gt 0) {
     $preflightStatus = "needs_manual_registration_review"
     $nextAction = "Inspect manual registration candidates first; retake any missing state without a visually matching PNG."
+}
+elseif ($focusedRetakeStates.Count -gt 0 -and $manualCandidateCount -eq 0) {
+    $preflightStatus = "ready_for_focused_retake"
+    $nextAction = "Open Unity Play Mode, run Prepare and Capture State for " + (Join-StateList $focusedRetakeStates) + ", then rerun this preflight."
+}
+elseif ($reviewReadiness -eq "ready_for_visual_review" -or ($suiteReady -and $screenshotStatus -eq "suite_ready")) {
+    $preflightStatus = "ready_for_visual_review"
+    $nextAction = "Open the review pack, judge the screenshots visually, then record PASS/FIX/BLOCKED."
 }
 elseif ($canRetakeFromCurrentEvidence) {
     $preflightStatus = "ready_for_focused_retake"

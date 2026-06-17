@@ -13,6 +13,7 @@ $recordVerifier = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRecord.p
 $reviewPackWriter = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeReviewPack.ps1"
 $defaultOutputPath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_RetakePlan.md"
 $focusedStates = @("Draw Choice", "Pending Placement", "Invalid Placement")
+$waveCombatState = "Wave Combat"
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
     $OutputPath = $defaultOutputPath
@@ -47,20 +48,22 @@ function Write-TextWithFallback {
         [string]$Contents
     )
 
+    $normalizedContents = $Contents -replace "`r`n", "`n"
+
     try {
         $preferredDir = Split-Path -Parent $PreferredPath
         if (-not [string]::IsNullOrWhiteSpace($preferredDir)) {
             [System.IO.Directory]::CreateDirectory($preferredDir) | Out-Null
         }
 
-        [System.IO.File]::WriteAllText($PreferredPath, $Contents, [System.Text.Encoding]::UTF8)
+        [System.IO.File]::WriteAllText($PreferredPath, $normalizedContents, [System.Text.Encoding]::UTF8)
         return $PreferredPath
     }
     catch {
         $fallbackRoot = Join-Path ([System.IO.Path]::GetTempPath()) "zombieFoodcenter-verification"
         [System.IO.Directory]::CreateDirectory($fallbackRoot) | Out-Null
         $fallbackPath = Join-Path $fallbackRoot (Split-Path -Leaf $PreferredPath)
-        [System.IO.File]::WriteAllText($fallbackPath, $Contents, [System.Text.Encoding]::UTF8)
+        [System.IO.File]::WriteAllText($fallbackPath, $normalizedContents, [System.Text.Encoding]::UTF8)
         return $fallbackPath
     }
 }
@@ -106,6 +109,9 @@ function Get-StateCriteria {
         }
         "Invalid Placement" {
             return "Blocked reason and Next recovery hint appear near the board or cue, without requiring the full log."
+        }
+        "Wave Combat" {
+            return "Strengthened action showcase is readable: attack trails, HIT>Z -12, HIT>Z KO, LEAK, BITE>TRK -7, lane flash, and one long truck."
         }
         default {
             return "Required state is readable and can be judged from the screenshot."
@@ -169,13 +175,13 @@ function Build-RetakePlanMarkdown {
     [void]$builder.AppendLine()
 
     if ($manualCandidateCount -eq 0 -and $FocusedRows.Count -gt 0) {
-        [void]$builder.AppendLine("No standalone PNG candidates remain for the missing required states. Capture fresh evidence instead of trying to register old screenshots.")
+        [void]$builder.AppendLine("No standalone PNG candidates remain for the required retake targets. Capture fresh evidence instead of trying to register old screenshots.")
         [void]$builder.AppendLine()
     }
 
     [void]$builder.AppendLine("## Focused Retake Targets")
     if ($FocusedRows.Count -eq 0) {
-        [void]$builder.AppendLine("No Draw/Pending/Invalid focused retakes are currently missing. Continue with review pack judgment or the next recorded blocker.")
+        [void]$builder.AppendLine("No focused retakes are currently missing. Continue with review pack judgment or the next recorded blocker.")
     }
     else {
         [void]$builder.AppendLine("| State | Unity menu path | Must see |")
@@ -240,6 +246,10 @@ $reviewPackData = Invoke-JsonScript -ScriptPath $reviewPackWriter -Arguments @(
 
 $missingStates = Get-ArrayValue (Get-ObjectProperty -ObjectValue $screenshotData -PropertyName "missing_states")
 $focusedRetakeStates = @($focusedStates | Where-Object { $missingStates -contains $_ })
+$waveCombatActionShowcaseReady = Get-ObjectProperty -ObjectValue $suiteData -PropertyName "wave_combat_action_showcase_ready" -DefaultValue $false
+if ($waveCombatActionShowcaseReady -ne $true -and -not ($focusedRetakeStates -contains $waveCombatState)) {
+    $focusedRetakeStates = @($focusedRetakeStates + $waveCombatState)
+}
 $focusedRows = Build-RetakeTargetRows -States $focusedRetakeStates
 $markdown = Build-RetakePlanMarkdown -SuiteData $suiteData -ScreenshotData $screenshotData -RecordData $recordData -ReviewPackData $reviewPackData -FocusedRows $focusedRows
 
