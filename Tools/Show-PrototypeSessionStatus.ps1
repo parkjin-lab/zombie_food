@@ -248,8 +248,8 @@ elseif ($playModeScreenshotStatus -ne "suite_ready") {
 }
 elseif ($waveCombatActionShowcaseReady -ne $true) {
     $topIssue = "Wave Combat action showcase is not ready: " + $waveCombatActionShowcaseReason + "."
-    $nextEvidenceAction = "Retake Wave Combat evidence and confirm attack trails and action labels before recording PASS."
-    $nextCodeTarget = "If retake still misses labels, fix the Wave Combat verification showcase setup."
+    $nextEvidenceAction = "Retake Wave Combat with the strengthened showcase and confirm HIT>Z, LEAK, BITE>TRK labels before recording PASS."
+    $nextCodeTarget = "No new combat-feedback code target until the strengthened Wave Combat showcase is visually judged."
 }
 elseif ($reviewReadiness -ne "ready_for_visual_review") {
     $topIssue = "Review pack is not ready for visual judgment: " + $reviewReadiness + "."

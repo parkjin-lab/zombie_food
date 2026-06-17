@@ -197,31 +197,39 @@ namespace ZombieFoodcenter.Prototype
             TriggerLaneHitFlash(1);
             TriggerLaneHitFlash(2);
 
-            SpawnVerificationCombatImpact(0, 0.62f, -0.03f, false);
-            SpawnVerificationCombatImpact(1, 0.52f, 0.00f, true);
+            SpawnVerificationCombatImpact(0, 0.64f, -0.05f, false);
+            SpawnVerificationCombatImpact(1, 0.58f, 0.02f, true);
+            SpawnVerificationAttackTrail(0, 0.64f, -0.05f, false);
+            SpawnVerificationAttackTrail(1, 0.58f, 0.02f, true);
 
             SpawnVerificationCombatLabel(
                 0,
-                0.62f,
-                0.18f,
-                "-12",
+                0.70f,
+                0.24f,
+                "HIT>Z -12",
                 new Color(1f, 0.64f, 0.28f, 1f),
-                1.35f);
+                4.60f);
             SpawnVerificationCombatLabel(
                 1,
-                0.52f,
-                0.22f,
-                "KO",
+                0.62f,
+                0.25f,
+                "HIT>Z KO",
                 new Color(1f, 0.94f, 0.42f, 1f),
-                1.45f);
+                4.85f);
             SpawnVerificationCombatLabel(
                 2,
-                0.28f,
-                0.16f,
+                0.34f,
+                0.18f,
                 "LEAK",
                 new Color(1f, 0.32f, 0.22f, 1f),
-                1.35f);
-            SpawnTruckDamageFloater(7f, "BITE");
+                4.50f);
+            SpawnVerificationCombatLabel(
+                1,
+                0.18f,
+                0.26f,
+                BuildTruckDamageFloaterLabel("BITE", 7f),
+                new Color(1f, 0.40f, 0.26f, 1f),
+                4.70f);
         }
 
         private void SpawnVerificationCombatImpact(int laneIndex, float x01, float yOffset01, bool knockout)
@@ -261,6 +269,34 @@ namespace ZombieFoodcenter.Prototype
             Destroy(anchor.gameObject);
         }
 
+        private void SpawnVerificationAttackTrail(int laneIndex, float x01, float yOffset01, bool knockout)
+        {
+            if (laneIndex < 0 || laneIndex >= laneTrackRoots.Length)
+            {
+                return;
+            }
+
+            RectTransform laneRoot = laneTrackRoots[laneIndex];
+            if (laneRoot == null)
+            {
+                return;
+            }
+
+            float laneHeight = Mathf.Max(1f, laneRoot.rect.height);
+            Vector2 target = BuildVerificationCombatLabelPosition(laneRoot, x01, yOffset01);
+            float truckEndX = foodTruckSprite != null
+                ? Mathf.Clamp(laneHeight * 1.66f, 118f, 252f)
+                : Mathf.Clamp(laneHeight * 0.82f, 64f, 136f);
+            float startX = Mathf.Min(truckEndX, target.x - laneHeight * 0.58f);
+            float width = Mathf.Max(laneHeight * 0.92f, target.x - startX);
+            float punch = knockout ? 1.24f : 1f;
+
+            SpawnEnemyAttackTrailSegment(laneRoot, startX, target.y, width, laneHeight, 0f, 0.30f * punch, new Color(0.20f, 0.05f, 0.01f, 0.86f), 4.40f);
+            SpawnEnemyAttackTrailSegment(laneRoot, startX, target.y, width, laneHeight, 0f, 0.18f * punch, new Color(1f, 0.62f, 0.08f, 1f), 4.40f);
+            SpawnEnemyAttackTrailSegment(laneRoot, startX + width * 0.12f, target.y, width * 0.72f, laneHeight, 0f, 0.09f * punch, new Color(1f, 1f, 0.74f, 1f), 4.10f);
+            SpawnEnemyAttackArrowhead(laneRoot, target, laneHeight, knockout);
+        }
+
         private void SpawnVerificationCombatLabel(
             int laneIndex,
             float x01,
@@ -286,7 +322,7 @@ namespace ZombieFoodcenter.Prototype
                 BuildVerificationCombatLabelPosition(laneRoot, x01, yOffset01),
                 label,
                 color,
-                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.20f), 13, 24),
+                Mathf.Clamp(Mathf.RoundToInt(laneHeight * 0.26f), 18, 36),
                 durationScale);
         }
 

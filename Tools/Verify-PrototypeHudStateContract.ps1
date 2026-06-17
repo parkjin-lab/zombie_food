@@ -555,7 +555,7 @@ Add-ContractCheck $checks "combat_feedback" "truck_damage_cause_labels_explain_h
     'ApplyTruckDamage(chip, TruckDamageCause.Overheat);',
     'public static string BuildTruckDamageCauseLabel(TruckDamageCause cause)',
     'public static int GetTruckDamageCausePriority(TruckDamageCause cause)',
-    'SpawnTruckDamageFloater(7f, "BITE");',
+    'BuildTruckDamageFloaterLabel("BITE", 7f)',
     'BuildTruckDamageCauseLabel_ReturnsCauseForCombatFloaters',
     'BuildTruckDamageFloaterLabel_IncludesCauseAndAmount',
     'BuildEnemyDamageFloaterLabel_UsesSourceTargetResultFlow'
@@ -633,12 +633,16 @@ Add-ContractCheck $checks "editor_helpers" "wave_combat_capture_has_action_showc
     'ClearTransientCombatVisuals();',
     'Prepared Wave Combat: lanes, truck, enemies, HP, Heat, attack trails, attack labels, and Wave status should be readable.',
     'SpawnVerificationCombatImpact(',
+    'SpawnVerificationAttackTrail(',
     'SpawnEnemyAttackTrail(widget, knockout);',
     'SpawnEnemyHitEffect(widget, knockout);',
     'SpawnVerificationCombatLabel(',
-    'SpawnTruckDamageFloater(7f, "BITE");',
-    '"-12"',
-    '"KO"',
+    'BuildTruckDamageFloaterLabel("BITE", 7f)',
+    'Outline outline = text.gameObject.AddComponent<Outline>();',
+    'Shadow shadow = text.gameObject.AddComponent<Shadow>();',
+    'floating.Outline = outline;',
+    '"HIT>Z -12"',
+    '"HIT>Z KO"',
     '"LEAK"',
     'TriggerLaneHitFlash(1);',
     'TriggerLaneHitFlash(2);'
@@ -834,7 +838,7 @@ Add-ContractCheck $checks "editor_helpers" "review_pack_collects_evidence_for_vi
     '| Release | Is there a visible breath, reward, or intentional variation after a spike?',
     'Wave Combat action showcase',
     'attack trails plus action labels',
-    '``-12``, ``KO``, ``LEAK``, ``TRUCK -7``',
+    '``HIT>Z -12``, ``HIT>Z KO``, ``LEAK``, ``BITE>TRK -7``',
     '``FIX_FEEDBACK`` if attack trails, action labels, or payoff cues are missing.',
     'Recommended Result Commands',
     'Current Wave Combat evidence is not action-showcase ready; record feedback fix or retake before PASS:',
@@ -854,7 +858,7 @@ Add-ContractCheck $checks "editor_helpers" "retake_plan_collects_focused_capture
     'Invalid Placement',
     'retake_plan_status',
     'focused_retake_count',
-    'confirm attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable'
+    'confirm attack trails, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, and lane flash are readable'
 ) "Focused retake planning should translate partial evidence into state-specific capture work."
 
 Add-ContractCheck $checks "editor_helpers" "retake_plan_doc_is_machine_checkable" $sources.playModeRetakePlanVerifier @(
@@ -876,7 +880,7 @@ Add-ContractCheck $checks "editor_helpers" "pass_record_reuses_suite_manifest_ev
     'SuiteDraftRelativePath',
     'AddEvidencePath(paths, seen, match.Groups["path"].Value, true)',
     'Screenshots captured: ',
-    'Wave Combat must show attack trails, -12, KO, LEAK, TRUCK -7, and lane flash.',
+    'Wave Combat must show attack trails, HIT>Z -12, HIT>Z KO, LEAK, BITE>TRK -7, and lane flash.',
     'Wave Combat: PASS / FIX_FEEDBACK / FIX_LAYOUT / FIX_ASSET / BLOCKED'
 ) "The PASS record helper should preserve suite screenshot evidence even after Editor state reloads."
 

@@ -182,7 +182,7 @@ namespace ZombieFoodcenter.Editor
         {
             bool confirmed = EditorUtility.DisplayDialog(
                 "Record prototype Play Mode PASS?",
-                "Use this only after visually confirming Draw Choice, Pending Placement, Invalid Placement, and Wave Combat are readable and usable. Wave Combat must show attack trails, -12, KO, LEAK, TRUCK -7, and lane flash. If a verification suite manifest exists, its screenshots will be included as evidence.",
+                "Use this only after visually confirming Draw Choice, Pending Placement, Invalid Placement, and Wave Combat are readable and usable. Wave Combat must show attack trails, HIT>Z -12, HIT>Z KO, LEAK, BITE>TRK -7, and lane flash. If a verification suite manifest exists, its screenshots will be included as evidence.",
                 "Record PASS",
                 "Cancel");
 

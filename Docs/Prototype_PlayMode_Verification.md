@@ -40,7 +40,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - Unity를 열기 직전에는 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`을 실행해 focused retake 대상, stale-doc 여부, screenshot 상태, 캡처 후 검증 명령을 한 번에 확인한다.
 - 상태만 먼저 만들고 직접 확인하려면 `Tools > Food Truck Prototype > Prepare State` 아래 메뉴를 사용한 뒤 `Capture Play Mode Snapshot`을 실행한다.
 - 네 상태가 모두 PASS임을 직접 확인한 뒤 `Tools > Food Truck Prototype > Record PASS Manual Result`를 실행하면 `Latest Manual Result`가 자동으로 PASS 기록으로 갱신된다. suite manifest가 있으면 해당 스크린샷 목록을 PASS 기록의 증거로 함께 사용한다.
-- Wave Combat PASS는 공격 궤적, `-12`, `KO`, `LEAK`, `TRUCK -7`, lane flash가 모두 읽힐 때만 기록한다. 이 조건이 빠지면 `FIX_FEEDBACK` 또는 `BLOCKED`로 남긴다.
+- Wave Combat PASS는 공격 궤적, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, lane flash가 모두 읽힐 때만 기록한다. 이 조건이 빠지면 `FIX_FEEDBACK` 또는 `BLOCKED`로 남긴다.
 - 문제가 보이면 PASS 기록 메뉴를 쓰지 말고 `Tools\Write-PrototypePlayModeResultFromSuite.ps1`로 FIX/BLOCKED 상태가 포함된 결과 draft를 만들거나 `-Apply`로 `Latest Manual Result`를 갱신한다. draft는 기본적으로 `Docs` 아래에 쓰고, 현재 환경에서 쓰기가 막히면 출력 JSON의 `draft_path`에 표시된 temp 경로로 저장된다.
 
 ## Required States
@@ -64,7 +64,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 ### Wave Combat
 - 푸드트럭 마커가 레인 왼쪽에서 보인다.
 - 적 이동, 레인 압력, HP, Heat, Wave 상태가 동시에 읽힌다.
-- 공격 궤적, `-12`, `KO`, `LEAK`, `TRUCK -7`, lane flash만 보고도 왜 맞고/죽고/트럭 HP가 줄었는지 이해된다.
+- 공격 궤적, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, lane flash만 보고도 왜 맞고/죽고/트럭 HP가 줄었는지 이해된다.
 - 배치/카드 편집 UI가 전투 화면을 불필요하게 덮지 않는다.
 
 ## Acceptance Criteria

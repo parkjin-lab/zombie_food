@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-06-10 KST
+Last updated: 2026-06-17 KST
 
 ## Current Status Snapshot
 - Play Mode suite evidence is now `captured_manual` with all four required
@@ -11,6 +11,9 @@ Last updated: 2026-06-10 KST
 - Manual record remains `not_recorded`; do not auto-record PASS/FIX/BLOCKED.
 - Wave Combat action showcase remains legacy/incomplete until attack trails and
   action labels are visually confirmed or retaken.
+- Source-side Wave Combat verification showcase has been strengthened with
+  longer-lived high-contrast `HIT>Z -12`, `HIT>Z KO`, `LEAK`, and `BITE>TRK -7`
+  overlays for the next retake.
 - Next heartbeat should skip focused retake work unless verifiers regress; keep
   preparing review-pack judgment, result-recording guidance, and narrow
   rhythm-beat improvements guarded by source checks.
@@ -75,7 +78,7 @@ Last updated: 2026-06-10 KST
 - Expanded the placement/draw battlefield layout so the truck-and-zombie play area now reserves more than half of the viewport instead of letting build controls dominate the screen.
 - Changed lane truck rendering to a single longer food truck marker, and strengthened combat readability with attack trails, larger impact flashes, longer hit poses, and brighter lane damage flash.
 - Added battlefield floating combat text for enemy damage, KO, lane leaks, and truck HP loss so hit results are readable even when particles overlap.
-- Updated Wave Combat Play Mode verification setup so captured evidence includes attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash instead of only a static lane overview.
+- Updated Wave Combat Play Mode verification setup so captured evidence includes attack trails, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, and lane flash instead of only a static lane overview.
 - Added machine-readable Wave Combat action showcase readiness to the suite verifier so captures can report whether the action labels are present or still missing.
 - Extended the Play Mode review pack with a Wave Combat action showcase summary and a visual acceptance checklist for Draw Choice, Pending Placement, Invalid Placement, and Wave Combat.
 - Exposed Wave Combat action showcase readiness in the session status and gate text output so the first session command shows whether Wave Combat can be recorded as PASS evidence.
@@ -91,6 +94,9 @@ Last updated: 2026-06-10 KST
 - Added `Tools/Invoke-PrototypePlayModeEvidencePreflight.ps1` so session status, retake plan doc, suite, screenshot, and review pack preview can be summarized as one focused-retake readiness check before opening Unity.
 - Added `Docs/Prototype_RhythmDesign_Audit.md` so rhythm is now an explicit design lens for difficulty, state cadence, variation, payoff, release, telemetry, and Play Mode review.
 - Ran a sub-agent project review pass on 2026-05-17 covering current status, next work, core-loop fun candidates, roadmap direction, and immediate handoff artifacts. The result keeps code changes blocked behind Play Mode evidence and promotes rhythm systemization as the next product direction after evidence closes.
+- Strengthened the Wave Combat verification showcase on 2026-06-17 so delayed
+  manual captures should still show thicker attack trails, longer action labels,
+  and outline/shadow contrast for hit, KO, leak, and truck-damage markers.
 
 ## Verification Snapshot
 - `Tools/Verify-PrototypeAssets.ps1 -Strict -JsonOnly`: `asset_status=ok`, `runtime_required_missing=0`, `final_art_missing=0`, `missing_meta=0`, `diagnostic_warnings=0`.
@@ -154,8 +160,10 @@ Last updated: 2026-06-10 KST
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.cs`: tracks short-lived battlefield combat floating text widgets and spawns truck-damage labels when HP drops.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.EnemyVisuals.cs`: lane truck markers now collapse to one long truck, while enemy hits spawn visible attack trails and larger impact flashes.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.EnemyVisuals.cs`: enemy hits now spawn `-damage`, `KO`, and `LEAK` floating text near the relevant lane target.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.EnemyVisuals.cs`: combat floating text now uses outline/shadow contrast and fades those effects with the label.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.EnemyVisuals.cs`: clears transient combat visuals before verification states are rebuilt.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PlayModeVerification.cs`: Wave Combat state preparation now spawns action labels and lane flash for screenshot evidence.
+- `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PlayModeVerification.cs`: Wave Combat verification now adds longer-lived high-contrast `HIT>Z -12`, `HIT>Z KO`, `LEAK`, and `BITE>TRK -7` showcase markers plus thicker verification attack trails.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: recipe activation pulse now resolves the actual recipe name from model state or payload fallback.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.PresentationActions.cs`: recipe expiry now has its own payoff cue presentation.
 - `Assets/Scripts/Prototype/FoodTruckPrototypeHud.DrawChoiceFlow.cs`: Draw Choice card text now includes fit count, estimated Heat cost, and a tactical role label.

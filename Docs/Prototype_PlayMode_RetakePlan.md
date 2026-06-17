@@ -18,7 +18,7 @@ Retake plan status: `ok`
 No Draw/Pending/Invalid focused retakes are currently missing. Continue with review pack judgment or the next recorded blocker.
 
 ## Wave Combat Note
-Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7`, and lane flash are readable.
+Wave Combat has legacy or incomplete action-showcase evidence. If Play Mode is available, retake Wave Combat too and confirm attack trails, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, and lane flash are readable.
 
 ## Follow-Up Commands
 Before opening Unity, verify this plan still matches the current evidence state:

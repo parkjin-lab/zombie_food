@@ -57,6 +57,8 @@ namespace ZombieFoodcenter.Prototype
         {
             public RectTransform Rect;
             public Text Text;
+            public Outline Outline;
+            public Shadow Shadow;
             public Vector2 Velocity;
             public float Remaining;
             public float Duration;

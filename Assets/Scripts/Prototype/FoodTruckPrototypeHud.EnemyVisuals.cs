@@ -734,6 +734,12 @@ namespace ZombieFoodcenter.Prototype
             Text text = CreateText(laneRoot, "CombatFloatText", fontSize, FontStyle.Bold, TextAnchor.MiddleCenter, color);
             text.raycastTarget = false;
             text.text = label;
+            Outline outline = text.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.02f, 0.03f, 0.05f, 0.94f);
+            outline.effectDistance = new Vector2(2f, -2f);
+            Shadow shadow = text.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.58f);
+            shadow.effectDistance = new Vector2(0f, -3f);
 
             RectTransform rect = text.rectTransform;
             rect.anchorMin = new Vector2(0f, 0.5f);
@@ -746,6 +752,8 @@ namespace ZombieFoodcenter.Prototype
             CombatFloatingTextWidget floating = new CombatFloatingTextWidget();
             floating.Rect = rect;
             floating.Text = text;
+            floating.Outline = outline;
+            floating.Shadow = shadow;
             floating.Duration = Mathf.Max(0.12f, combatFloatingTextDuration * Mathf.Max(0.2f, durationScale));
             floating.Remaining = floating.Duration;
             floating.Velocity = new Vector2(
@@ -785,6 +793,20 @@ namespace ZombieFoodcenter.Prototype
                     Color c = floating.Text.color;
                     c.a = Mathf.Lerp(1f, 0f, life01);
                     floating.Text.color = c;
+                }
+
+                if (floating.Outline != null)
+                {
+                    Color c = floating.Outline.effectColor;
+                    c.a = Mathf.Lerp(0.94f, 0f, life01);
+                    floating.Outline.effectColor = c;
+                }
+
+                if (floating.Shadow != null)
+                {
+                    Color c = floating.Shadow.effectColor;
+                    c.a = Mathf.Lerp(0.58f, 0f, life01);
+                    floating.Shadow.effectColor = c;
                 }
             }
         }

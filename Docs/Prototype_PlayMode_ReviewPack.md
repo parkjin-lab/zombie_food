@@ -77,7 +77,7 @@ These missing planned resources are not runtime blockers. Use them to separate f
 | Draw Choice | Three comparable cards with shape, ingredient, value/risk, `Fit`, `Heat`, and `Role` visible. | `FIX_LAYOUT` if clipped or overlapping; `FIX_FEEDBACK` if the choice tradeoff is unclear. |
 | Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |
 | Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |
-| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels `-12`, `KO`, `LEAK`, `TRUCK -7` and lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if attack trails, action labels, or payoff cues are missing. |
+| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7` and lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if attack trails, action labels, or payoff cues are missing. |
 
 ## Rhythm Beat Review Checklist
 Use this table to name which beat failed before requesting new mechanics or broad balance changes.

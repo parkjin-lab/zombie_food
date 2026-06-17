@@ -228,6 +228,12 @@ complete. Battlefield floaters now use compact source-to-target result copy
 such as `HIT>Z -5`, `HIT>Z KO`, and `BITE>TRK -7` so damage and survival beats
 read as a cause chain instead of isolated numbers.
 
+2026-06-17 Wave Combat verification update: the action-showcase overlay now
+uses longer-lived high-contrast combat labels, thicker verification attack
+trails, and explicit `HIT>Z -12`, `HIT>Z KO`, `LEAK`, and `BITE>TRK -7` markers
+so the next retake should make the Pressure beat cause/effect readable even
+when manual capture is delayed.
+
 2026-05-25 board-local invalid placement update: the first board-local fail
 label pass is complete. Blocked inventory cells now show compact local labels
 such as `S2 OCCUPIED`, `S4 BOUNDS`, or `S1 ANCHOR` during invalid hover/fail
@@ -245,7 +251,7 @@ while runtime placeholder art remains `asset_status=ok`.
 
 ### Highest Priority
 1. Play Mode focused retakes for the three missing states.
-2. Wave Combat retake with action showcase labels.
+2. Wave Combat retake with high-contrast action showcase labels.
 3. Combat cause labels: source-to-target result floater pass complete; continue
    toward visual attack trails that start at specific placed block/recipe
    sources once Play Mode evidence confirms the compact labels are readable.

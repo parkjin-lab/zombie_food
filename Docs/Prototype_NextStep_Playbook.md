@@ -30,7 +30,8 @@
 - 전장 레이아웃은 이제 Draw/Pending Placement에서도 푸드트럭과 좀비가 화면의 절반 이상을 차지하도록 보강됐다. 트럭은 lane마다 반복하지 않고 한 대의 긴 마커로 보여주며, 피격 순간에는 공격 궤적과 충격 플래시가 더 크게 보이도록 보강됐다.
 - 전투 결과 판독성은 이제 좀비 피격 `-damage`, 처치 `KO`, 트럭 도달 `LEAK`, 트럭 피해 `TRUCK -HP` 플로팅 텍스트로 보강됐다.
 - 트럭 피해 원인 판독성은 이제 `BITE -HP`, `PRESSURE -HP`, `OVERHEAT -HP`처럼 원인 라벨을 붙이는 방향으로 보강됐다.
-- Wave Combat suite 캡처는 이제 검증용 액션 showcase를 포함해 attack trails, `-12`, `KO`, `LEAK`, `TRUCK -7` 표식과 lane flash가 찍히도록 보강됐다.
+- Wave Combat suite 캡처는 이제 검증용 액션 showcase를 포함해 attack trails, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7` 표식과 lane flash가 찍히도록 보강됐다.
+- 2026-06-17 기준 Wave Combat 검증용 액션 showcase는 수동 캡처 지연에도 보이도록 더 긴 지속시간, 더 굵은 트레일, outline/shadow가 붙은 `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7` 라벨로 보강됐다.
 - Review pack은 이제 Wave Combat action showcase 준비 여부와 사유를 같이 보여주며, 네 상태의 시각 판정 체크리스트를 한 장에 포함한다.
 - 게임 리듬감 기준은 이제 별도 audit로 승격됐다. 현재 판정은 "리듬 재료는 있으나, beat map과 tension/release 검증 기준이 부족하다"이며, 다음 기능은 `Read`, `Commit`, `Pressure`, `Payoff`, `Release` 중 어느 beat를 개선하는지 먼저 밝혀야 한다.
 - `Tools\Show-PrototypeSessionStatus.ps1`도 이제 `wave_combat_action_showcase_ready/reason`을 첫 화면과 JSON에 함께 출력한다.
@@ -92,7 +93,7 @@
 - Invalid Placement retake에서는 실패 사유와 `Next` 행동 힌트가 보드 근처/cue에서 동시에 읽히는지 확인한다.
 - Pending Placement retake에서는 R1/R2 추천 이유가 보드 조작을 방해하지 않는 길이로 읽히는지 확인한다.
 - Wave Combat/Draw/Pending retake에서는 푸드트럭과 좀비 전장이 실제 화면의 50% 이상으로 느껴지는지, 트럭이 한 대만 보이는지, 공격 궤적과 피격 플래시만 보고도 어떤 좀비가 맞았는지 이해되는지 확인한다.
-- Wave Combat retake에서는 suite 캡처 직후 attack trails와 액션 showcase 표식(`-12`, `KO`, `LEAK`, `TRUCK -7`)이 겹치지 않고 읽히는지 확인한다.
+- Wave Combat retake에서는 suite 캡처 직후 attack trails와 액션 showcase 표식(`HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`)이 겹치지 않고 읽히는지 확인한다.
 - Wave Combat retake에서는 압박이 평평하게 흘러가는지, 아니면 상승-피크-해소가 느껴지는지 같이 판정한다.
 
 ### P2 (중기: 자동화와 제품 확장)
