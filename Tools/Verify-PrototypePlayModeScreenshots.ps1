@@ -57,11 +57,13 @@ function New-ManualRegistrationCommand {
     param(
         [string]$StateName,
         [string]$TargetPath,
-        [string]$RootPath
+        [string]$RootPath,
+        [switch]$WaveCombatActionShowcase
     )
 
     $relativePath = Get-ProjectRelativePath -TargetPath $TargetPath -RootPath $RootPath
-    return 'powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "' + $RootPath + '" -State "' + $StateName + '" -ScreenshotPath "' + $relativePath + '" -PreviewOnly -JsonOnly'
+    $showcaseFlag = if ($WaveCombatActionShowcase) { " -WaveCombatActionShowcase" } else { "" }
+    return 'powershell -ExecutionPolicy Bypass -File "Tools\Register-PrototypePlayModeManualEvidence.ps1" -ProjectPath "' + $RootPath + '" -State "' + $StateName + '" -ScreenshotPath "' + $relativePath + '"' + $showcaseFlag + ' -PreviewOnly -JsonOnly'
 }
 
 function Get-ScreenshotTriageMap {
@@ -198,6 +200,8 @@ function Get-SuiteEvidenceMap {
         return $map
     }
 
+    $script:SuiteVerifierData = $suiteData
+
     if ($null -eq $suiteData.state_results) {
         return $map
     }
@@ -247,7 +251,15 @@ $smallFileScreenshots = New-Object System.Collections.Generic.List[string]
 $coveredStates = New-Object "System.Collections.Generic.HashSet[string]" ([System.StringComparer]::OrdinalIgnoreCase)
 $manualRegistrationCandidates = New-Object System.Collections.Generic.List[object]
 $triagedNonStateScreenshots = New-Object System.Collections.Generic.List[object]
+$triagedActionShowcaseScreenshots = New-Object System.Collections.Generic.List[object]
+$waveCombatActionShowcaseCandidates = New-Object System.Collections.Generic.List[object]
 $unlabeledCount = 0
+$waveCombatActionShowcaseReady = if ($null -ne $script:SuiteVerifierData -and $null -ne $script:SuiteVerifierData.wave_combat_action_showcase_ready) {
+    $script:SuiteVerifierData.wave_combat_action_showcase_ready -eq $true
+}
+else {
+    $false
+}
 
 foreach ($path in $candidatePaths) {
     $fullPath = [System.IO.Path]::GetFullPath($path)
@@ -256,6 +268,7 @@ foreach ($path in $candidatePaths) {
     $triageStatus = if ($null -ne $triage) { [string]$triage.status } else { "unreviewed" }
     $triageReason = if ($null -ne $triage) { [string]$triage.reason } else { "NOT_RECORDED" }
     $isTriagedNonState = $triageStatus -eq "ignored_non_state"
+    $isTriagedActionShowcase = $triageStatus -eq "ignored_action_showcase"
     $state = if ($suiteEvidenceMap.ContainsKey($pathKey)) { $suiteEvidenceMap[$pathKey] } elseif ($isTriagedNonState) { "Triaged Non-State" } else { Get-StateFromFileName -Path $fullPath }
     $fileInfo = if (Test-Path -LiteralPath $fullPath -PathType Leaf) { Get-Item -LiteralPath $fullPath } else { $null }
     $header = Read-PngHeader -Path $fullPath
@@ -307,6 +320,13 @@ foreach ($path in $candidatePaths) {
             reason = $triageReason
         }) | Out-Null
     }
+    elseif ($isTriagedActionShowcase) {
+        $triagedActionShowcaseScreenshots.Add([ordered]@{
+            path = $fullPath
+            relative_path = Get-ProjectRelativePath -TargetPath $fullPath -RootPath $ProjectPath
+            reason = $triageReason
+        }) | Out-Null
+    }
     elseif ($state -eq "Unlabeled" -and $machineQuality) {
         $manualRegistrationCandidates.Add([ordered]@{
             path = $fullPath
@@ -314,6 +334,16 @@ foreach ($path in $candidatePaths) {
             width = $header.width
             height = $header.height
             size_bytes = $sizeBytes
+        }) | Out-Null
+    }
+    elseif ($state -eq "Wave Combat" -and -not $waveCombatActionShowcaseReady -and -not $suiteEvidenceMap.ContainsKey($pathKey) -and $machineQuality) {
+        $waveCombatActionShowcaseCandidates.Add([ordered]@{
+            path = $fullPath
+            relative_path = Get-ProjectRelativePath -TargetPath $fullPath -RootPath $ProjectPath
+            width = $header.width
+            height = $header.height
+            size_bytes = $sizeBytes
+            command = New-ManualRegistrationCommand -StateName "Wave Combat" -TargetPath $fullPath -RootPath $ProjectPath -WaveCombatActionShowcase
         }) | Out-Null
     }
 }
@@ -341,7 +371,15 @@ if ($screenshots.Count -gt 0) {
     }
     elseif ($missingStates.Count -eq 0) {
         $status = "suite_ready"
-        $nextAction = "Review the screenshots visually, then record PASS or FIX/BLOCKED."
+        if (-not $waveCombatActionShowcaseReady -and $waveCombatActionShowcaseCandidates.Count -gt 0) {
+            $nextAction = "Visually inspect Wave Combat action-showcase candidates, then register a matching one with -WaveCombatActionShowcase or retake Wave Combat."
+        }
+        elseif (-not $waveCombatActionShowcaseReady) {
+            $nextAction = "Retake Wave Combat with the strengthened showcase; no unregistered action-showcase candidates are available."
+        }
+        else {
+            $nextAction = "Review the screenshots visually, then record PASS or FIX/BLOCKED."
+        }
     }
     else {
         $status = "partial"
@@ -365,8 +403,11 @@ $result = [ordered]@{
     small_file_count = $smallFileScreenshots.Count
     unlabeled_count = $unlabeledCount
     manual_registration_candidate_count = $manualRegistrationCandidates.Count
+    wave_combat_action_showcase_candidate_count = $waveCombatActionShowcaseCandidates.Count
+    wave_combat_action_showcase_candidates = $waveCombatActionShowcaseCandidates.ToArray()
     triage_manifest_path = $triagePath
     triaged_non_state_count = $triagedNonStateScreenshots.Count
+    triaged_action_showcase_count = $triagedActionShowcaseScreenshots.Count
     covered_state_count = $coveredStates.Count
     expected_state_count = $requiredStates.Count
     missing_states = $missingStates
@@ -377,6 +418,7 @@ $result = [ordered]@{
     manual_registration_candidates = $manualRegistrationCandidates.ToArray()
     manual_registration_commands = $manualRegistrationCommands.ToArray()
     triaged_non_state_screenshots = $triagedNonStateScreenshots.ToArray()
+    triaged_action_showcase_screenshots = $triagedActionShowcaseScreenshots.ToArray()
     visual_review_required = $true
     next_action = $nextAction
 }
@@ -391,7 +433,9 @@ else {
     Write-Host ("covered_state_count=" + $coveredStates.Count + "/" + $requiredStates.Count)
     Write-Host ("unlabeled_count=" + $unlabeledCount)
     Write-Host ("manual_registration_candidate_count=" + $manualRegistrationCandidates.Count)
+    Write-Host ("wave_combat_action_showcase_candidate_count=" + $waveCombatActionShowcaseCandidates.Count)
     Write-Host ("triaged_non_state_count=" + $triagedNonStateScreenshots.Count)
+    Write-Host ("triaged_action_showcase_count=" + $triagedActionShowcaseScreenshots.Count)
     if ($missingStates.Count -gt 0) {
         Write-Host ("missing_states=" + ($missingStates -join ", "))
     }
@@ -399,6 +443,12 @@ else {
         Write-Host "manual_registration_commands:"
         foreach ($commandTemplate in $manualRegistrationCommands) {
             Write-Host ("- " + $commandTemplate.state + ": " + $commandTemplate.command)
+        }
+    }
+    if ($waveCombatActionShowcaseCandidates.Count -gt 0) {
+        Write-Host "wave_combat_action_showcase_candidates:"
+        foreach ($candidate in $waveCombatActionShowcaseCandidates) {
+            Write-Host ("- " + $candidate.relative_path + ": " + $candidate.command)
         }
     }
     Write-Host "visual_review_required=true"

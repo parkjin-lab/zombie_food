@@ -207,6 +207,7 @@ if ($focusedRetakeStates.Count -eq 0) {
 }
 
 $manualCandidateCount = Get-ObjectProperty $screenshotData "manual_registration_candidate_count" (Get-ObjectProperty $retakePlanData "manual_registration_candidate_count" 0)
+$waveCombatActionShowcaseCandidateCount = Get-ObjectProperty $screenshotData "wave_combat_action_showcase_candidate_count" (Get-ObjectProperty $sessionData "playmode_wave_combat_action_showcase_candidate_count" 0)
 $triagedNonStateCount = Get-ObjectProperty $screenshotData "triaged_non_state_count" (Get-ObjectProperty $retakePlanData "triaged_non_state_count" 0)
 $retakePlanDocStatus = Get-ObjectProperty $retakePlanData "retake_plan_doc_status" "unknown"
 $retakePlanDocMissingNeedles = Get-ArrayValue (Get-ObjectProperty $retakePlanData "missing_needles" @())
@@ -251,6 +252,10 @@ elseif ($retakePlanDocStatus -ne "ok") {
 elseif ($focusedRetakeStates.Count -gt 0 -and $manualCandidateCount -gt 0) {
     $preflightStatus = "needs_manual_registration_review"
     $nextAction = "Inspect manual registration candidates first; retake any missing state without a visually matching PNG."
+}
+elseif ($focusedRetakeStates.Count -gt 0 -and $waveCombatActionShowcaseCandidateCount -gt 0 -and $waveCombatActionShowcaseReady -ne $true) {
+    $preflightStatus = "needs_wave_combat_candidate_review"
+    $nextAction = "Inspect Wave Combat action-showcase candidates first; register a visually matching one with -WaveCombatActionShowcase or retake Wave Combat."
 }
 elseif ($focusedRetakeStates.Count -gt 0 -and $manualCandidateCount -eq 0) {
     $preflightStatus = "ready_for_focused_retake"
@@ -310,6 +315,7 @@ $result = [ordered]@{
     focused_retake_count = $focusedRetakeStates.Count
     focused_retake_core_states_all_missing = $allFocusedStatesMissing
     manual_registration_candidate_count = $manualCandidateCount
+    wave_combat_action_showcase_candidate_count = $waveCombatActionShowcaseCandidateCount
     triaged_non_state_count = $triagedNonStateCount
     retake_plan_doc_status = $retakePlanDocStatus
     retake_plan_doc_missing_needles = $retakePlanDocMissingNeedles.Count
@@ -344,6 +350,7 @@ else {
     Write-Host ("playmode_suite_status=" + $suiteStatus)
     Write-Host ("playmode_screenshot_status=" + $screenshotStatus)
     Write-Host ("manual_registration_candidate_count=" + $manualCandidateCount)
+    Write-Host ("wave_combat_action_showcase_candidate_count=" + $waveCombatActionShowcaseCandidateCount)
     Write-Host ("triaged_non_state_count=" + $triagedNonStateCount)
     Write-Host ("wave_combat_action_showcase_ready=" + [string]$waveCombatActionShowcaseReady)
     Write-Host ("wave_combat_action_showcase_reason=" + $waveCombatActionShowcaseReason)

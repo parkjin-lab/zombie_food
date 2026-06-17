@@ -178,6 +178,26 @@ function Get-TriagedNonStateScreenshots {
     return @($ScreenshotData.triaged_non_state_screenshots)
 }
 
+function Get-WaveCombatActionShowcaseCandidates {
+    param([object]$ScreenshotData)
+
+    if ($null -eq $ScreenshotData -or $null -eq $ScreenshotData.wave_combat_action_showcase_candidates) {
+        return @()
+    }
+
+    return @($ScreenshotData.wave_combat_action_showcase_candidates)
+}
+
+function Get-TriagedActionShowcaseScreenshots {
+    param([object]$ScreenshotData)
+
+    if ($null -eq $ScreenshotData -or $null -eq $ScreenshotData.triaged_action_showcase_screenshots) {
+        return @()
+    }
+
+    return @($ScreenshotData.triaged_action_showcase_screenshots)
+}
+
 function Get-PlannedResourceRows {
     param([object]$AssetData)
 
@@ -257,6 +277,8 @@ function Build-ReviewPackMarkdown {
     $screenshotRows = Get-ScreenshotRows -ScreenshotData $ScreenshotData
     $manualRegistrationCommands = Get-ManualRegistrationCommands -ScreenshotData $ScreenshotData
     $triagedNonStateScreenshots = Get-TriagedNonStateScreenshots -ScreenshotData $ScreenshotData
+    $waveCombatActionShowcaseCandidates = Get-WaveCombatActionShowcaseCandidates -ScreenshotData $ScreenshotData
+    $triagedActionShowcaseScreenshots = Get-TriagedActionShowcaseScreenshots -ScreenshotData $ScreenshotData
     $plannedResourceRows = Get-PlannedResourceRows -AssetData $AssetData
     $waveCombatActionShowcaseReady = ($SuiteData.wave_combat_action_showcase_ready -eq $true)
     $builder = New-Object System.Text.StringBuilder
@@ -277,8 +299,14 @@ function Build-ReviewPackMarkdown {
     if ($null -ne $ScreenshotData.manual_registration_candidate_count) {
         [void]$builder.AppendLine('- Manual registration candidates: `' + $ScreenshotData.manual_registration_candidate_count + '`')
     }
+    if ($null -ne $ScreenshotData.wave_combat_action_showcase_candidate_count) {
+        [void]$builder.AppendLine('- Wave Combat action-showcase candidates: `' + $ScreenshotData.wave_combat_action_showcase_candidate_count + '`')
+    }
     if ($null -ne $ScreenshotData.triaged_non_state_count) {
         [void]$builder.AppendLine('- Triaged non-state screenshots: `' + $ScreenshotData.triaged_non_state_count + '`')
+    }
+    if ($null -ne $ScreenshotData.triaged_action_showcase_count) {
+        [void]$builder.AppendLine('- Triaged action-showcase screenshots: `' + $ScreenshotData.triaged_action_showcase_count + '`')
     }
     [void]$builder.AppendLine('- Manual record status: `' + $RecordData.playmode_record_status + '`')
     if ($null -ne $AssetData) {
@@ -365,12 +393,39 @@ function Build-ReviewPackMarkdown {
     }
     [void]$builder.AppendLine()
 
+    [void]$builder.AppendLine("## Wave Combat Action-Showcase Candidates")
+    if ($waveCombatActionShowcaseCandidates.Count -eq 0) {
+        [void]$builder.AppendLine("No extra machine-quality Wave Combat PNG candidates are available. Retake Wave Combat with the strengthened showcase.")
+    }
+    else {
+        [void]$builder.AppendLine("Use one of these only after visually confirming attack trails, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, lane flash, and one long truck are readable.")
+        foreach ($candidate in $waveCombatActionShowcaseCandidates) {
+            [void]$builder.AppendLine()
+            [void]$builder.AppendLine('- Candidate: `' + $candidate.relative_path + '`')
+            [void]$builder.AppendLine('```powershell')
+            [void]$builder.AppendLine([string]$candidate.command)
+            [void]$builder.AppendLine('```')
+        }
+    }
+    [void]$builder.AppendLine()
+
     [void]$builder.AppendLine("## Triaged Non-State Screenshots")
     if ($triagedNonStateScreenshots.Count -eq 0) {
         [void]$builder.AppendLine("No screenshots have been triaged as non-required states.")
     }
     else {
         foreach ($triaged in $triagedNonStateScreenshots) {
+            [void]$builder.AppendLine('- `' + $triaged.relative_path + '`: ' + $triaged.reason)
+        }
+    }
+    [void]$builder.AppendLine()
+
+    [void]$builder.AppendLine("## Triaged Wave Combat Action-Showcase Screenshots")
+    if ($triagedActionShowcaseScreenshots.Count -eq 0) {
+        [void]$builder.AppendLine("No Wave Combat screenshots have been rejected specifically for action-showcase weakness.")
+    }
+    else {
+        foreach ($triaged in $triagedActionShowcaseScreenshots) {
             [void]$builder.AppendLine('- `' + $triaged.relative_path + '`: ' + $triaged.reason)
         }
     }
@@ -415,7 +470,13 @@ if (-not $PreviewOnly) {
     $actualOutputPath = Write-TextWithFallback -PreferredPath $OutputPath -Contents $markdown
 }
 
-$nextAction = if ($readiness -eq "ready_for_visual_review") {
+$nextAction = if ($screenshotData.wave_combat_action_showcase_candidate_count -gt 0 -and $suiteData.wave_combat_action_showcase_ready -ne $true) {
+    "Visually inspect Wave Combat action-showcase candidates, then register a matching one with -WaveCombatActionShowcase or retake Wave Combat."
+}
+elseif ($suiteData.wave_combat_action_showcase_ready -ne $true) {
+    "Retake Wave Combat with the strengthened showcase; no unregistered action-showcase candidates are available."
+}
+elseif ($readiness -eq "ready_for_visual_review") {
     "Open the review pack, make visual PASS/FIX/BLOCKED decisions, then apply the result writer command."
 }
 elseif ($screenshotData.manual_registration_candidate_count -gt 0) {
@@ -437,8 +498,12 @@ $result = [ordered]@{
     missing_states = $screenshotData.missing_states
     manual_registration_candidate_count = $screenshotData.manual_registration_candidate_count
     manual_registration_commands = $screenshotData.manual_registration_commands
+    wave_combat_action_showcase_candidate_count = $screenshotData.wave_combat_action_showcase_candidate_count
+    wave_combat_action_showcase_candidates = $screenshotData.wave_combat_action_showcase_candidates
     triaged_non_state_count = $screenshotData.triaged_non_state_count
     triaged_non_state_screenshots = $screenshotData.triaged_non_state_screenshots
+    triaged_action_showcase_count = $screenshotData.triaged_action_showcase_count
+    triaged_action_showcase_screenshots = $screenshotData.triaged_action_showcase_screenshots
     manual_record_status = $recordData.playmode_record_status
     asset_status = $assetData.asset_status
     asset_planned_missing = $assetData.planned_missing

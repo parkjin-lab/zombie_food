@@ -41,6 +41,8 @@
 - `Docs\Prototype_PlayMode_Screenshot_Triage.txt`는 시각 검토 후 필수 상태 증거가 아니라고 판단한 PNG를 기록한다. triage된 PNG는 더 이상 manual registration candidate로 추천되지 않는다.
 - `Tools\Write-PrototypePlayModeRetakePlan.ps1`은 현재 partial evidence를 읽어 Draw Choice, Pending Placement, Invalid Placement의 focused retake 메뉴와 must-see 기준을 한 장짜리 `Docs\Prototype_PlayMode_RetakePlan.md`로 정리한다.
 - 2026-06-18 기준 `Tools\Write-PrototypePlayModeRetakePlan.ps1`은 missing state가 없어도 `wave_combat_action_showcase_ready=false`이면 Wave Combat를 focused retake target으로 올린다.
+- 2026-06-18 기준 `Tools\Verify-PrototypePlayModeScreenshots.ps1`은 suite에 등록되지 않은 machine-quality `wave-combat` PNG를 action-showcase 후보로 따로 노출하고, `-WaveCombatActionShowcase` 등록 명령을 생성한다.
+- 기존 Wave Combat PNG를 직접 확인했지만 공격 궤적/액션 라벨 증거가 약하면 `Docs\Prototype_PlayMode_Screenshot_Triage.txt`에 `ignored_action_showcase`로 기록한다. 이렇게 기록된 PNG는 action-showcase 후보에서 제외되고, 다음 행동은 강화된 Wave Combat 재촬영으로 유지된다.
 - `Tools\Verify-PrototypePlayModeRetakePlan.ps1`은 `Docs\Prototype_PlayMode_RetakePlan.md`가 현재 suite/screenshot/review preview 상태와 맞는지 확인하고, stale이면 gate/session status에서 바로 드러낸다.
 - `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`은 session status, retake plan doc, suite, screenshot, review pack preview를 한 번에 모아 `ready_for_focused_retake` 또는 `ready_for_visual_review` 같은 다음 행동 상태를 출력한다.
 

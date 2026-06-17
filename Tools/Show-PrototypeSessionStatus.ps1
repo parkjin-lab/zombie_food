@@ -156,6 +156,8 @@ $playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $pla
 $playModeScreenshotMissingStates = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.missing_states } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.missing_states } else { @() }
 $playModeManualRegistrationCandidateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_candidate_count) { $playModeScreenshotsData.manual_registration_candidate_count } else { 0 }
 $playModeManualRegistrationCommands = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_commands) { $playModeScreenshotsData.manual_registration_commands } else { @() }
+$playModeWaveCombatActionShowcaseCandidateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.wave_combat_action_showcase_candidate_count) { $playModeScreenshotsData.wave_combat_action_showcase_candidate_count } else { 0 }
+$playModeWaveCombatActionShowcaseCandidates = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.wave_combat_action_showcase_candidates) { $playModeScreenshotsData.wave_combat_action_showcase_candidates } else { @() }
 $playModeTriagedNonStateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.triaged_non_state_count) { $playModeScreenshotsData.triaged_non_state_count } else { 0 }
 $reviewPackStatus = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_pack_status } elseif (-not $playModeReviewPackResult.ok) { "failed" } else { "unknown" }
 $reviewReadiness = if ($null -ne $playModeReviewPackData) { $playModeReviewPackData.review_readiness } else { "unknown" }
@@ -248,7 +250,12 @@ elseif ($playModeScreenshotStatus -ne "suite_ready") {
 }
 elseif ($waveCombatActionShowcaseReady -ne $true) {
     $topIssue = "Wave Combat action showcase is not ready: " + $waveCombatActionShowcaseReason + "."
-    $nextEvidenceAction = "Retake Wave Combat with the strengthened showcase and confirm HIT>Z, LEAK, BITE>TRK labels before recording PASS."
+    if ($playModeWaveCombatActionShowcaseCandidateCount -gt 0) {
+        $nextEvidenceAction = "Inspect " + $playModeWaveCombatActionShowcaseCandidateCount + " Wave Combat action-showcase candidate(s), then register a matching one or retake Wave Combat."
+    }
+    else {
+        $nextEvidenceAction = "Retake Wave Combat with the strengthened showcase and confirm HIT>Z, LEAK, BITE>TRK labels before recording PASS."
+    }
     $nextCodeTarget = "No new combat-feedback code target until the strengthened Wave Combat showcase is visually judged."
 }
 elseif ($reviewReadiness -ne "ready_for_visual_review") {
@@ -309,6 +316,8 @@ $summary = [ordered]@{
     playmode_screenshot_missing_states = $playModeScreenshotMissingStates
     playmode_manual_registration_candidate_count = $playModeManualRegistrationCandidateCount
     playmode_manual_registration_commands = $playModeManualRegistrationCommands
+    playmode_wave_combat_action_showcase_candidate_count = $playModeWaveCombatActionShowcaseCandidateCount
+    playmode_wave_combat_action_showcase_candidates = $playModeWaveCombatActionShowcaseCandidates
     playmode_triaged_non_state_count = $playModeTriagedNonStateCount
     review_pack_status = $reviewPackStatus
     review_readiness = $reviewReadiness
@@ -405,6 +414,7 @@ Write-Host ("wave_combat_action_showcase_reason=" + $summary.wave_combat_action_
 Write-Host ("playmode_screenshot_status=" + $summary.playmode_screenshot_status)
 Write-Host ("playmode_screenshot_count=" + $summary.playmode_screenshot_count)
 Write-Host ("playmode_manual_registration_candidate_count=" + $summary.playmode_manual_registration_candidate_count)
+Write-Host ("playmode_wave_combat_action_showcase_candidate_count=" + $summary.playmode_wave_combat_action_showcase_candidate_count)
 Write-Host ("playmode_triaged_non_state_count=" + $summary.playmode_triaged_non_state_count)
 Write-Host ("review_pack_status=" + $summary.review_pack_status)
 Write-Host ("review_readiness=" + $summary.review_readiness)
