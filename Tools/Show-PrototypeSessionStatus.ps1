@@ -51,10 +51,49 @@ function Invoke-JsonScript {
     }
 }
 
-$gateScript = Join-Path $ProjectPath "Tools\Gate-Verification.ps1"
+function Invoke-KeyValueScript {
+    param(
+        [string]$ScriptPath,
+        [string[]]$Arguments,
+        [string]$StatusKey
+    )
+
+    if (-not (Test-Path -LiteralPath $ScriptPath)) {
+        return [pscustomobject]@{
+            ok = $false
+            exit_code = 90
+            data = $null
+            error = "missing_script"
+        }
+    }
+
+    $output = & powershell -ExecutionPolicy Bypass -File $ScriptPath @Arguments
+    $exitCode = $LASTEXITCODE
+    $statusLine = @($output | Where-Object { [string]$_ -like ($StatusKey + "=*") } | Select-Object -Last 1)
+    if ($statusLine.Count -eq 0) {
+        return [pscustomobject]@{
+            ok = $false
+            exit_code = $exitCode
+            data = $null
+            error = "missing_status_key: " + $StatusKey
+        }
+    }
+
+    $statusValue = ([string]$statusLine[0]).Substring($StatusKey.Length + 1)
+    return [pscustomobject]@{
+        ok = ($exitCode -eq 0)
+        exit_code = $exitCode
+        data = [pscustomobject]@{
+            $StatusKey = $statusValue
+        }
+        error = $null
+    }
+}
+
 $assetScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
 $layoutScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
 $hudContractScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
+$staticScript = Join-Path $ProjectPath "Tools\Verify-PrototypeStatic.ps1"
 $playModeRecordScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRecord.ps1"
 $playModeSuiteScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $playModeScreenshotsScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
@@ -67,15 +106,14 @@ $handoffPath = Join-Path $ProjectPath "Docs\Prototype_Session_Handoff.md"
 $playModePath = Join-Path $ProjectPath "Docs\Prototype_PlayMode_Verification.md"
 $playbookPath = Join-Path $ProjectPath "Docs\Prototype_NextStep_Playbook.md"
 
-$gateResult = Invoke-JsonScript -ScriptPath $gateScript -Arguments @(
-    "-ProjectPath", $ProjectPath,
-    "-RunTests",
-    "-JsonOnly"
-)
-
 $assetResult = Invoke-JsonScript -ScriptPath $assetScript -Arguments @(
     "-ProjectPath", $ProjectPath,
     "-Strict",
+    "-JsonOnly"
+)
+
+$layoutResult = Invoke-JsonScript -ScriptPath $layoutScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
     "-JsonOnly"
 )
 
@@ -88,6 +126,11 @@ $hudContractResult = Invoke-JsonScript -ScriptPath $hudContractScript -Arguments
     "-ProjectPath", $ProjectPath,
     "-JsonOnly"
 )
+
+$staticResult = Invoke-KeyValueScript -ScriptPath $staticScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-Compact"
+) -StatusKey "static_status"
 
 $playModeSuiteResult = Invoke-JsonScript -ScriptPath $playModeSuiteScript -Arguments @(
     "-ProjectPath", $ProjectPath,
@@ -116,44 +159,37 @@ $playModeRetakePlanVerifierResult = Invoke-JsonScript -ScriptPath $playModeRetak
     "-JsonOnly"
 )
 
-$gateData = $gateResult.data
 $assetData = $assetResult.data
-$verification = if ($null -ne $gateData) { $gateData.status } else { $null }
-$gateAssets = if ($null -ne $gateData) { $gateData.assets } else { $null }
-$gateLayout = if ($null -ne $gateData) { $gateData.layout } else { $null }
-$gateHudContract = if ($null -ne $gateData) { $gateData.hud_contract } else { $null }
-$gatePlayModeSuite = if ($null -ne $gateData) { $gateData.playmode_suite } else { $null }
-$gatePlayModeScreenshots = if ($null -ne $gateData) { $gateData.playmode_screenshots } else { $null }
+$layoutData = $layoutResult.data
 $playModeRecordData = $playModeRecordResult.data
 $hudContractData = $hudContractResult.data
+$staticData = $staticResult.data
 $playModeSuiteData = $playModeSuiteResult.data
 $playModeScreenshotsData = $playModeScreenshotsResult.data
 $playModeReviewPackData = $playModeReviewPackResult.data
 $playModeRetakePlanData = $playModeRetakePlanResult.data
 $playModeRetakePlanVerifierData = $playModeRetakePlanVerifierResult.data
 
-$assetStatus = if ($null -ne $assetData) { $assetData.asset_status } elseif ($null -ne $gateAssets) { $gateAssets.asset_status } else { "unknown" }
+$assetStatus = if ($null -ne $assetData) { $assetData.asset_status } else { "unknown" }
 $assetPlannedMissing = if ($null -ne $assetData -and $null -ne $assetData.PSObject.Properties["planned_missing"]) {
     $assetData.planned_missing
-} elseif ($null -ne $gateAssets -and $null -ne $gateAssets.PSObject.Properties["planned_missing"]) {
-    $gateAssets.planned_missing
 } else {
     0
 }
-$layoutStatus = if ($null -ne $gateLayout) { $gateLayout.layout_status } else { "unknown" }
-$hudContractStatus = if ($null -ne $hudContractData) { $hudContractData.hud_contract_status } elseif ($null -ne $gateHudContract) { $gateHudContract.hud_contract_status } else { "unknown" }
-$hudContractFailedChecks = if ($null -ne $hudContractData) { $hudContractData.failed_checks } elseif ($null -ne $gateHudContract) { $gateHudContract.failed_checks } else { $null }
+$layoutStatus = if ($null -ne $layoutData) { $layoutData.layout_status } else { "unknown" }
+$hudContractStatus = if ($null -ne $hudContractData) { $hudContractData.hud_contract_status } else { "unknown" }
+$hudContractFailedChecks = if ($null -ne $hudContractData) { $hudContractData.failed_checks } else { $null }
 $playModeRecordStatus = if ($null -ne $playModeRecordData) { $playModeRecordData.playmode_record_status } else { "unknown" }
-$playModeSuiteStatus = if ($null -ne $playModeSuiteData) { $playModeSuiteData.playmode_suite_status } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.playmode_suite_status } else { "unknown" }
-$playModeSuiteCaptureSource = if ($null -ne $playModeSuiteData) { $playModeSuiteData.suite_capture_source } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.suite_capture_source } else { "unknown" }
-$playModeSuiteCapturedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.captured_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.captured_count } else { $null }
-$playModeSuiteExpectedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.expected_state_count } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.expected_state_count } else { $null }
-$waveCombatActionShowcaseReady = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_ready } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.wave_combat_action_showcase_ready } else { $null }
-$waveCombatActionShowcaseReason = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_reason } elseif ($null -ne $gatePlayModeSuite) { $gatePlayModeSuite.wave_combat_action_showcase_reason } else { "unknown" }
-$playModeScreenshotStatus = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.playmode_screenshot_status } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.playmode_screenshot_status } else { "unknown" }
-$playModeScreenshotCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.screenshot_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.screenshot_count } else { $null }
-$playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.invalid_count } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.invalid_count } else { $null }
-$playModeScreenshotMissingStates = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.missing_states } elseif ($null -ne $gatePlayModeScreenshots) { $gatePlayModeScreenshots.missing_states } else { @() }
+$playModeSuiteStatus = if ($null -ne $playModeSuiteData) { $playModeSuiteData.playmode_suite_status } else { "unknown" }
+$playModeSuiteCaptureSource = if ($null -ne $playModeSuiteData) { $playModeSuiteData.suite_capture_source } else { "unknown" }
+$playModeSuiteCapturedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.captured_count } else { $null }
+$playModeSuiteExpectedCount = if ($null -ne $playModeSuiteData) { $playModeSuiteData.expected_state_count } else { $null }
+$waveCombatActionShowcaseReady = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_ready } else { $null }
+$waveCombatActionShowcaseReason = if ($null -ne $playModeSuiteData) { $playModeSuiteData.wave_combat_action_showcase_reason } else { "unknown" }
+$playModeScreenshotStatus = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.playmode_screenshot_status } else { "unknown" }
+$playModeScreenshotCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.screenshot_count } else { $null }
+$playModeScreenshotInvalidCount = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.invalid_count } else { $null }
+$playModeScreenshotMissingStates = if ($null -ne $playModeScreenshotsData) { $playModeScreenshotsData.missing_states } else { @() }
 $playModeManualRegistrationCandidateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_candidate_count) { $playModeScreenshotsData.manual_registration_candidate_count } else { 0 }
 $playModeManualRegistrationCommands = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.manual_registration_commands) { $playModeScreenshotsData.manual_registration_commands } else { @() }
 $playModeWaveCombatActionShowcaseCandidateCount = if ($null -ne $playModeScreenshotsData -and $null -ne $playModeScreenshotsData.wave_combat_action_showcase_candidate_count) { $playModeScreenshotsData.wave_combat_action_showcase_candidate_count } else { 0 }
@@ -176,16 +212,17 @@ $retakePlanDocDocumentedCount = if ($null -ne $playModeRetakePlanVerifierData) {
 $retakePlanDocExpectedCount = if ($null -ne $playModeRetakePlanVerifierData) { $playModeRetakePlanVerifierData.expected_focused_retake_count } else { $null }
 $retakePlanDocNextAction = if ($null -ne $playModeRetakePlanVerifierData) { $playModeRetakePlanVerifierData.next_action } else { "Run Tools\Verify-PrototypePlayModeRetakePlan.ps1 to confirm the retake checklist is current." }
 $retakePlanDocError = if ($playModeRetakePlanVerifierResult.ok) { $null } else { $playModeRetakePlanVerifierResult.error }
-$staticStatus = if ($null -ne $verification) { $verification.static_status } else { "unknown" }
-$compileStatus = if ($null -ne $verification) { $verification.compile_status } else { "unknown" }
-$testsStatus = if ($null -ne $verification) { $verification.tests_status } else { "unknown" }
-$manualRequired = if ($null -ne $verification) { [bool]$verification.manual_verification_required } else { $true }
+$staticStatus = if ($null -ne $staticData) { $staticData.static_status } else { "unknown" }
+$compileStatus = "inconclusive"
+$testsStatus = "inconclusive"
+$manualRequired = $true
+$gateStatus = if ($assetResult.ok -and $layoutResult.ok -and $hudContractResult.ok -and $staticResult.ok -and $assetStatus -eq "ok" -and $layoutStatus -eq "ok" -and $hudContractStatus -eq "ok" -and $staticStatus -eq "ok") { "ok" } else { "failed" }
 
 $readiness = "needs_manual_playmode"
-if ($gateResult.ok -and $assetStatus -eq "ok" -and $layoutStatus -eq "ok" -and $hudContractStatus -eq "ok" -and $staticStatus -eq "ok" -and $playModeRecordStatus -eq "passed" -and -not $manualRequired) {
+if ($gateStatus -eq "ok" -and $playModeRecordStatus -eq "passed" -and -not $manualRequired) {
     $readiness = "ready"
 }
-elseif (-not $gateResult.ok -or $assetStatus -ne "ok" -or $layoutStatus -ne "ok" -or $hudContractStatus -ne "ok" -or $staticStatus -ne "ok" -or $playModeRecordStatus -eq "invalid_record") {
+elseif ($gateStatus -ne "ok" -or $playModeRecordStatus -eq "invalid_record") {
     $readiness = "needs_fix_before_playmode"
 }
 elseif ($playModeSuiteStatus -eq "invalid_suite") {
@@ -298,7 +335,7 @@ $summary = [ordered]@{
     top_issue = $topIssue
     next_evidence_action = $nextEvidenceAction
     next_code_target = $nextCodeTarget
-    gate_status = if ($null -ne $gateData) { $gateData.gate_status } else { "unknown" }
+    gate_status = $gateStatus
     asset_status = $assetStatus
     asset_planned_missing = $assetPlannedMissing
     layout_status = $layoutStatus

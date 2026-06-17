@@ -1,6 +1,6 @@
 # Prototype Autonomous Development Directive
 
-Last updated: 2026-06-10 KST
+Last updated: 2026-06-18 KST
 
 ## Purpose
 This document tells Codex, sub-agents, and heartbeat automations how to keep the
@@ -21,24 +21,29 @@ manual result integrity. Only then should it improve a narrow, named rhythm beat
 - Official manual result is still open; do not claim final PASS automatically.
 - Wave Combat action showcase is still legacy/incomplete until evidence shows
   attack trails plus action labels.
+- Existing extra Wave Combat PNGs from 20260531 and 20260604 are triaged as
+  `ignored_action_showcase`; do not recycle them as showcase evidence.
+- Evidence preflight is optimized to avoid recursively running full session
+  status and currently returns `ready_for_focused_retake` for Wave Combat.
 - Large untracked Unity Asset Store/plugin/import folders are present and must
   stay unstaged unless explicitly selected by the user.
 
 ## Heartbeat Priority Order
 1. Run the smallest status verifier set:
+   - `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1 -JsonOnly`
    - `Tools\Verify-PrototypePlayModeSuite.ps1 -JsonOnly`
    - `Tools\Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly`
    - `Tools\Verify-PrototypePlayModeRecord.ps1 -JsonOnly`
 2. If review evidence is stale or missing, regenerate review artifacts:
    - `Tools\Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly`
    - full review pack only when a tracked doc update is useful.
-   - If suite/screenshot evidence is already complete and
-     `review_readiness=ready_for_visual_review`, do not generate new retake work;
-     prepare visual judgment/result-recording guidance instead.
+   - If suite/screenshot evidence is complete but
+     `wave_combat_action_showcase_ready=false`, keep the next action on Wave
+     Combat focused retake, not broad result-recording guidance.
 3. If `wave_combat_action_showcase_ready=false`, do not record Wave Combat as
-   PASS. Prefer retake guidance or `FIX_FEEDBACK`.
+   PASS. Prefer focused retake guidance or `FIX_FEEDBACK`.
 4. If official manual result is `not_recorded`, keep the next action focused on
-   PASS/FIX/BLOCKED review, not broad gameplay expansion.
+   Wave Combat showcase evidence first, then PASS/FIX/BLOCKED review.
 5. If evidence is blocked by environment limits, continue only safe local work:
    docs, guards, review tooling, stale-state detection, and narrow source guards.
 6. If evidence is PASS or a clear FIX is recorded, pick one weakest rhythm beat
@@ -78,13 +83,18 @@ Use this order when the evidence state allows code work:
 3. Pressure beat: tune wave ramp only through bounded, visible values.
    - Status: cadence overlap telemetry source pass complete as of 2026-06-11.
    - Acceptance: telemetry exposes Build/Climb/Peak and multiplier.
-4. Release beat: tune rest reward visibility before adding reward choices.
+4. Evidence tempo: keep focused retake and review automation fast enough for
+   unattended iteration.
+   - Status: preflight recursion removed as of 2026-06-18.
+   - Acceptance: preflight returns Wave Combat focused retake readiness without
+     re-running full session status.
+5. Release beat: tune rest reward visibility before adding reward choices.
    - Acceptance: review confirms the reward chip reads without crowding.
-5. Read beat: simplify draw card intent if review says the card row is too dense.
+6. Read beat: simplify draw card intent if review says the card row is too dense.
    - Status: candidate deferred as of 2026-06-14 until review pack result is
      recorded, to avoid stale Draw Choice evidence.
    - Acceptance: card comparison remains readable in portrait screenshots.
-6. Review beat naming: keep the review pack able to map visual failures to a
+7. Review beat naming: keep the review pack able to map visual failures to a
    rhythm beat before asking for new systems.
    - Status: source pass complete as of 2026-06-10.
    - Acceptance: HUD contract guards the review-pack rhythm checklist.
@@ -104,6 +114,7 @@ Use this order when the evidence state allows code work:
 Status-only pass:
 
 ```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly

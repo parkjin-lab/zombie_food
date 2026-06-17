@@ -56,7 +56,7 @@
 ### P0 (즉시: Play Mode 증거와 결과 기록)
 - 첫 상태 확인은 `Tools\Show-PrototypeSessionStatus.ps1`로 시작한다. suite/스크린샷/review pack/record/showcase 상태가 기대와 다르면 먼저 인계 문서를 확인한다.
 - 플레이어 검증은 P0의 마지막 단계로만 둔다. 에이전트가 가능한 확인과 문서 갱신을 끝낸 뒤, 사람이 볼 것은 "새 캡처가 읽히는가"와 "PASS/FIX/BLOCKED 중 무엇인가"로 제한한다.
-- 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다. 단, suite/screenshot이 이미 `captured_manual`/`suite_ready`이고 review pack이 `ready_for_visual_review`이면 focused retake를 새로 만들지 않는다.
+- 현재 `top_issue`가 suite 미촬영 또는 `manual_partial`이면 새 gameplay code보다 Capture Verification Suite, focused retake, 또는 standalone PNG 수동 등록을 우선한다. 단, suite/screenshot이 이미 `captured_manual`/`suite_ready`이고 review pack이 `ready_for_visual_review`여도 `wave_combat_action_showcase_ready=false`이면 Wave Combat focused retake를 우선한다.
 - 현재 `manual_registration_candidate_count=0`이고 missing state가 남아 있으면 Unity를 열기 전에 `Tools\Write-PrototypePlayModeRetakePlan.ps1`을 실행해 retake checklist를 먼저 만든다.
 - retake checklist 생성 뒤 `Tools\Verify-PrototypePlayModeRetakePlan.ps1`로 문서가 현재 증거 상태와 동기화되어 있는지 확인한다.
 - Unity를 열기 전 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`로 focused retake 대상과 캡처 후 실행할 검증 명령을 한 번 더 확인한다.
@@ -66,7 +66,7 @@
 - suite 캡처 직후 `Tools\Verify-PrototypePlayModeSuite.ps1`로 네 상태의 manifest와 스크린샷 파일 존재를 확인한다.
 - 이어서 `Tools\Verify-PrototypePlayModeScreenshots.ps1`로 PNG 유효성, 세로 해상도, 파일 크기, suite 라벨 커버리지를 확인한다.
 - `Tools\Write-PrototypePlayModeReviewPack.ps1`로 suite 상태, screenshot 상태, record 상태, contact sheet, 결과 명령 템플릿을 한 장에 모은다.
-- `Show-PrototypeSessionStatus.ps1`에서 `review_readiness=partial_evidence`이면 아직 전체 review pack 판정 전에 suite-state 캡처 또는 focused retake가 필요하다. `ready_for_visual_review`이면 새 캡처보다 review pack 판정과 결과 기록 준비가 우선이다.
+- `Show-PrototypeSessionStatus.ps1`에서 `review_readiness=partial_evidence`이면 아직 전체 review pack 판정 전에 suite-state 캡처 또는 focused retake가 필요하다. `ready_for_visual_review`라도 Wave Combat action showcase가 false이면 결과 기록보다 Wave Combat retake가 우선이다.
 - review pack에서 `wave_combat_action_showcase_ready=true`가 아니면 Wave Combat는 아직 액션 증거가 부족한 상태로 보고 retake 또는 `FIX_FEEDBACK` 판정을 우선 고려한다.
 - review pack을 보고 네 상태가 모두 읽히고 조작 가능하면 `Tools\Write-PrototypePlayModeResultFromSuite.ps1 ... -Apply` 또는 Unity 메뉴 `Record PASS Manual Result`로 PASS를 기록한다.
 - 하나라도 문제가 있으면 PASS 메뉴를 쓰지 말고 result writer로 `FIX_LAYOUT`, `FIX_ASSET`, `FIX_FEEDBACK`, `BLOCKED` 중 실제 상태를 기록한다.
@@ -157,7 +157,7 @@
 - Play Mode 진입 후 긴 직접 플레이보다 `Capture Verification Suite` 또는 `Prepare and Capture State`를 먼저 실행했는가?
 - 사람에게 요청한 확인이 한 장의 캡처 판정 또는 최종 PASS/FIX 승인으로 제한되는가?
 - suite verifier -> screenshot verifier -> review pack -> result writer 순서로 증거를 닫았는가?
-- focused retake는 전체 suite에서 실패하거나 빠진 상태에만 사용했는가?
+- focused retake는 전체 suite에서 실패/누락된 상태 또는 `wave_combat_action_showcase_ready=false`인 Wave Combat에만 사용했는가?
 - 실패 로그 상위 2개 원인을 `FIX_LAYOUT`, `FIX_ASSET`, `FIX_FEEDBACK`, `BLOCKED` 중 하나와 다음 코드 타겟으로 연결했는가?
 
 ## 실행 순서
@@ -197,7 +197,6 @@ powershell -ExecutionPolicy Bypass -File "Tools\Invoke-PrototypePlayModeEvidence
 ### 5. 시각 리뷰 pack 생성
 ```powershell
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
-powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 ```
 
 ### 6. 결과 기록
@@ -222,7 +221,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - Rhythm design audit: `Docs/Prototype_RhythmDesign_Audit.md`.
 - First status command: `powershell -ExecutionPolicy Bypass -File "Tools\Show-PrototypeSessionStatus.ps1" -ProjectPath "D:\uni\zombieFoodcenter"`.
 - MCP unavailable fallback: local scripts/file inspection first; MCP 연결 문제로 completion-critical UX 검증을 멈추지 않는다.
-- Immediate next validation: suite/screenshot/record/review-pack preview를 먼저 실행한다. `ready_for_visual_review`이면 focused retake를 반복하지 말고 review pack에서 PASS/FIX/BLOCKED 후보와 약한 rhythm beat를 분류한다.
+- Immediate next validation: `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1 -JsonOnly`를 먼저 실행한다. `ready_for_visual_review`보다 `ready_for_focused_retake`와 `wave_combat_action_showcase_ready=false`를 우선하며, 현재는 Wave Combat retake가 먼저다.
 - Immediate next implementation after evidence closure: 완료된 Composer/Payoff/Rhythm/Pressure/Rest source pass를 재시작하지 않는다. 먼저 Play Mode visual review에서 어느 beat가 약한지 확인한 뒤 rest reward display/value tuning, Heat ramp tuning, Read choice diversity, cadence overlap telemetry, 또는 payoff hint visibility 중 하나만 고른다.
 - Current fallback status: Wave Combat 코드 보완과 helper-state setup, suite capture/evidence verifier, screenshot quality verifier, manual PNG evidence registration, focused retake plan writer, action-showcase/review-readiness/next-focus-aware session status, review pack writer, suite-backed result writer는 준비되어 있다.
 - Manual record remains open until Draw Choice, Pending Placement, Invalid Placement, Wave Combat suite evidence is captured, visually reviewed, and recorded.

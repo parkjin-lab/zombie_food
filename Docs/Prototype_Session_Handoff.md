@@ -1,6 +1,6 @@
 ﻿# Prototype Session Handoff
 
-Last updated: 2026-06-17 KST
+Last updated: 2026-06-18 KST
 
 ## Current Status Snapshot
 - Play Mode suite evidence is now `captured_manual` with all four required
@@ -16,9 +16,9 @@ Last updated: 2026-06-17 KST
   overlays for the next retake.
 - Retake planning now treats `wave_combat_action_showcase_ready=false` as a
   focused Wave Combat retake target even when all four suite states are covered.
-- Next heartbeat should skip focused retake work unless verifiers regress; keep
-  preparing review-pack judgment, result-recording guidance, and narrow
-  rhythm-beat improvements guarded by source checks.
+- Next heartbeat should route through evidence preflight first. If
+  `wave_combat_action_showcase_ready=false`, keep Wave Combat focused retake as
+  the active evidence task even though suite/screenshot coverage is complete.
 
 ## Completed In This Pass
 - Added a local prototype asset verification path that does not depend on MCP or Unity Editor connectivity.
@@ -239,9 +239,9 @@ Last updated: 2026-06-17 KST
 - Blocked placement next-action copy is code-guarded, but still needs Play Mode visual review to confirm the cue is not too long in portrait.
 - Pending Placement recommendation reasons are code-guarded, but still need Play Mode visual review to confirm the R1/R2 text stays readable in portrait.
 - Review pack assembly is available and `-PreviewOnly -JsonOnly` reports `review_readiness=ready_for_visual_review`; it now also carries Wave Combat action showcase status, planned resource backlog, visual acceptance checklist, and rhythm beat review checklist.
-- Focused retake plan assembly remains available, but current evidence coverage means focused retake count should stay at 0 unless suite/screenshot verifiers regress.
+- Focused retake plan assembly remains available. Current state coverage no longer requires Draw/Pending/Invalid retakes, but Wave Combat remains a focused retake exception while action-showcase evidence is false.
 - Focused retake plan doc verification is available and reports `retake_plan_doc_status=ok`; if suite/screenshot evidence changes, regenerate `Docs/Prototype_PlayMode_RetakePlan.md` before opening Unity.
-- PlayMode evidence preflight is available; if current suite/screenshot coverage remains complete, it should lead toward `ready_for_visual_review` rather than new focused retakes. Use it before any future Unity capture so stale-doc or screenshot regressions do not hide inside separate command outputs.
+- PlayMode evidence preflight is available and is the routing source of truth: `focused_retake_count > 0` and `wave_combat_action_showcase_ready=false` outrank `review_readiness=ready_for_visual_review`. Use it before any future Unity capture so stale-doc or screenshot regressions do not hide inside separate command outputs.
 - Rhythm design audit is available and currently reports that the prototype has strong rhythm ingredients but lacks an explicit beat map and tension/release review criteria.
 - Gap/update policy is available in `Docs/Prototype_Gap_And_Update_Policy.md` and consolidates the 2026-05-25 sub-agent review into missing areas, work authorization rules, evidence-blocked policy, and future update sequencing.
 - Autonomous development directive is available in `Docs/Prototype_Autonomous_Development_Directive.md` and sets the heartbeat/sub-agent rule to `Evidence first, weakest beat next`.
@@ -275,7 +275,7 @@ Last updated: 2026-06-17 KST
 1. Treat the combat-only HUD compaction as complete unless a fresh screenshot shows a regression.
 2. Run `Tools/Write-PrototypePlayModeRetakePlan.ps1 -PreviewOnly -JsonOnly`, then generate `Docs/Prototype_PlayMode_RetakePlan.md` if the focused retake count is still above zero.
 3. Run `Tools/Verify-PrototypePlayModeRetakePlan.ps1` to confirm the written retake checklist is not stale.
-4. Run `Tools/Invoke-PrototypePlayModeEvidencePreflight.ps1` before opening Unity; if suite/screenshot coverage still reports complete evidence, expect `ready_for_visual_review` and do not create new focused-retake work.
+4. Run `Tools/Invoke-PrototypePlayModeEvidencePreflight.ps1` before opening Unity; if it reports `ready_for_focused_retake`, retake Wave Combat even when suite/screenshot coverage is complete.
 5. Review `Docs/Prototype_RhythmDesign_Audit.md` and name the beat being tested: `Read`, `Commit`, `Pressure`, `Payoff`, or `Release`.
 6. In Play Mode, run `Tools > Food Truck Prototype > Capture Verification Suite` before attempting longer manual play.
 7. If only standalone screenshots are available, run `Tools/Verify-PrototypePlayModeScreenshots.ps1 -JsonOnly` or the review pack preview and copy the generated `Register-PrototypePlayModeManualEvidence.ps1` command template for any visually matching missing state.
@@ -283,7 +283,7 @@ Last updated: 2026-06-17 KST
 9. Run `Tools/Verify-PrototypePlayModeScreenshots.ps1` to confirm captured PNGs are valid portrait evidence and have labeled state coverage.
 10. Run `Tools/Write-PrototypePlayModeReviewPack.ps1 -PreviewOnly -JsonOnly` for a no-write readiness check, then run `Tools/Write-PrototypePlayModeReviewPack.ps1` to assemble the evidence into one review sheet before making PASS/FIX/BLOCKED decisions.
 11. Rerun `Tools/Invoke-PrototypePlayModeEvidencePreflight.ps1` after capture; proceed to judgment when it reaches `ready_for_visual_review`.
-12. Use `Tools > Food Truck Prototype > Prepare and Capture State` only for focused retakes of Draw Choice, Pending Placement, or Invalid Placement.
+12. Use `Tools > Food Truck Prototype > Prepare and Capture State` for the focused state reported by preflight. In the current state that means Wave Combat, not Draw/Pending/Invalid.
 13. If all required states pass visually, run `Tools > Food Truck Prototype > Record PASS Manual Result`; otherwise use `Tools/Write-PrototypePlayModeResultFromSuite.ps1` with the failing `FIX_*` or `BLOCKED` status when you are ready to create/apply the result draft.
 14. Run `Tools/Verify-PrototypeHudStateContract.ps1` after any Draw/Pending/Invalid Placement HUD code change.
 15. Run `Tools/Verify-PrototypeLayout.ps1` after any HUD layout code change.
@@ -328,7 +328,6 @@ powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreensh
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeScreenshots.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -PreviewOnly -JsonOnly
-powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeReviewPack.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
 powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat PASS
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter"
 powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
