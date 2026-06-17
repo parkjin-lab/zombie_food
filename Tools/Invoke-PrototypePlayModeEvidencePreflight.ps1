@@ -63,6 +63,54 @@ function Invoke-JsonScript {
     }
 }
 
+function Invoke-KeyValueScript {
+    param(
+        [string]$Name,
+        [string]$ScriptPath,
+        [string[]]$Arguments,
+        [string]$StatusKey
+    )
+
+    if (-not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
+        return [pscustomobject]@{
+            name = $Name
+            ok = $false
+            parsed = $false
+            exit_code = 90
+            data = $null
+            error = "missing_script"
+        }
+    }
+
+    $output = & powershell -ExecutionPolicy Bypass -File $ScriptPath @Arguments
+    $exitCode = $LASTEXITCODE
+    $statusLine = @($output | Where-Object { [string]$_ -like ($StatusKey + "=*") } | Select-Object -Last 1)
+    if ($statusLine.Count -eq 0) {
+        return [pscustomobject]@{
+            name = $Name
+            ok = $false
+            parsed = $false
+            exit_code = $exitCode
+            data = $null
+            error = "missing_status_key: " + $StatusKey
+        }
+    }
+
+    $statusValue = ([string]$statusLine[0]).Substring($StatusKey.Length + 1)
+    $data = [pscustomobject]@{
+        $StatusKey = $statusValue
+    }
+
+    return [pscustomobject]@{
+        name = $Name
+        ok = ($exitCode -eq 0)
+        parsed = $true
+        exit_code = $exitCode
+        data = $data
+        error = $null
+    }
+}
+
 function Get-ObjectProperty {
     param(
         [object]$ObjectValue,
@@ -144,16 +192,35 @@ function New-CommandLine {
     return ($parts.ToArray() -join " ")
 }
 
-$sessionStatusScript = Join-Path $ProjectPath "Tools\Show-PrototypeSessionStatus.ps1"
+$assetVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypeAssets.ps1"
+$layoutVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypeLayout.ps1"
+$hudContractVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypeHudStateContract.ps1"
+$staticVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypeStatic.ps1"
 $retakePlanVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeRetakePlan.ps1"
 $suiteVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeSuite.ps1"
 $screenshotVerifierScript = Join-Path $ProjectPath "Tools\Verify-PrototypePlayModeScreenshots.ps1"
 $reviewPackWriterScript = Join-Path $ProjectPath "Tools\Write-PrototypePlayModeReviewPack.ps1"
 
-$sessionResult = Invoke-JsonScript -Name "session_status" -ScriptPath $sessionStatusScript -Arguments @(
+$assetResult = Invoke-JsonScript -Name "assets" -ScriptPath $assetVerifierScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-Strict",
+    "-JsonOnly"
+)
+
+$layoutResult = Invoke-JsonScript -Name "layout" -ScriptPath $layoutVerifierScript -Arguments @(
     "-ProjectPath", $ProjectPath,
     "-JsonOnly"
 )
+
+$hudContractResult = Invoke-JsonScript -Name "hud_contract" -ScriptPath $hudContractVerifierScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-JsonOnly"
+)
+
+$staticResult = Invoke-KeyValueScript -Name "static" -ScriptPath $staticVerifierScript -Arguments @(
+    "-ProjectPath", $ProjectPath,
+    "-Compact"
+) -StatusKey "static_status"
 
 $retakePlanResult = Invoke-JsonScript -Name "retake_plan_doc" -ScriptPath $retakePlanVerifierScript -Arguments @(
     "-ProjectPath", $ProjectPath,
@@ -176,30 +243,33 @@ $reviewPackResult = Invoke-JsonScript -Name "review_pack_preview" -ScriptPath $r
     "-JsonOnly"
 )
 
-$scriptResults = @($sessionResult, $retakePlanResult, $suiteResult, $screenshotResult, $reviewPackResult)
+$scriptResults = @($assetResult, $layoutResult, $hudContractResult, $staticResult, $retakePlanResult, $suiteResult, $screenshotResult, $reviewPackResult)
 $failedParses = @($scriptResults | Where-Object { -not $_.parsed })
 
-$sessionData = $sessionResult.data
+$assetData = $assetResult.data
+$layoutData = $layoutResult.data
+$hudContractData = $hudContractResult.data
+$staticData = $staticResult.data
 $retakePlanData = $retakePlanResult.data
 $suiteData = $suiteResult.data
 $screenshotData = $screenshotResult.data
 $reviewPackData = $reviewPackResult.data
 
-$gateStatus = Get-ObjectProperty $sessionData "gate_status" "unknown"
-$assetStatus = Get-ObjectProperty $sessionData "asset_status" "unknown"
-$assetPlannedMissing = Get-ObjectProperty $sessionData "asset_planned_missing" 0
-$layoutStatus = Get-ObjectProperty $sessionData "layout_status" "unknown"
-$hudContractStatus = Get-ObjectProperty $sessionData "hud_contract_status" "unknown"
-$staticStatus = Get-ObjectProperty $sessionData "static_status" "unknown"
-$compileStatus = Get-ObjectProperty $sessionData "compile_status" "unknown"
-$testsStatus = Get-ObjectProperty $sessionData "tests_status" "unknown"
-$suiteStatus = Get-ObjectProperty $suiteData "playmode_suite_status" (Get-ObjectProperty $sessionData "playmode_suite_status" "unknown")
-$suiteCapturedCount = Get-ObjectProperty $suiteData "captured_count" (Get-ObjectProperty $sessionData "playmode_suite_captured_count" $null)
-$suiteExpectedCount = Get-ObjectProperty $suiteData "expected_state_count" (Get-ObjectProperty $sessionData "playmode_suite_expected_count" $null)
-$suiteCaptureSource = Get-ObjectProperty $suiteData "suite_capture_source" (Get-ObjectProperty $sessionData "playmode_suite_capture_source" "unknown")
-$screenshotStatus = Get-ObjectProperty $screenshotData "playmode_screenshot_status" (Get-ObjectProperty $sessionData "playmode_screenshot_status" "unknown")
-$screenshotCount = Get-ObjectProperty $screenshotData "screenshot_count" (Get-ObjectProperty $sessionData "playmode_screenshot_count" 0)
-$invalidScreenshotCount = Get-ObjectProperty $screenshotData "invalid_count" (Get-ObjectProperty $sessionData "playmode_screenshot_invalid_count" 0)
+$assetStatus = Get-ObjectProperty $assetData "asset_status" "unknown"
+$assetPlannedMissing = Get-ObjectProperty $assetData "planned_missing" 0
+$layoutStatus = Get-ObjectProperty $layoutData "layout_status" "unknown"
+$hudContractStatus = Get-ObjectProperty $hudContractData "hud_contract_status" "unknown"
+$staticStatus = Get-ObjectProperty $staticData "static_status" "unknown"
+$gateStatus = if ($assetStatus -eq "ok" -and $layoutStatus -eq "ok" -and $hudContractStatus -eq "ok" -and $staticStatus -eq "ok") { "ok" } else { "failed" }
+$compileStatus = "inconclusive"
+$testsStatus = "inconclusive"
+$suiteStatus = Get-ObjectProperty $suiteData "playmode_suite_status" "unknown"
+$suiteCapturedCount = Get-ObjectProperty $suiteData "captured_count" $null
+$suiteExpectedCount = Get-ObjectProperty $suiteData "expected_state_count" $null
+$suiteCaptureSource = Get-ObjectProperty $suiteData "suite_capture_source" "unknown"
+$screenshotStatus = Get-ObjectProperty $screenshotData "playmode_screenshot_status" "unknown"
+$screenshotCount = Get-ObjectProperty $screenshotData "screenshot_count" 0
+$invalidScreenshotCount = Get-ObjectProperty $screenshotData "invalid_count" 0
 $missingStates = Get-ArrayValue (Get-ObjectProperty $screenshotData "missing_states" (Get-ObjectProperty $retakePlanData "expected_missing_states" @()))
 $focusedRetakeStates = Get-ArrayValue (Get-ObjectProperty $retakePlanData "expected_focused_retake_states" $null)
 if ($focusedRetakeStates.Count -eq 0) {
@@ -207,15 +277,15 @@ if ($focusedRetakeStates.Count -eq 0) {
 }
 
 $manualCandidateCount = Get-ObjectProperty $screenshotData "manual_registration_candidate_count" (Get-ObjectProperty $retakePlanData "manual_registration_candidate_count" 0)
-$waveCombatActionShowcaseCandidateCount = Get-ObjectProperty $screenshotData "wave_combat_action_showcase_candidate_count" (Get-ObjectProperty $sessionData "playmode_wave_combat_action_showcase_candidate_count" 0)
+$waveCombatActionShowcaseCandidateCount = Get-ObjectProperty $screenshotData "wave_combat_action_showcase_candidate_count" 0
 $triagedNonStateCount = Get-ObjectProperty $screenshotData "triaged_non_state_count" (Get-ObjectProperty $retakePlanData "triaged_non_state_count" 0)
 $retakePlanDocStatus = Get-ObjectProperty $retakePlanData "retake_plan_doc_status" "unknown"
 $retakePlanDocMissingNeedles = Get-ArrayValue (Get-ObjectProperty $retakePlanData "missing_needles" @())
-$reviewPackStatus = Get-ObjectProperty $reviewPackData "review_pack_status" (Get-ObjectProperty $sessionData "review_pack_status" "unknown")
-$reviewReadiness = Get-ObjectProperty $reviewPackData "review_readiness" (Get-ObjectProperty $sessionData "review_readiness" "unknown")
-$reviewNextAction = Get-ObjectProperty $reviewPackData "next_action" (Get-ObjectProperty $sessionData "review_pack_next_action" "")
-$waveCombatActionShowcaseReady = Get-ObjectProperty $suiteData "wave_combat_action_showcase_ready" (Get-ObjectProperty $sessionData "wave_combat_action_showcase_ready" $null)
-$waveCombatActionShowcaseReason = Get-ObjectProperty $suiteData "wave_combat_action_showcase_reason" (Get-ObjectProperty $sessionData "wave_combat_action_showcase_reason" "unknown")
+$reviewPackStatus = Get-ObjectProperty $reviewPackData "review_pack_status" "unknown"
+$reviewReadiness = Get-ObjectProperty $reviewPackData "review_readiness" "unknown"
+$reviewNextAction = Get-ObjectProperty $reviewPackData "next_action" ""
+$waveCombatActionShowcaseReady = Get-ObjectProperty $suiteData "wave_combat_action_showcase_ready" $null
+$waveCombatActionShowcaseReason = Get-ObjectProperty $suiteData "wave_combat_action_showcase_reason" "unknown"
 
 $coreChecksOk = (
     $gateStatus -eq "ok" -and

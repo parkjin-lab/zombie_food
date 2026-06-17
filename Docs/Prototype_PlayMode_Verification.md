@@ -38,7 +38,7 @@ powershell -ExecutionPolicy Bypass -File "Tools\Gate-Verification.ps1" -ProjectP
 - Play Mode 입력이 불안정하면 `Tools > Food Truck Prototype > Prepare and Capture State` 아래의 Draw Choice / Pending Placement / Invalid Placement / Wave Combat 메뉴를 사용한다. 각 메뉴는 해당 상태를 자동으로 만든 뒤 스크린샷과 draft에 준비 상태 요약을 남긴다.
 - focused retake 전에 `Tools\Write-PrototypePlayModeRetakePlan.ps1`을 실행하면 현재 missing state, menu path, must-see 기준, 후속 검증 명령을 `Docs\Prototype_PlayMode_RetakePlan.md`로 정리한다. 현재처럼 `manual_registration_candidate_count=0`이면 새 PNG 캡처가 필요한 상태로 간주한다.
 - retake plan 생성 뒤 `Tools\Verify-PrototypePlayModeRetakePlan.ps1`을 실행해 문서가 현재 suite/screenshot/review preview와 맞는지 확인한다. stale이면 먼저 retake plan을 다시 생성한다.
-- Unity를 열기 직전에는 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`을 실행해 focused retake 대상, stale-doc 여부, screenshot 상태, 캡처 후 검증 명령을 한 번에 확인한다.
+- Unity를 열기 직전에는 `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`을 실행해 focused retake 대상, stale-doc 여부, screenshot 상태, 캡처 후 검증 명령을 한 번에 확인한다. 이 preflight는 session status 전체를 다시 부르지 않고 필요한 로컬 가드만 직접 확인해 빠르게 반복할 수 있다.
 - 상태만 먼저 만들고 직접 확인하려면 `Tools > Food Truck Prototype > Prepare State` 아래 메뉴를 사용한 뒤 `Capture Play Mode Snapshot`을 실행한다.
 - 네 상태가 모두 PASS임을 직접 확인한 뒤 `Tools > Food Truck Prototype > Record PASS Manual Result`를 실행하면 `Latest Manual Result`가 자동으로 PASS 기록으로 갱신된다. suite manifest가 있으면 해당 스크린샷 목록을 PASS 기록의 증거로 함께 사용한다.
 - Wave Combat PASS는 공격 궤적, `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7`, lane flash가 모두 읽힐 때만 기록한다. 이 조건이 빠지면 `FIX_FEEDBACK` 또는 `BLOCKED`로 남긴다.

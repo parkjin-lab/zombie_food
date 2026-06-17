@@ -354,6 +354,7 @@ Current status:
 - Focused retake plan writer works in preview mode, but current evidence no longer requires Draw/Pending/Invalid focused retakes unless suite or screenshot coverage regresses.
 - Focused retake plan verifier reports retake_plan_doc_status=ok with no expected missing required states in the current evidence set.
 - PlayMode evidence and review pack now report complete state coverage, but Wave Combat remains a focused retake target until `wave_combat_action_showcase_ready=true`; commands_after_capture remain available for that capture pass.
+- PlayMode evidence preflight now avoids recursively running full session status; it directly checks asset/layout/HUD/static plus retake/suite/screenshot/review preview inputs and currently returns `ready_for_focused_retake` for Wave Combat in about 30-40 seconds on this PC.
 - Sub-agent review on 2026-05-17 confirms this is still the immediate blocker; no tracked code/doc drift was present before this documentation update.
 - Untracked imported Unity asset/plugin folders are present and intentionally not part of the prototype source checkpoint unless explicitly selected.
 - Session status top issue is no longer missing state coverage; the next evidence action is to retake Wave Combat with the strengthened showcase because existing 20260531/20260604 Wave Combat PNGs were triaged as action-showcase weak.
@@ -386,6 +387,7 @@ Recent work:
 - Added Tools/Write-PrototypePlayModeRetakePlan.ps1 for turning partial evidence into a focused Draw/Pending/Invalid retake checklist before opening Unity.
 - Added Tools/Verify-PrototypePlayModeRetakePlan.ps1 for detecting stale focused retake plan docs after evidence changes.
 - Added Tools/Invoke-PrototypePlayModeEvidencePreflight.ps1 for one-command focused retake readiness before Unity and after capture.
+- Optimized Tools/Invoke-PrototypePlayModeEvidencePreflight.ps1 so it no longer shells through Show-PrototypeSessionStatus before running the same evidence checks again.
 - Added Docs/Prototype_RhythmDesign_Audit.md for making rhythm a first-class game design criterion.
 - Added 2026-05-17 sub-agent review updates to the handoff/playbook/roadmap/rhythm artifacts so the next session can continue without re-triaging.
 - Added Tools/Write-PrototypePlayModeResultFromSuite.ps1 for drafting or applying PASS/FIX/BLOCKED manual results from suite evidence.

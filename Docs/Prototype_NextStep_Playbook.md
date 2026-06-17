@@ -44,7 +44,7 @@
 - 2026-06-18 기준 `Tools\Verify-PrototypePlayModeScreenshots.ps1`은 suite에 등록되지 않은 machine-quality `wave-combat` PNG를 action-showcase 후보로 따로 노출하고, `-WaveCombatActionShowcase` 등록 명령을 생성한다.
 - 기존 Wave Combat PNG를 직접 확인했지만 공격 궤적/액션 라벨 증거가 약하면 `Docs\Prototype_PlayMode_Screenshot_Triage.txt`에 `ignored_action_showcase`로 기록한다. 이렇게 기록된 PNG는 action-showcase 후보에서 제외되고, 다음 행동은 강화된 Wave Combat 재촬영으로 유지된다.
 - `Tools\Verify-PrototypePlayModeRetakePlan.ps1`은 `Docs\Prototype_PlayMode_RetakePlan.md`가 현재 suite/screenshot/review preview 상태와 맞는지 확인하고, stale이면 gate/session status에서 바로 드러낸다.
-- `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`은 session status, retake plan doc, suite, screenshot, review pack preview를 한 번에 모아 `ready_for_focused_retake` 또는 `ready_for_visual_review` 같은 다음 행동 상태를 출력한다.
+- `Tools\Invoke-PrototypePlayModeEvidencePreflight.ps1`은 asset/layout/HUD/static 가드와 retake plan doc, suite, screenshot, review pack preview를 직접 모아 `ready_for_focused_retake` 또는 `ready_for_visual_review` 같은 다음 행동 상태를 출력한다. 2026-06-18 기준 session status 전체 재호출을 제거해 focused retake preflight가 약 99초에서 약 30-40초로 줄었다.
 
 ## 이번 스프린트 목표
 - Play Mode 검증 닫기: `Capture Verification Suite` -> suite verifier -> screenshot verifier -> review pack -> result writer/record verifier 순서로 증거와 판정을 남긴다.
