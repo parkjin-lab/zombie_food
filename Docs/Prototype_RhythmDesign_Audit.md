@@ -115,6 +115,11 @@ two-beat overlap such as Unlock+Weather or Boss+Rest reads as 1, and heavier
 collisions such as Boss+Rest+Event read as 2 so rhythm spikes can be tuned
 intentionally.
 
+2026-06-14 Read choice diversity note: sub-agent review recommends keeping this
+as the next small Read-beat candidate, but deferring the code change until the
+current review pack PASS/FIX/BLOCKED decision is recorded so Draw Choice evidence
+does not become stale.
+
 ## Rhythm Pillars
 | Pillar | Design rule |
 | --- | --- |

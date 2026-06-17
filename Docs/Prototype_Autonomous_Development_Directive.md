@@ -81,6 +81,8 @@ Use this order when the evidence state allows code work:
 4. Release beat: tune rest reward visibility before adding reward choices.
    - Acceptance: review confirms the reward chip reads without crowding.
 5. Read beat: simplify draw card intent if review says the card row is too dense.
+   - Status: candidate deferred as of 2026-06-14 until review pack result is
+     recorded, to avoid stale Draw Choice evidence.
    - Acceptance: card comparison remains readable in portrait screenshots.
 6. Review beat naming: keep the review pack able to map visual failures to a
    rhythm beat before asking for new systems.
