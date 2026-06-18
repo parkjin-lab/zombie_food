@@ -1,0 +1,112 @@
+﻿# Prototype Play Mode Review Pack
+
+Generated: 2026-06-10 23:57 KST
+Review readiness: `ready_for_visual_review`
+Visual review required: `True`
+
+## Machine Summary
+- Suite status: `captured_manual` (4/4)
+- Suite evidence source: `manual screenshot registration`
+- Screenshot status: `suite_ready` (7/7 quality pass)
+- Unlabeled screenshots: `0`
+- Manual registration candidates: `0`
+- Triaged non-state screenshots: `1`
+- Manual record status: `not_recorded`
+- Asset status: `ok`, planned missing: `14`
+- Wave Combat action showcase: `False` (legacy_wave_combat_capture_without_attack_trails_and_labels)
+
+## Planned Resource Backlog
+These missing planned resources are not runtime blockers. Use them to separate feedback polish from Play Mode readability failures.
+| Category | Resource | Intended role |
+| --- | --- | --- |
+| planned_feedback | `Assets\Resources\FoodTruckPrototype\VFX\attack_source_trail.png` | Future 256x256 transparent PNG or sprite-sheet frame set. Keep no embedded text so labels can stay localized/readable. |
+| planned_feedback | `Assets\Resources\FoodTruckPrototype\VFX\hit_impact_pop.png` | Future 256x256 transparent PNG or sprite-sheet frame set. Keep no embedded text so labels can stay localized/readable. |
+| planned_feedback | `Assets\Resources\FoodTruckPrototype\VFX\lane_leak_warning.png` | Future 256x256 transparent PNG or sprite-sheet frame set. Keep no embedded text so labels can stay localized/readable. |
+| planned_feedback | `Assets\Resources\FoodTruckPrototype\VFX\release_reward_pulse.png` | Future 256x256 transparent PNG or sprite-sheet frame set. Keep no embedded text so labels can stay localized/readable. |
+| planned_feedback | `Assets\Resources\FoodTruckPrototype\VFX\wave_payoff_pulse.png` | Future 256x256 transparent PNG or sprite-sheet frame set. Keep no embedded text so labels can stay localized/readable. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\placement_success.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\placement_fail.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\wave_start.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\heat_warning.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\overheat_spike.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\combo_ready.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\recipe_activate.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\release_reward.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+| planned_audio | `Assets\Resources\FoodTruckPrototype\Audio\wave_payoff.wav` | Short WAV, normalized for UI/gameplay clarity; map each cue to a named rhythm beat. |
+
+## State Review Table
+| State | Evidence | Current record | Visual decision |
+| --- | --- | --- | --- |
+| Draw Choice | suite: PlayModeScreenshots/foodtruck-playmode-20260530-144551-837-draw-choice.png | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+| Pending Placement | suite: PlayModeScreenshots/foodtruck-playmode-20260530-144625-512-pending-placement.png | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+| Invalid Placement | suite: PlayModeScreenshots/foodtruck-playmode-20260530-144641-778-invalid-placement.png | `NOT_RECORDED` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+| Wave Combat | suite: PlayModeScreenshots/foodtruck-playmode-20260504-010153.png | `PASS` | PASS / FIX_LAYOUT / FIX_ASSET / FIX_FEEDBACK / BLOCKED |
+
+## Screenshot Contact Sheet
+### Invalid Placement
+- Quality: `True`, size: `1170x2532`, bytes: `172749`
+![Invalid Placement](playmodescreenshots/foodtruck-playmode-20260530-144641-778-invalid-placement.png)
+
+### Wave Combat
+- Quality: `True`, size: `1170x2532`, bytes: `119229`
+![Wave Combat](playmodescreenshots/foodtruck-playmode-20260504-010153.png)
+
+### Pending Placement
+- Quality: `True`, size: `1170x2532`, bytes: `178641`
+![Pending Placement](playmodescreenshots/foodtruck-playmode-20260530-144625-512-pending-placement.png)
+
+### Draw Choice
+- Quality: `True`, size: `1170x2532`, bytes: `295476`
+![Draw Choice](playmodescreenshots/foodtruck-playmode-20260530-144551-837-draw-choice.png)
+
+### Triaged Non-State
+- Quality: `True`, size: `1170x2532`, bytes: `114110`
+![Triaged Non-State](PlayModeScreenshots/foodtruck-playmode-20260504-010245.png)
+
+### Wave Combat
+- Quality: `True`, size: `1170x2532`, bytes: `106559`
+![Wave Combat](PlayModeScreenshots/foodtruck-playmode-20260531-011713-891-wave-combat.png)
+
+### Wave Combat
+- Quality: `True`, size: `1170x2532`, bytes: `60532`
+![Wave Combat](PlayModeScreenshots/foodtruck-playmode-20260604-004905-153-wave-combat.png)
+
+## Visual Acceptance Checklist
+| State | Must see in screenshot | Record as FIX when missing |
+| --- | --- | --- |
+| Draw Choice | Three comparable cards with shape, ingredient, value/risk, `Fit`, `Heat`, and `Role` visible. | `FIX_LAYOUT` if clipped or overlapping; `FIX_FEEDBACK` if the choice tradeoff is unclear. |
+| Pending Placement | Pending block, 3x3 board, recommendation reason, rotation, and next action are readable. | `FIX_LAYOUT` if board/controls crowd the battlefield; `FIX_FEEDBACK` if the next action is unclear. |
+| Invalid Placement | Blocked reason and `Next` recovery hint appear near the board/cue. | `FIX_FEEDBACK` if the reason or recovery hint is missing. |
+| Wave Combat | Battlefield takes over half the screen, one long truck is visible, enemies/lane pressure are readable, and attack trails plus action labels `HIT>Z -12`, `HIT>Z KO`, `LEAK`, `BITE>TRK -7` and lane flash are visible. | `FIX_LAYOUT` if the battlefield is crowded; `FIX_FEEDBACK` if attack trails, action labels, or payoff cues are missing. |
+
+## Rhythm Beat Review Checklist
+Use this table to name which beat failed before requesting new mechanics or broad balance changes.
+| Beat | Screenshot question | Record as FIX when |
+| --- | --- | --- |
+| Read | Can the player compare the current offer and understand the safest/greediest/utility option? | Draw cards do not explain fit, Heat, role, recipe progress, or the next decision pressure. |
+| Commit | Does placement resolve quickly into a clear next state? | Pending/invalid placement does not show a recovery path, or the Wave live cue is missing after first placement. |
+| Pressure | Does combat visibly rise from Build to Peak? | The battlefield lacks readable lane pressure, attack trails, action labels, Heat pressure, or enemy approach. |
+| Payoff | Does the result explain why the last choice mattered? | Wave/recipe payoff and Next hint are missing, too small, or detached from the screenshot outcome. |
+| Release | Is there a visible breath, reward, or intentional variation after a spike? | Rest reward, event, weather, boss aftermath, or recovery beat is absent or crowded. |
+
+## Manual Evidence Registration Hints
+No unlabeled machine-quality PNG candidates are available for manual registration.
+
+## Triaged Non-State Screenshots
+- `Docs\PlayModeScreenshots\foodtruck-playmode-20260504-010245.png`: Build Flow idle screenshot; it does not show 3 Draw Choice cards, a pending block, or invalid placement feedback.
+
+## Recommended Result Commands
+Current Wave Combat evidence is not action-showcase ready; record feedback fix or retake before PASS:
+```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement PASS -InvalidPlacement PASS -WaveCombat FIX_FEEDBACK -TopIssue "Wave Combat evidence still needs readable attack trails and action labels." -Apply
+```
+Example FIX result:
+```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Write-PrototypePlayModeResultFromSuite.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -DrawChoice PASS -PendingPlacement FIX_LAYOUT -InvalidPlacement FIX_FEEDBACK -WaveCombat FIX_FEEDBACK -Apply
+```
+After applying a result:
+```powershell
+powershell -ExecutionPolicy Bypass -File "Tools\Verify-PrototypePlayModeRecord.ps1" -ProjectPath "D:\uni\zombieFoodcenter" -JsonOnly
+```
+
+Note: this review pack organizes evidence only. It does not replace visual PASS/FIX/BLOCKED judgment.
